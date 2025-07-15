@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Etiquetas de Almacén con IA</title>
     
-    <!-- Tailwind CSS para el diseño -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
         /* Estilos generales de la aplicación */
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
             background-color: #f8f9fa;
         }
         .main-container {
@@ -133,13 +132,17 @@
             margin: 2rem auto;
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
+        
+        .print-page:last-of-type {
+            page-break-after: auto;
+        }
 
         .label-print {
             border: 2pt solid #333;
             padding: 0.2cm;
             box-sizing: border-box;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            font-size: 8.5pt;
+            font-size: 8pt;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -149,6 +152,7 @@
             justify-content: space-between;
             align-items: center;
             min-height: 0.6cm;
+            flex-shrink: 0;
         }
         .label-print-header img {
              height: 0.6cm;
@@ -158,24 +162,25 @@
         .label-print-title {
             text-align: center;
             font-size: 8pt;
-            line-height: 1.2;
+            line-height: 1.1;
             padding: 0 0.1cm;
         }
         .label-print-body {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
+            justify-content: space-between;
             min-height: 0;
         }
         .label-print-body p, .label-print-body .flex-line {
             margin: 0;
             font-weight: 700;
             border-bottom: 0.5px solid #ccc;
-            padding-bottom: 1px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            padding-bottom: 1px;
+            font-size: 8.5pt;
         }
         .label-print-body p span, .label-print-body .flex-line span {
             font-weight: 400;
@@ -193,41 +198,35 @@
             border-bottom: none;
         }
 
+
         @media print {
             body { background-color: white; }
             .main-container, #print-controls, #modal, #api-key-modal { display: none; }
             #print-preview-view { display: block; background-color: white; }
             .print-page { margin: 0; box-shadow: none; page-break-after: always; }
+            .print-page:last-of-type { page-break-after: auto; }
             @page { size: letter; margin: 0; }
         }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <!-- Contenedor Principal de la UI -->
     <div class="main-container">
-        <!-- Botón de Configuración -->
         <div class="absolute top-4 right-4">
             <button id="settings-btn" class="p-2 rounded-full hover:bg-gray-200 transition" title="Configuración">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             </button>
         </div>
-        <!-- Cabecera -->
         <header class="text-center my-8">
             <h1 class="text-4xl font-extrabold mt-4 text-gray-900">Generador de Etiquetas de Almacén con IA</h1>
             <p class="text-lg text-gray-600 mt-2">Crea etiquetas de forma rápida a partir de un vale o manualmente.</p>
         </header>
 
-        <!-- Pestañas para cambiar de modo -->
         <div class="flex justify-center space-x-2 my-8">
             <button id="tab-upload" class="tab active">Cargar Imagen</button>
             <button id="tab-manual" class="tab">Entrada Manual</button>
         </div>
 
-        <!-- Vistas de Carga y Manual -->
         <div id="upload-view" class="card">
             <h2 class="text-2xl font-bold text-center mb-6">Paso 1: Sube la imagen del vale</h2>
             <div id="drop-zone">
@@ -255,7 +254,6 @@
             <div class="text-center mt-8"><button id="add-manual-item-btn" class="btn btn-primary">Añadir a la Lista de Revisión</button></div>
         </div>
 
-        <!-- Vista de Revisión y Edición -->
         <div id="review-view" class="card mt-8 hidden">
              <h2 class="text-2xl font-bold text-center mb-2">Paso 2: Revisa, selecciona y edita las partidas</h2>
             <p class="text-center text-gray-600 mb-6">Modifica los datos si es necesario antes de imprimir.</p>
@@ -264,7 +262,7 @@
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="p-4 rounded-l-lg"><input type="checkbox" id="select-all-checkbox"></th>
-                            <th class="p-4">Cant.</th>
+                            <th class="p-4 w-24">Cant.</th>
                             <th class="p-4">Código AX</th>
                             <th class="p-4">Nombre</th>
                             <th class="p-4">Dimensión</th>
@@ -283,7 +281,6 @@
         </div>
     </div>
 
-    <!-- Vista Previa de Impresión (oculta por defecto) -->
     <div id="print-preview-view" class="hidden">
         <div id="print-controls" class="flex justify-center items-center space-x-4">
             <h2 class="text-xl font-bold">Vista Previa de Impresión</h2>
@@ -293,7 +290,6 @@
         <div id="print-area" class="py-8"></div>
     </div>
 
-    <!-- Modal de Mensajes -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
         <div class="card text-center max-w-sm">
             <div id="loader" class="loader mx-auto hidden"></div>
@@ -301,7 +297,6 @@
         </div>
     </div>
     
-    <!-- Modal para API Key y Logos -->
     <div id="api-key-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
         <div class="card text-left max-w-2xl w-full">
             <h2 class="text-2xl font-bold mb-4">Configuración</h2>
@@ -405,10 +400,12 @@
 
             const openSettingsModal = () => {
                 apiKeyInput.value = getSetting('geminiApiKey') || '';
-                logoLeftUrlInput.value = getSetting('logoLeftUrl')?.startsWith('http') ? getSetting('logoLeftUrl') : '';
-                logoRightUrlInput.value = getSetting('logoRightUrl')?.startsWith('http') ? getSetting('logoRightUrl') : '';
-                logoLeftPreview.src = getSetting('logoLeftUrl') || '';
-                logoRightPreview.src = getSetting('logoRightUrl') || '';
+                const logoLeft = getSetting('logoLeftUrl') || '';
+                const logoRight = getSetting('logoRightUrl') || '';
+                logoLeftUrlInput.value = logoLeft.startsWith('http') ? logoLeft : '';
+                logoRightUrlInput.value = logoRight.startsWith('http') ? logoRight : '';
+                logoLeftPreview.src = logoLeft;
+                logoRightPreview.src = logoRight;
                 apiKeyModal.classList.remove('hidden');
             };
 
@@ -417,15 +414,13 @@
                 if (key) setSetting('geminiApiKey', key);
 
                 if (logoLeftFileInput.files[0]) {
-                    const base64 = await fileToBase64(logoLeftFileInput.files[0]);
-                    setSetting('logoLeftUrl', base64);
+                    setSetting('logoLeftUrl', await fileToBase64(logoLeftFileInput.files[0]));
                 } else if (logoLeftUrlInput.value.trim()) {
                     setSetting('logoLeftUrl', logoLeftUrlInput.value.trim());
                 }
 
                 if (logoRightFileInput.files[0]) {
-                    const base64 = await fileToBase64(logoRightFileInput.files[0]);
-                    setSetting('logoRightUrl', base64);
+                    setSetting('logoRightUrl', await fileToBase64(logoRightFileInput.files[0]));
                 } else if (logoRightUrlInput.value.trim()) {
                     setSetting('logoRightUrl', logoRightUrlInput.value.trim());
                 }
@@ -448,23 +443,23 @@
                 showModal("Toda la configuración ha sido borrada.", false, 2000);
             };
 
-            const setupLogoInput = (fileInput, urlInput, preview, storageKey) => {
+            const setupLogoInput = (fileInput, urlInput, preview) => {
                 fileInput.addEventListener('change', async () => {
                     if (fileInput.files[0]) {
-                        urlInput.value = ''; // Prioritize file over URL
+                        urlInput.value = ''; 
                         preview.src = await fileToBase64(fileInput.files[0]);
                     }
                 });
                 urlInput.addEventListener('input', () => {
                     if (urlInput.value.trim()) {
-                        fileInput.value = ''; // Prioritize URL over file
+                        fileInput.value = ''; 
                         preview.src = urlInput.value.trim();
                     }
                 });
             };
             
-            setupLogoInput(logoLeftFileInput, logoLeftUrlInput, logoLeftPreview, 'logoLeftUrl');
-            setupLogoInput(logoRightFileInput, logoRightUrlInput, logoRightPreview, 'logoRightUrl');
+            setupLogoInput(logoLeftFileInput, logoLeftUrlInput, logoLeftPreview);
+            setupLogoInput(logoRightFileInput, logoRightUrlInput, logoRightPreview);
 
             clearLogoLeftBtn.addEventListener('click', () => {
                 removeSetting('logoLeftUrl');
@@ -608,26 +603,25 @@
                     row.className = 'border-b hover:bg-purple-50';
                     row.innerHTML = `
                         <td class="p-4"><input type="checkbox" class="item-checkbox h-5 w-5 rounded text-purple-600 focus:ring-purple-500" checked></td>
-                        <td class="p-4 font-bold">${item.cantidad || ''}</td>
-                        <td class="p-4"><input class="input-field" value="${item.codigo || item.codigoAx || ''}"></td>
-                        <td class="p-4"><input class="input-field" value="${item.descripcion || item.nombre || ''}"></td>
-                        <td class="p-4"><input class="input-field" value="${item.claveAlmacen || item.dimension || ''}"></td>
-                        <td class="p-4"><input class="input-field" value="${item.noParte || ''}"></td>
-                        <td class="p-4"><input class="input-field" value="${item.descripcion || ''}"></td>
-                        <td class="p-4">
+                        <td class="p-2 w-24"><input type="number" class="input-field text-center font-bold" value="${item.cantidad || ''}"></td>
+                        <td class="p-2"><input class="input-field" value="${item.codigo || item.codigoAx || ''}"></td>
+                        <td class="p-2"><input class="input-field" value="${item.descripcion || item.nombre || ''}"></td>
+                        <td class="p-2"><input class="input-field" value="${item.claveAlmacen || item.dimension || ''}"></td>
+                        <td class="p-2"><input class="input-field" value="${item.noParte || ''}"></td>
+                        <td class="p-2"><input class="input-field" value="${item.descripcion || ''}"></td>
+                        <td class="p-2">
                             <select class="select-field">
                                 <option>NUEVO</option>
                                 <option>USADO NUEVO</option>
                             </select>
                         </td>
-                        <td class="p-4">
+                        <td class="p-2">
                             <select class="select-field">
                                 <option>INVENTARIABLE</option>
                                 <option>CONSUMIBLE</option>
                             </select>
                         </td>
                     `;
-                    row.dataset.cantidad = item.cantidad;
                     reviewTableBody.appendChild(row);
                 });
                 reviewView.classList.remove('hidden');
@@ -637,7 +631,7 @@
             selectAllCheckbox.addEventListener('change', (e) => {
                 document.querySelectorAll('.item-checkbox').forEach(cb => { cb.checked = e.target.checked; });
             });
-
+            
             preparePrintBtn.addEventListener('click', () => {
                 const selectedRows = Array.from(reviewTableBody.querySelectorAll('tr')).filter(row => 
                     row.querySelector('.item-checkbox').checked
@@ -654,12 +648,12 @@
                     const inputs = row.querySelectorAll('input');
                     const selects = row.querySelectorAll('select');
                     const labelData = {
-                        cantidad: parseInt(row.dataset.cantidad, 10) || 0,
-                        codigoAx: inputs[1].value,
-                        nombre: inputs[2].value,
-                        dimension: inputs[3].value,
-                        noParte: inputs[4].value,
-                        descripcion: inputs[5].value,
+                        cantidad: parseInt(inputs[1].value, 10) || 0,
+                        codigoAx: inputs[2].value,
+                        nombre: inputs[3].value,
+                        dimension: inputs[4].value,
+                        noParte: inputs[5].value,
+                        descripcion: inputs[6].value,
                         condicion: selects[0].value,
                         categoria: selects[1].value
                     };
@@ -692,9 +686,8 @@
                 label.className = 'label-print';
                 const safeData = Object.fromEntries(Object.entries(data).map(([key, value]) => [key, document.createTextNode(value).textContent]));
                 
-                const logoLeftUrl = getSetting('logoLeftUrl');
-                const logoRightUrl = getSetting('logoRightUrl');
-
+                const logoLeftUrl = getSetting('logoLeftUrl') || '';
+                const logoRightUrl = getSetting('logoRightUrl') || '';
                 const logoLeftImg = logoLeftUrl ? `<img src="${logoLeftUrl}" alt="Logo Izquierdo">` : '<div></div>';
                 const logoRightImg = logoRightUrl ? `<img src="${logoRightUrl}" alt="Logo Derecho">` : '<div></div>';
 
@@ -734,4 +727,3 @@
     </script>
 </body>
 </html>
-
