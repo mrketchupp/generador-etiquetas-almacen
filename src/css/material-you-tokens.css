@@ -1,0 +1,422 @@
+/* ===================================================================
+   MATERIAL YOU 3 - SISTEMA COMPLETO DE TOKENS DE DISEÑO
+   Generador de Etiquetas de Almacén con IA
+   =================================================================== */
+
+:root {
+  /* ===== PALETA DE COLORES PRIMARIA ===== */
+  --md-sys-color-primary: #6750A4;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #EADDFF;
+  --md-sys-color-on-primary-container: #21005D;
+
+  /* ===== PALETA DE COLORES SECUNDARIA ===== */
+  --md-sys-color-secondary: #625B71;
+  --md-sys-color-on-secondary: #FFFFFF;
+  --md-sys-color-secondary-container: #E8DEF8;
+  --md-sys-color-on-secondary-container: #1D192B;
+
+  /* ===== PALETA DE COLORES TERCIARIA ===== */
+  --md-sys-color-tertiary: #7D5260;
+  --md-sys-color-on-tertiary: #FFFFFF;
+  --md-sys-color-tertiary-container: #FFD8E4;
+  --md-sys-color-on-tertiary-container: #31111D;
+
+  /* ===== COLORES DE SUPERFICIE ===== */
+  --md-sys-color-surface: #FEF7FF;
+  --md-sys-color-surface-dim: #DED8E1;
+  --md-sys-color-surface-bright: #FEF7FF;
+  --md-sys-color-surface-container-lowest: #FFFFFF;
+  --md-sys-color-surface-container-low: #F7F2FA;
+  --md-sys-color-surface-container: #F3EDF7;
+  --md-sys-color-surface-container-high: #ECE6F0;
+  --md-sys-color-surface-container-highest: #E6E0E9;
+  --md-sys-color-on-surface: #1D1B20;
+  --md-sys-color-on-surface-variant: #49454F;
+
+  /* ===== COLORES DE ESTADO ===== */
+  --md-sys-color-error: #BA1A1A;
+  --md-sys-color-error-container: #FFDAD6;
+  --md-sys-color-on-error: #FFFFFF;
+  --md-sys-color-on-error-container: #410002;
+
+  --md-sys-color-success: #146C2E;
+  --md-sys-color-success-container: #B7F397;
+  --md-sys-color-on-success: #FFFFFF;
+  --md-sys-color-on-success-container: #002204;
+
+  --md-sys-color-warning: #785900;
+  --md-sys-color-warning-container: #FFDF9C;
+  --md-sys-color-on-warning: #FFFFFF;
+  --md-sys-color-on-warning-container: #251A00;
+
+  /* ===== CONTORNOS ===== */
+  --md-sys-color-outline: #79747E;
+  --md-sys-color-outline-variant: #CAC4D0;
+
+  /* ===== TIPOGRAFÍA - MATERIAL DESIGN 3 ===== */
+  --md-sys-typescale-display-large-font: 400 57px/64px 'Inter', system-ui, sans-serif;
+  --md-sys-typescale-display-medium-font: 400 45px/52px 'Inter', system-ui, sans-serif;
+  --md-sys-typescale-display-small-font: 400 36px/44px 'Inter', system-ui, sans-serif;
+
+  --md-sys-typescale-headline-large-font: 400 32px/40px 'Inter', system-ui, sans-serif;
+  --md-sys-typescale-headline-medium-font: 400 28px/36px 'Inter', system-ui, sans-serif;
+  --md-sys-typescale-headline-small-font: 400 24px/32px 'Inter', system-ui, sans-serif;
+
+  --md-sys-typescale-title-large-font: 400 22px/28px 'Inter', system-ui, sans-serif;
+  --md-sys-typescale-title-medium-font: 500 16px/24px 'Inter', system-ui, sans-serif;
+  --md-sys-typescale-title-small-font: 500 14px/20px 'Inter', system-ui, sans-serif;
+
+  --md-sys-typescale-body-large-font: 400 16px/24px 'Inter', system-ui, sans-serif;
+  --md-sys-typescale-body-medium-font: 400 14px/20px 'Inter', system-ui, sans-serif;
+  --md-sys-typescale-body-small-font: 400 12px/16px 'Inter', system-ui, sans-serif;
+
+  --md-sys-typescale-label-large-font: 500 14px/20px 'Inter', system-ui, sans-serif;
+  --md-sys-typescale-label-medium-font: 500 12px/16px 'Inter', system-ui, sans-serif;
+  --md-sys-typescale-label-small-font: 500 11px/16px 'Inter', system-ui, sans-serif;
+
+  /* ===== ELEVACIÓN ===== */
+  --md-sys-elevation-level0: none;
+  --md-sys-elevation-level1: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-level2: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-level3: 0px 1px 3px 0px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-level4: 0px 2px 3px 0px rgba(0, 0, 0, 0.3), 0px 6px 10px 4px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-level5: 0px 4px 4px 0px rgba(0, 0, 0, 0.3), 0px 8px 12px 6px rgba(0, 0, 0, 0.15);
+
+  /* ===== ESPACIADO ===== */
+  --md-sys-spacing-xs: 4px;
+  --md-sys-spacing-sm: 8px;
+  --md-sys-spacing-md: 12px;
+  --md-sys-spacing-lg: 16px;
+  --md-sys-spacing-xl: 24px;
+  --md-sys-spacing-xxl: 32px;
+  --md-sys-spacing-xxxl: 48px;
+
+  /* ===== MOTION TOKENS ===== */
+  --md-sys-motion-duration-short1: 50ms;
+  --md-sys-motion-duration-short2: 100ms;
+  --md-sys-motion-duration-short3: 150ms;
+  --md-sys-motion-duration-short4: 200ms;
+  --md-sys-motion-duration-medium1: 250ms;
+  --md-sys-motion-duration-medium2: 300ms;
+  --md-sys-motion-duration-medium3: 350ms;
+  --md-sys-motion-duration-medium4: 400ms;
+  --md-sys-motion-duration-long1: 450ms;
+  --md-sys-motion-duration-long2: 500ms;
+  --md-sys-motion-duration-long3: 550ms;
+  --md-sys-motion-duration-long4: 600ms;
+
+  --md-sys-motion-easing-linear: cubic-bezier(0, 0, 1, 1);
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --md-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+
+  /* ===== BORDES Y RADIOS ===== */
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 28px;
+  --md-sys-shape-corner-full: 9999px;
+}
+
+/* ===== MODO OSCURO ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --md-sys-color-primary: #D0BCFF;
+    --md-sys-color-on-primary: #381E72;
+    --md-sys-color-primary-container: #4F378B;
+    --md-sys-color-on-primary-container: #EADDFF;
+
+    --md-sys-color-secondary: #CCC2DC;
+    --md-sys-color-on-secondary: #332D41;
+    --md-sys-color-secondary-container: #4A4458;
+    --md-sys-color-on-secondary-container: #E8DEF8;
+
+    --md-sys-color-tertiary: #EFB8C8;
+    --md-sys-color-on-tertiary: #492532;
+    --md-sys-color-tertiary-container: #633B48;
+    --md-sys-color-on-tertiary-container: #FFD8E4;
+
+    --md-sys-color-surface: #10131C;
+    --md-sys-color-surface-dim: #10131C;
+    --md-sys-color-surface-bright: #363A43;
+    --md-sys-color-surface-container-lowest: #0B0F17;
+    --md-sys-color-surface-container-low: #191C24;
+    --md-sys-color-surface-container: #1D212A;
+    --md-sys-color-surface-container-high: #272B34;
+    --md-sys-color-surface-container-highest: #32363F;
+    --md-sys-color-on-surface: #E6E1E5;
+    --md-sys-color-on-surface-variant: #CAC4D0;
+
+    --md-sys-color-error: #FFB4AB;
+    --md-sys-color-error-container: #93000A;
+    --md-sys-color-on-error: #690005;
+    --md-sys-color-on-error-container: #FFDAD6;
+
+    --md-sys-color-outline: #938F99;
+    --md-sys-color-outline-variant: #49454F;
+  }
+}
+
+/* ===== CLASES UTILITARIAS DE TIPOGRAFÍA ===== */
+.md-typescale-display-large { font: var(--md-sys-typescale-display-large-font); }
+.md-typescale-display-medium { font: var(--md-sys-typescale-display-medium-font); }
+.md-typescale-display-small { font: var(--md-sys-typescale-display-small-font); }
+
+.md-typescale-headline-large { font: var(--md-sys-typescale-headline-large-font); }
+.md-typescale-headline-medium { font: var(--md-sys-typescale-headline-medium-font); }
+.md-typescale-headline-small { font: var(--md-sys-typescale-headline-small-font); }
+
+.md-typescale-title-large { font: var(--md-sys-typescale-title-large-font); }
+.md-typescale-title-medium { font: var(--md-sys-typescale-title-medium-font); }
+.md-typescale-title-small { font: var(--md-sys-typescale-title-small-font); }
+
+.md-typescale-body-large { font: var(--md-sys-typescale-body-large-font); }
+.md-typescale-body-medium { font: var(--md-sys-typescale-body-medium-font); }
+.md-typescale-body-small { font: var(--md-sys-typescale-body-small-font); }
+
+.md-typescale-label-large { font: var(--md-sys-typescale-label-large-font); }
+.md-typescale-label-medium { font: var(--md-sys-typescale-label-medium-font); }
+.md-typescale-label-small { font: var(--md-sys-typescale-label-small-font); }
+
+/* ===== COMPONENTES BASE ===== */
+
+/* Botones Material You 3 */
+.md-filled-button {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  padding: var(--md-sys-spacing-md) var(--md-sys-spacing-xl);
+  font: var(--md-sys-typescale-label-large-font);
+  cursor: pointer;
+  transition: 
+    background-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
+    box-shadow var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+.md-filled-button:hover {
+  box-shadow: var(--md-sys-elevation-level2);
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 85%, white);
+}
+
+.md-filled-button:active {
+  box-shadow: var(--md-sys-elevation-level1);
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 90%, black);
+}
+
+.md-outlined-button {
+  background-color: transparent;
+  color: var(--md-sys-color-primary);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-full);
+  padding: var(--md-sys-spacing-md) var(--md-sys-spacing-xl);
+  font: var(--md-sys-typescale-label-large-font);
+  cursor: pointer;
+  transition: 
+    background-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
+    border-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.md-outlined-button:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+  border-color: var(--md-sys-color-primary);
+}
+
+.md-text-button {
+  background-color: transparent;
+  color: var(--md-sys-color-primary);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-full);
+  padding: var(--md-sys-spacing-md) var(--md-sys-spacing-lg);
+  font: var(--md-sys-typescale-label-large-font);
+  cursor: pointer;
+  transition: background-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.md-text-button:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+}
+
+/* Cards Material You 3 */
+.md-card {
+  background-color: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--md-sys-spacing-lg);
+  box-shadow: var(--md-sys-elevation-level1);
+  transition: box-shadow var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.md-card:hover {
+  box-shadow: var(--md-sys-elevation-level2);
+}
+
+/* Inputs Material You 3 */
+.md-outlined-field {
+  position: relative;
+  margin: var(--md-sys-spacing-md) 0;
+}
+
+.md-outlined-field input {
+  width: 100%;
+  padding: var(--md-sys-spacing-lg);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-small);
+  background-color: transparent;
+  color: var(--md-sys-color-on-surface);
+  font: var(--md-sys-typescale-body-large-font);
+  transition: border-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.md-outlined-field input:focus {
+  outline: none;
+  border-color: var(--md-sys-color-primary);
+  border-width: 2px;
+}
+
+.md-outlined-field label {
+  position: absolute;
+  left: var(--md-sys-spacing-lg);
+  top: var(--md-sys-spacing-lg);
+  color: var(--md-sys-color-on-surface-variant);
+  font: var(--md-sys-typescale-body-large-font);
+  pointer-events: none;
+  transition: 
+    transform var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
+    color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.md-outlined-field input:focus + label,
+.md-outlined-field input:not(:placeholder-shown) + label {
+  transform: translateY(-28px) scale(0.75);
+  color: var(--md-sys-color-primary);
+}
+
+/* Tabs Material You 3 */
+.md-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.md-tab {
+  background: none;
+  border: none;
+  padding: var(--md-sys-spacing-lg) var(--md-sys-spacing-xl);
+  color: var(--md-sys-color-on-surface-variant);
+  font: var(--md-sys-typescale-title-small-font);
+  cursor: pointer;
+  position: relative;
+  transition: color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.md-tab:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+}
+
+.md-tab.active {
+  color: var(--md-sys-color-primary);
+}
+
+.md-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--md-sys-color-primary);
+}
+
+/* Chips Material You 3 */
+.md-chip {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+  padding: var(--md-sys-spacing-sm) var(--md-sys-spacing-md);
+  font: var(--md-sys-typescale-label-medium-font);
+  cursor: pointer;
+  transition: 
+    background-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard),
+    border-color var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+
+.md-chip:hover {
+  background-color: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, var(--md-sys-color-surface-container-high));
+}
+
+/* Sistema de Grid Responsivo */
+.md-grid {
+  display: grid;
+  gap: var(--md-sys-spacing-lg);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Utilidades de Color */
+.text-primary { color: var(--md-sys-color-primary); }
+.text-secondary { color: var(--md-sys-color-secondary); }
+.text-error { color: var(--md-sys-color-error); }
+.text-success { color: var(--md-sys-color-success); }
+.text-on-surface { color: var(--md-sys-color-on-surface); }
+.text-on-surface-variant { color: var(--md-sys-color-on-surface-variant); }
+
+.bg-primary { background-color: var(--md-sys-color-primary); }
+.bg-secondary { background-color: var(--md-sys-color-secondary); }
+.bg-surface { background-color: var(--md-sys-color-surface); }
+.bg-surface-container { background-color: var(--md-sys-color-surface-container); }
+
+/* Utilidades de Espaciado */
+.p-xs { padding: var(--md-sys-spacing-xs); }
+.p-sm { padding: var(--md-sys-spacing-sm); }
+.p-md { padding: var(--md-sys-spacing-md); }
+.p-lg { padding: var(--md-sys-spacing-lg); }
+.p-xl { padding: var(--md-sys-spacing-xl); }
+
+.m-xs { margin: var(--md-sys-spacing-xs); }
+.m-sm { margin: var(--md-sys-spacing-sm); }
+.m-md { margin: var(--md-sys-spacing-md); }
+.m-lg { margin: var(--md-sys-spacing-lg); }
+.m-xl { margin: var(--md-sys-spacing-xl); }
+
+/* Fundido del Body con Material You 3 */
+body {
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font: var(--md-sys-typescale-body-medium-font);
+  margin: 0;
+  padding: var(--md-sys-spacing-lg);
+  min-height: 100vh;
+  transition: 
+    background-color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard),
+    color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+/* Importar fuente Inter desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+@media (max-width: 768px) {
+  .md-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body {
+    padding: var(--md-sys-spacing-md);
+  }
+}
+
+/* ===== FOCUS VISIBLE PARA ACCESIBILIDAD ===== */
+*:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+}
