@@ -1503,71 +1503,91 @@ const STORAGE_KEYS = {
     categoriaValues: 'generador_etiquetas_categoriaValues'
 };
 
-// ============ GLOBAL VARIABLES ============
+// Default values - only use if storage is empty
+const DEFAULT_VALUES = {
+    warehouseText: 'BRONCO RIG-00',
+    condicionValues: ['NUEVO', 'USADO NUEVO', 'RESGUARDO'],
+    categoriaValues: ['INVENTARIABLE', 'CONSUMIBLES']
+};
+
+// ============ GLOBAL VARIABLES - DO NOT INITIALIZE WITH DEFAULTS ============
 let currentMode = 'material';
 let materials = [];
 let codigoaxItems = [];
 let leftLogoData = '';
 let rightLogoData = '';
-let warehouseText = 'BRONCO RIG-00';
+let warehouseText = '';
 let codigoaxNombreMap = {};
+let condicionOptions = [];  // EMPTY - will be populated from storage or defaults
+let categoriaOptions = [];  // EMPTY - will be populated from storage or defaults
 let config = {};
 
-// ============ INITIALIZATION - LOAD FROM MEMORY STORAGE FIRST ============
+// ============ INITIALIZATION - CHECK STORAGE FIRST, USE DEFAULTS ONLY IF EMPTY ============
 function initializeFromStorage() {
     console.log('=== Starting initialization from memory storage ===');
     
-    // Load logos
+    // Load logos (no defaults needed)
     leftLogoData = memoryStorage.getItem(STORAGE_KEYS.leftLogoUrl) || '';
     rightLogoData = memoryStorage.getItem(STORAGE_KEYS.rightLogoUrl) || '';
-    warehouseText = memoryStorage.getItem(STORAGE_KEYS.warehouseText) || 'BRONCO RIG-00';
     
-    console.log('Warehouse text loaded:', warehouseText);
+    // Load warehouse text - use default ONLY if storage is empty
+    let storedWarehouse = memoryStorage.getItem(STORAGE_KEYS.warehouseText);
+    if (storedWarehouse) {
+        // User has saved value or this is a reload
+        warehouseText = storedWarehouse;
+        console.log('Warehouse text: loaded from storage', warehouseText);
+    } else {
+        // First time user - set default and save it
+        warehouseText = DEFAULT_VALUES.warehouseText;
+        memoryStorage.setItem(STORAGE_KEYS.warehouseText, warehouseText);
+        console.log('Warehouse text: first time, set to default', warehouseText);
+    }
     
-    // Load CSV data
+    // Load CSV data (no defaults)
     const csvDataString = memoryStorage.getItem(STORAGE_KEYS.codigoaxNombreMap);
     if (csvDataString) {
         try {
             codigoaxNombreMap = JSON.parse(csvDataString);
-            console.log('CSV data loaded from storage:', Object.keys(codigoaxNombreMap).length, 'entries');
+            console.log('CSV data loaded:', Object.keys(codigoaxNombreMap).length, 'entries');
         } catch (e) {
-            console.error('Error parsing CSV data from storage:', e);
+            console.error('Error parsing CSV data:', e);
             codigoaxNombreMap = {};
         }
+    } else {
+        console.log('CSV data: empty');
     }
     
-    // Load dropdown options with defaults
-    const storedCondicion = memoryStorage.getItem(STORAGE_KEYS.condicionValues);
+    // Load dropdown options - CRITICAL: only use defaults if nothing in storage
+    let storedCondicion = memoryStorage.getItem(STORAGE_KEYS.condicionValues);
     if (storedCondicion) {
+        // User has saved custom values
         condicionOptions = storedCondicion.split('\n').map(v => v.trim()).filter(v => v);
+        console.log('Condicion options: loaded from storage', condicionOptions);
     } else {
-        // Set default if not in storage
-        condicionOptions = ['NUEVO', 'USADO NUEVO', 'RESGUARDO'];
+        // First time user - use defaults and SAVE them
+        condicionOptions = DEFAULT_VALUES.condicionValues;
         memoryStorage.setItem(STORAGE_KEYS.condicionValues, condicionOptions.join('\n'));
+        console.log('Condicion options: first time, set to defaults', condicionOptions);
     }
     
-    const storedCategoria = memoryStorage.getItem(STORAGE_KEYS.categoriaValues);
+    let storedCategoria = memoryStorage.getItem(STORAGE_KEYS.categoriaValues);
     if (storedCategoria) {
+        // User has saved custom values
         categoriaOptions = storedCategoria.split('\n').map(v => v.trim()).filter(v => v);
+        console.log('Categoria options: loaded from storage', categoriaOptions);
     } else {
-        // Set default if not in storage
-        categoriaOptions = ['INVENTARIABLE', 'CONSUMIBLES'];
+        // First time user - use defaults and SAVE them
+        categoriaOptions = DEFAULT_VALUES.categoriaValues;
         memoryStorage.setItem(STORAGE_KEYS.categoriaValues, categoriaOptions.join('\n'));
+        console.log('Categoria options: first time, set to defaults', categoriaOptions);
     }
     
-    console.log('Dropdown options loaded:', { condicionOptions, categoriaOptions });
-    
-    console.log('Configuration loaded from storage:', {
-        leftLogo: leftLogoData ? 'exists' : 'empty',
-        rightLogo: rightLogoData ? 'exists' : 'empty',
-        warehouseText: warehouseText,
-        csvEntries: Object.keys(codigoaxNombreMap).length
-    });
+    console.log('=== Initialization complete ===');
     
     return { leftLogo: leftLogoData, rightLogo: rightLogoData, warehouseText: warehouseText };
 }
 
-// CALL INITIALIZATION IMMEDIATELY
+// CALL INITIALIZATION IMMEDIATELY - This ensures defaults are only applied once on first-ever load
 config = initializeFromStorage();
 
 // ============ DOM READY - APPLY TO UI ============
@@ -2513,7 +2533,7 @@ function saveLogoConfig() {
     // Get values from form
     const leftLogoUrl = document.getElementById('leftLogoUrl')?.value || '';
     const rightLogoUrl = document.getElementById('rightLogoUrl')?.value || '';
-    const warehouseTextValue = document.getElementById('warehouseText')?.value || 'BRONCO RIG-00';
+    const warehouseTextValue = document.getElementById('warehouseText')?.value || DEFAULT_VALUES.warehouseText;
     
     // Save dropdown options
     const condicionText = document.getElementById('condicionValues')?.value || '';
@@ -2522,14 +2542,17 @@ function saveLogoConfig() {
     const newCondicionOptions = condicionText.split('\n').map(v => v.trim()).filter(v => v);
     const newCategoriaOptions = categoriaText.split('\n').map(v => v.trim()).filter(v => v);
     
+    // Always save to storage when user saves config
     if (newCondicionOptions.length > 0) {
         memoryStorage.setItem(STORAGE_KEYS.condicionValues, newCondicionOptions.join('\n'));
         condicionOptions = newCondicionOptions;
+        console.log('Condicion options saved:', condicionOptions);
     }
     
     if (newCategoriaOptions.length > 0) {
         memoryStorage.setItem(STORAGE_KEYS.categoriaValues, newCategoriaOptions.join('\n'));
         categoriaOptions = newCategoriaOptions;
+        console.log('Categoria options saved:', categoriaOptions);
     }
     
     // SAVE TO MEMORY STORAGE WITH CORRECT KEYS
