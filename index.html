@@ -1809,6 +1809,15 @@ document.getElementById('materialForm').addEventListener('submit', (e) => {
             }
         }
 
+function updateHeaderText() {
+const input = document.getElementById('headerText');
+if (input) {
+headerText = input.value || 'BRONCO RIG-91';
+storage.setItem(STORAGE_KEYS.headerText, headerText);
+console.log('Header text actualizado a:', headerText);
+}
+}
+
         function renderReviewTable() {
   const tbody = document.getElementById('reviewTableBody');
   tbody.innerHTML = '';
@@ -2105,7 +2114,7 @@ document.getElementById('materialForm').addEventListener('submit', (e) => {
                         </div>
                         <div class="label-title">
                             <h4>ETIQUETADO ALMACEN<\/h4>
-                            <p>BRONCO RIG-91<\/p>
+                            <p>${headerText}<\/p>
                         </div>
                         <div class="label-logo-right">
                             ${logoRight ? `<img src="${logoRight}" class="label-logo" alt="Logo derecho">` : '<div style="width: 65px; height: 32px; background: #f0f0f0;"></div>'}
