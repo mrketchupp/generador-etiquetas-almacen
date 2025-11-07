@@ -1448,6 +1448,15 @@ body {
                     <button onclick="clearCSV()" class="btn-secondary" style="margin-top: 10px; width: auto;">Limpiar CSV</button>
                 </div>
 
+                <div class="logo-section">
+                    <h3>Texto de Almacen</h3>
+                    <p style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 10px;">
+                        Personaliza el texto que aparece en las etiquetas (ej: BRONCO RIG-91)
+                    </p>
+                    <input type="text" id="headerText" class="form-input" placeholder="BRONCO RIG-91" onchange="updateHeaderText()">
+                    <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 8px;">Este texto aparecerá en todas las etiquetas generadas</p>
+                </div>
+
                 <button class="btn-primary" onclick="saveLogoConfig()">Cerrar Configuración</button>
             </div>
         </div>
@@ -1459,14 +1468,26 @@ body {
 // Data persists during the current session but is lost on page reload
 // Pattern follows the exact structure from reference code
 
-// Using browser's native localStorage for persistent storage
-const storage = localStorage;
+const storage = {
+    data: {},
+    getItem: function(key) {
+        return this.data[key] || null;
+    },
+    setItem: function(key, value) {
+        this.data[key] = value;
+        console.log(`Stored: ${key}`);
+    },
+    removeItem: function(key) {
+        delete this.data[key];
+        console.log(`Removed: ${key}`);
+    }
+};
 
 const STORAGE_KEYS = {
     logoLeft: 'logoLeft',
     logoRight: 'logoRight',
     codigosAX: 'codigosAX',
-    firstVisitShown: 'firstVisitShown'
+    headerText: 'headerText'
 };
 
 // ============ GLOBAL VARIABLES ============
@@ -1475,6 +1496,7 @@ let materials = [];
 let codigoaxItems = [];
 let logoLeft = storage.getItem(STORAGE_KEYS.logoLeft);
 let logoRight = storage.getItem(STORAGE_KEYS.logoRight);
+let headerText = storage.getItem(STORAGE_KEYS.headerText) || 'BRONCO RIG-91';
 let codigosData = {};
 
 // Hardcoded dropdown values - NOT customizable
@@ -2219,7 +2241,7 @@ function createLabel(material) {
                 </div>
                 <div class="label-title">
                     <h4>ETIQUETADO ALMACEN</h4>
-                    <p>BRONCO RIG-91</p>
+                    <p>${headerText}</p>
                 </div>
                 <div class="label-logo-right">
                     ${logoRight ? `<img src="${logoRight}" class="label-logo" alt="Logo derecho">` : '<div style="width: 65px; height: 32px;"></div>'}
