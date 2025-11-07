@@ -1414,10 +1414,12 @@ body {
                     <div class="logo-controls">
                         <div class="file-upload-wrapper">
                             <label class="file-upload-label" for="leftLogoFile">Cargar archivo</label>
-                            <input type="file" id="leftLogoFile" class="file-upload-input" accept="image/*" onchange="handleLogoUpload('left', this)">
+                            <input type="file" id="leftLogoFile" class="file-upload-input" accept="image/*" onchange="handleLogoUpload(event, 'left')">
                         </div>
-                        <input type="text" id="leftLogoUrl" class="form-input" placeholder="O pega una URL de imagen" onchange="handleLogoUrl('left', this.value)">
+                        <p style="font-size: 12px; color: var(--color-text-secondary); margin: 10px 0;">O pega una URL:</p>
+                        <input type="text" id="leftLogoUrl" class="form-input" placeholder="https://ejemplo.com/logo.png" onchange="handleLogoUrl(event, 'left')">
                         <div id="leftLogoPreview" class="logo-preview empty">Sin logo configurado</div>
+                        <button onclick="clearLogo('left')" class="btn-secondary" style="margin-top: 10px; width: auto;">Limpiar logo</button>
                     </div>
                 </div>
 
@@ -1426,297 +1428,133 @@ body {
                     <div class="logo-controls">
                         <div class="file-upload-wrapper">
                             <label class="file-upload-label" for="rightLogoFile">Cargar archivo</label>
-                            <input type="file" id="rightLogoFile" class="file-upload-input" accept="image/*" onchange="handleLogoUpload('right', this)">
+                            <input type="file" id="rightLogoFile" class="file-upload-input" accept="image/*" onchange="handleLogoUpload(event, 'right')">
                         </div>
-                        <input type="text" id="rightLogoUrl" class="form-input" placeholder="O pega una URL de imagen" onchange="handleLogoUrl('right', this.value)">
+                        <p style="font-size: 12px; color: var(--color-text-secondary); margin: 10px 0;">O pega una URL:</p>
+                        <input type="text" id="rightLogoUrl" class="form-input" placeholder="https://ejemplo.com/logo.png" onchange="handleLogoUrl(event, 'right')">
                         <div id="rightLogoPreview" class="logo-preview empty">Sin logo configurado</div>
-                    </div>
-                </div>
-
-                <div class="logo-section">
-                    <h3>Texto de Almacén</h3>
-                    <div class="logo-controls">
-                        <input type="text" id="warehouseText" class="form-input" placeholder="Ej: BRONCO RIG-00" value="BRONCO RIG-00">
-                    </div>
-                </div>
-
-                <div class="logo-section">
-                    <h3>Personalizar Listas Desplegables</h3>
-                    <div class="logo-controls" style="gap: 16px;">
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Valores para "Condición" (uno por línea)</label>
-                            <textarea id="condicionValues" style="width: 100%; height: 80px; font-family: monospace; padding: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-base); background: var(--color-surface); color: var(--color-text); resize: vertical;">NUEVO
-USADO NUEVO
-RESGUARDO</textarea>
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px;">Valores para "Categoría" (uno por línea)</label>
-                            <textarea id="categoriaValues" style="width: 100%; height: 80px; font-family: monospace; padding: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-base); background: var(--color-surface); color: var(--color-text); resize: vertical;">INVENTARIABLE
-CONSUMIBLES</textarea>
-                        </div>
+                        <button onclick="clearLogo('right')" class="btn-secondary" style="margin-top: 10px; width: auto;">Limpiar logo</button>
                     </div>
                 </div>
 
                 <div class="logo-section">
                     <h3>Cargar Tabla de Códigos AX</h3>
                     <p style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 10px;">
-                        Carga un archivo CSV con columnas "Codigo AX" y "Nombre" para autocomplete automático
+                        Archivo CSV con columnas "Codigo AX" y "Nombre"
                     </p>
                     <button onclick="document.getElementById('csvFile').click()" class="btn-secondary" style="width: auto;">Cargar archivo CSV</button>
                     <input type="file" id="csvFile" accept=".csv" onchange="handleCSVUpload(event)" style="display: none;">
-                    <div id="csvStatus" style="margin-top: 10px; font-size: 12px; padding: 8px 12px; border-radius: 4px; background: var(--color-background);"></div>
+                    <div id="csvStatus" style="margin-top: 10px; font-size: 12px;"></div>
+                    <button onclick="clearCSV()" class="btn-secondary" style="margin-top: 10px; width: auto;">Limpiar CSV</button>
                 </div>
 
-                <button class="btn-primary" onclick="saveLogoConfig()">Guardar Configuración</button>
+                <button class="btn-primary" onclick="saveLogoConfig()">Cerrar Configuración</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ============ IN-MEMORY STORAGE (Session Persistence) ============
-// This mimics localStorage behavior but uses JavaScript variables
-// Data persists during the session but is lost on page reload
-// (localStorage is blocked in sandboxed environments)
-const memoryStorage = {
-    data: {},
-    getItem: function(key) {
-        return this.data[key] || null;
-    },
-    setItem: function(key, value) {
-        this.data[key] = value;
-        console.log(`Stored in memory: ${key}`);
-    },
-    removeItem: function(key) {
-        delete this.data[key];
-    },
-    clear: function() {
-        this.data = {};
-    }
-};
+        // ============ STORAGE PERSISTENCE ============
+// NOTE: This environment blocks localStorage, so we use in-memory storage
+// Data persists during the current session but is lost on page reload
+// Pattern follows the exact structure from reference code
+
+// Using browser's native localStorage for persistent storage
+const storage = localStorage;
 
 const STORAGE_KEYS = {
-    leftLogoUrl: 'generador_etiquetas_leftLogo',
-    rightLogoUrl: 'generador_etiquetas_rightLogo',
-    warehouseText: 'generador_etiquetas_warehouseText',
-    codigoaxNombreMap: 'generador_etiquetas_codigoaxMap',
-    condicionValues: 'generador_etiquetas_condicionValues',
-    categoriaValues: 'generador_etiquetas_categoriaValues'
+    logoLeft: 'logoLeft',
+    logoRight: 'logoRight',
+    codigosAX: 'codigosAX',
+    firstVisitShown: 'firstVisitShown'
 };
 
-// Default values - only use if storage is empty
-const DEFAULT_VALUES = {
-    warehouseText: 'BRONCO RIG-00',
-    condicionValues: ['NUEVO', 'USADO NUEVO', 'RESGUARDO'],
-    categoriaValues: ['INVENTARIABLE', 'CONSUMIBLES']
-};
-
-// ============ GLOBAL VARIABLES - DO NOT INITIALIZE WITH DEFAULTS ============
+// ============ GLOBAL VARIABLES ============
 let currentMode = 'material';
 let materials = [];
 let codigoaxItems = [];
-let leftLogoData = '';
-let rightLogoData = '';
-let warehouseText = '';
-let codigoaxNombreMap = {};
-let condicionOptions = [];  // EMPTY - will be populated from storage or defaults
-let categoriaOptions = [];  // EMPTY - will be populated from storage or defaults
-let config = {};
+let logoLeft = storage.getItem(STORAGE_KEYS.logoLeft);
+let logoRight = storage.getItem(STORAGE_KEYS.logoRight);
+let codigosData = {};
 
-// ============ INITIALIZATION - CHECK STORAGE FIRST, USE DEFAULTS ONLY IF EMPTY ============
-function initializeFromStorage() {
-    console.log('=== Starting initialization from memory storage ===');
-    
-    // Load logos (no defaults needed)
-    leftLogoData = memoryStorage.getItem(STORAGE_KEYS.leftLogoUrl) || '';
-    rightLogoData = memoryStorage.getItem(STORAGE_KEYS.rightLogoUrl) || '';
-    
-    // Load warehouse text - use default ONLY if storage is empty
-    let storedWarehouse = memoryStorage.getItem(STORAGE_KEYS.warehouseText);
-    if (storedWarehouse) {
-        // User has saved value or this is a reload
-        warehouseText = storedWarehouse;
-        console.log('Warehouse text: loaded from storage', warehouseText);
-    } else {
-        // First time user - set default and save it
-        warehouseText = DEFAULT_VALUES.warehouseText;
-        memoryStorage.setItem(STORAGE_KEYS.warehouseText, warehouseText);
-        console.log('Warehouse text: first time, set to default', warehouseText);
+// Hardcoded dropdown values - NOT customizable
+const condicionOptions = ['NUEVO', 'USADO NUEVO', 'RESGUARDO'];
+const categoriaOptions = ['INVENTARIABLE', 'CONSUMIBLES'];
+
+// ============ INITIALIZATION - LOAD CSV DATA ============
+function initCodigosData() {
+  const storedData = storage.getItem(STORAGE_KEYS.codigosAX);
+  if (storedData) {
+    try {
+      codigosData = JSON.parse(storedData);
+      console.log('CSV data loaded from storage:', Object.keys(codigosData).length, 'entries');
+    } catch (e) {
+      console.error('Error parsing CSV data:', e);
+      codigosData = {};
     }
-    
-    // Load CSV data (no defaults)
-    const csvDataString = memoryStorage.getItem(STORAGE_KEYS.codigoaxNombreMap);
-    if (csvDataString) {
-        try {
-            codigoaxNombreMap = JSON.parse(csvDataString);
-            console.log('CSV data loaded:', Object.keys(codigoaxNombreMap).length, 'entries');
-        } catch (e) {
-            console.error('Error parsing CSV data:', e);
-            codigoaxNombreMap = {};
-        }
-    } else {
-        console.log('CSV data: empty');
-    }
-    
-    // Load dropdown options - CRITICAL: only use defaults if nothing in storage
-    let storedCondicion = memoryStorage.getItem(STORAGE_KEYS.condicionValues);
-    if (storedCondicion) {
-        // User has saved custom values
-        condicionOptions = storedCondicion.split('\n').map(v => v.trim()).filter(v => v);
-        console.log('Condicion options: loaded from storage', condicionOptions);
-    } else {
-        // First time user - use defaults and SAVE them
-        condicionOptions = DEFAULT_VALUES.condicionValues;
-        memoryStorage.setItem(STORAGE_KEYS.condicionValues, condicionOptions.join('\n'));
-        console.log('Condicion options: first time, set to defaults', condicionOptions);
-    }
-    
-    let storedCategoria = memoryStorage.getItem(STORAGE_KEYS.categoriaValues);
-    if (storedCategoria) {
-        // User has saved custom values
-        categoriaOptions = storedCategoria.split('\n').map(v => v.trim()).filter(v => v);
-        console.log('Categoria options: loaded from storage', categoriaOptions);
-    } else {
-        // First time user - use defaults and SAVE them
-        categoriaOptions = DEFAULT_VALUES.categoriaValues;
-        memoryStorage.setItem(STORAGE_KEYS.categoriaValues, categoriaOptions.join('\n'));
-        console.log('Categoria options: first time, set to defaults', categoriaOptions);
-    }
-    
-    console.log('=== Initialization complete ===');
-    
-    return { leftLogo: leftLogoData, rightLogo: rightLogoData, warehouseText: warehouseText };
+  } else {
+    codigosData = {};
+    console.log('No CSV data in storage - starting empty');
+  }
+  updateCSVStatus();
 }
 
-// CALL INITIALIZATION IMMEDIATELY - This ensures defaults are only applied once on first-ever load
-config = initializeFromStorage();
-
-// ============ DOM READY - APPLY TO UI ============
-window.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM ready - applying configuration to UI');
-    applyConfigurationToModal(config);
-    loadSampleData();
-    setupUrlChangeListeners();
+// ============ DOM READY - RESTORE CONFIGURATION ============
+window.addEventListener('DOMContentLoaded', function() {
+    console.log('=== Page loaded, initializing configuration ===');
+    
+    // Restore logos
+    if (logoLeft) {
+        updateLogoPreview('left', logoLeft);
+        const leftInput = document.getElementById('leftLogoUrl');
+        if (leftInput) leftInput.value = logoLeft;
+    }
+    
+    if (logoRight) {
+        updateLogoPreview('right', logoRight);
+        const rightInput = document.getElementById('rightLogoUrl');
+        if (rightInput) rightInput.value = logoRight;
+    }
+    
+    // Initialize CSV data
+    initCodigosData();
+    
+    // Check if this is first time - if no configuration, show modal
+    const hasConfiguration = logoLeft || logoRight || Object.keys(codigosData).length > 0;
+    if (!hasConfiguration) {
+        console.log('First time user - opening configuration modal');
+        setTimeout(() => {
+            openConfigModal();
+        }, 500);
+    }
+    
+    console.log('Configuration restored:', {
+        logoLeft: logoLeft ? 'exists' : 'empty',
+        logoRight: logoRight ? 'exists' : 'empty',
+        csvEntries: Object.keys(codigosData).length
+    });
 });
 
-function applyConfigurationToModal(config) {
-    console.log('Applying configuration to modal inputs');
-    
-    // Apply left logo
-    if (config.leftLogo) {
-        const leftInput = document.getElementById('leftLogoUrl');
-        const leftPreview = document.getElementById('leftLogoPreview');
-        if (leftInput) leftInput.value = config.leftLogo;
-        if (leftPreview) {
-            leftPreview.innerHTML = `<img src="${config.leftLogo}" alt="Logo izquierdo">`;
-            leftPreview.classList.remove('empty');
-        }
-    }
-    
-    // Apply right logo
-    if (config.rightLogo) {
-        const rightInput = document.getElementById('rightLogoUrl');
-        const rightPreview = document.getElementById('rightLogoPreview');
-        if (rightInput) rightInput.value = config.rightLogo;
-        if (rightPreview) {
-            rightPreview.innerHTML = `<img src="${config.rightLogo}" alt="Logo derecho">`;
-            rightPreview.classList.remove('empty');
-        }
-    }
-    
-    // Apply warehouse text
-    if (config.warehouseText) {
-        const warehouseInput = document.getElementById('warehouseText');
-        if (warehouseInput) warehouseInput.value = config.warehouseText;
-    }
-    
-    // Update CSV status display
-    updateCSVStatusDisplay();
-    
-    // Ensure textareas have values (not just placeholders)
-    const condicionInput = document.getElementById('condicionValues');
-    if (condicionInput) {
-        if (!condicionInput.value || condicionInput.value.trim() === '') {
-            condicionInput.value = condicionOptions.join('\n');
-        }
-    }
-    
-    const categoriaInput = document.getElementById('categoriaValues');
-    if (categoriaInput) {
-        if (!categoriaInput.value || categoriaInput.value.trim() === '') {
-            categoriaInput.value = categoriaOptions.join('\n');
-        }
-    }
-    
-    console.log('Configuration applied to modal');
-}
 
-function updateCSVStatusDisplay() {
-    const statusDiv = document.getElementById('csvStatus');
-    const count = Object.keys(codigoaxNombreMap).length;
+
+function updateCSVStatus() {
+    const statusElement = document.getElementById('csvStatus');
+    const count = Object.keys(codigosData).length;
     
-    if (statusDiv) {
+    if (statusElement) {
         if (count > 0) {
-            statusDiv.innerHTML = `✓ CSV cargado (${count} registros)`;
-            statusDiv.style.color = '#22c55e';
+            statusElement.textContent = count + ' códigos AX cargados';
+            statusElement.style.color = '#22c55e';
         } else {
-            statusDiv.innerHTML = 'No hay CSV cargado';
-            statusDiv.style.color = '#999';
+            statusElement.textContent = '';
+            statusElement.style.color = '#999';
         }
     }
 }
 
-function setupUrlChangeListeners() {
-    const leftLogoInput = document.getElementById('leftLogoUrl');
-    const rightLogoInput = document.getElementById('rightLogoUrl');
-    if (leftLogoInput) {
-        leftLogoInput.addEventListener('input', function() {
-            updateLogoPreview('left', this.value);
-        });
-    }
-    if (rightLogoInput) {
-        rightLogoInput.addEventListener('input', function() {
-            updateLogoPreview('right', this.value);
-        });
-    }
-}
 
-function loadSampleData() {
-    // Add sample materials for testing
-    const samples = [
-        {
-            cantidad: 10,
-            codigoAx: '1720',
-            nombre: 'ANILLOS',
-            dimension: 'BX-154',
-            noParte: '',
-            descripcion: '',
-            condicion: 'NUEVO',
-            categoria: 'INVENTARIABLE'
-        },
-        {
-            cantidad: 8,
-            codigoAx: '1866',
-            nombre: 'CLAVIJA',
-            dimension: '100 AMP ACP1034',
-            noParte: '',
-            descripcion: '',
-            condicion: 'NUEVO',
-            categoria: 'INVENTARIABLE'
-        },
-        {
-            cantidad: 4,
-            codigoAx: '1763',
-            nombre: 'BOMBA HIDRAULICA DE TRANSFERENCIA',
-            dimension: '312-7727',
-            noParte: 'CATERPILLAR',
-            descripcion: '',
-            condicion: 'NUEVO',
-            categoria: 'INVENTARIABLE'
-        }
-    ];
-    // Uncomment to preload sample data
-    // materials = samples;
-}
+
+
 
         // Mode switching
         function switchMode(mode) {
@@ -1823,60 +1661,40 @@ document.getElementById('materialForm').addEventListener('submit', (e) => {
         }
 
         // Render review table
-        // CSV Upload and Parsing Functions
+        // ============ CSV UPLOAD AND PARSING ============
         function handleCSVUpload(event) {
             const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const csv = e.target.result;
-                    const codigoaxMap = parseCSV(csv);
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const csvText = e.target.result;
+                    const parsedData = parseCSV(csvText);
                     
-                    if (Object.keys(codigoaxMap).length > 0) {
-                        // Update global variable
-                        codigoaxNombreMap = codigoaxMap;
-                        
-                        // SAVE TO MEMORY STORAGE IMMEDIATELY
-                        memoryStorage.setItem(STORAGE_KEYS.codigoaxNombreMap, JSON.stringify(codigoaxMap));
-                        console.log('CSV saved to storage:', Object.keys(codigoaxMap).length, 'entries');
-                        
-                        // Update status display
-                        updateCSVStatusDisplay();
-                        
-                        alert(`CSV cargado correctamente (${Object.keys(codigoaxMap).length} registros)`);
+                    if (Object.keys(parsedData).length > 0) {
+                        codigosData = parsedData;
+                        storage.setItem(STORAGE_KEYS.codigosAX, JSON.stringify(codigosData));
+                        updateCSVStatus();
+                        alert('Archivo CSV cargado exitosamente. ' + Object.keys(codigosData).length + ' códigos disponibles.');
+                        console.log('CSV uploaded and saved to storage');
                     } else {
-                        throw new Error('No se encontraron datos válidos en el CSV');
+                        alert('No se encontraron datos válidos en el CSV');
                     }
-                } catch (error) {
-                    const statusDiv = document.getElementById('csvStatus');
-                    if (statusDiv) {
-                        statusDiv.innerHTML = `✗ Error al cargar CSV: ${error.message}`;
-                        statusDiv.style.color = '#ef4444';
-                    }
-                    console.error('CSV parsing error:', error);
-                    alert(`Error al cargar CSV: ${error.message}`);
-                }
-            };
-            reader.readAsText(file);
+                };
+                reader.readAsText(file);
+            }
         }
 
         function parseCSV(csv) {
             const lines = csv.trim().split('\n');
-            const codigoaxMap = {};
+            const codigosMap = {};
             
-            if (lines.length < 2) {
-                throw new Error('CSV debe tener al menos un encabezado y una fila de datos');
-            }
+            if (lines.length < 2) return codigosMap;
             
             const header = lines[0].split(',').map(h => h.trim().toLowerCase());
             const codigoaxIndex = header.findIndex(h => h.includes('codigo') && h.includes('ax'));
             const nombreIndex = header.findIndex(h => h.includes('nombre'));
             
-            if (codigoaxIndex === -1 || nombreIndex === -1) {
-                throw new Error('CSV debe tener columnas "Codigo AX" y "Nombre"');
-            }
+            if (codigoaxIndex === -1 || nombreIndex === -1) return codigosMap;
             
             for (let i = 1; i < lines.length; i++) {
                 if (lines[i].trim() === '') continue;
@@ -1886,21 +1704,25 @@ document.getElementById('materialForm').addEventListener('submit', (e) => {
                 const nombre = parts[nombreIndex];
                 
                 if (codigoax && nombre) {
-                    codigoaxMap[codigoax.toUpperCase()] = nombre;
+                    codigosMap[codigoax.toUpperCase()] = nombre;
                 }
             }
             
-            return codigoaxMap;
+            return codigosMap;
+        }
+        
+        function clearCSV() {
+            codigosData = {};
+            storage.removeItem(STORAGE_KEYS.codigosAX);
+            document.getElementById('csvFile').value = '';
+            updateCSVStatus();
+            alert('CSV eliminado.');
+            console.log('CSV cleared from storage');
         }
 
         function autocompleteNombre(codigoaxValue) {
             const codigoax = codigoaxValue.trim().toUpperCase();
-            
-            if (codigoaxNombreMap[codigoax]) {
-                return codigoaxNombreMap[codigoax];
-            }
-            
-            return null;
+            return codigosData[codigoax] || null;
         }
 
         // Material Mode Step 1 Autocomplete
@@ -1966,121 +1788,109 @@ document.getElementById('materialForm').addEventListener('submit', (e) => {
         }
 
         function renderReviewTable() {
-            const tbody = document.getElementById('reviewTableBody');
-            tbody.innerHTML = '';
-            
-            materials.forEach((material, index) => {
-                const row = document.createElement('tr');
-                
-                // Cantidad
-                const tdCantidad = document.createElement('td');
-                const inputCantidad = document.createElement('input');
-                inputCantidad.type = 'number';
-                inputCantidad.value = material.cantidad;
-                inputCantidad.min = '1';
-                inputCantidad.onchange = function() { updateMaterial(index, 'cantidad', this.value); };
-                tdCantidad.appendChild(inputCantidad);
-                row.appendChild(tdCantidad);
-                
-                // Codigo AX
-                const tdCodigoAX = document.createElement('td');
-                const inputCodigoAX = document.createElement('input');
-                inputCodigoAX.type = 'text';
-                inputCodigoAX.value = material.codigoAx;
-                inputCodigoAX.onchange = function() { 
-                    updateMaterial(index, 'codigoAx', this.value); 
-                    autocompleteMaterialNombreFromTable(index);
-                };
-                tdCodigoAX.appendChild(inputCodigoAX);
-                row.appendChild(tdCodigoAX);
-                
-                // Nombre
-                const tdNombre = document.createElement('td');
-                const inputNombre = document.createElement('input');
-                inputNombre.type = 'text';
-                inputNombre.value = material.nombre;
-                inputNombre.onchange = function() { updateMaterial(index, 'nombre', this.value); };
-                tdNombre.appendChild(inputNombre);
-                row.appendChild(tdNombre);
-                
-                // Dimension
-                const tdDimension = document.createElement('td');
-                const inputDimension = document.createElement('input');
-                inputDimension.type = 'text';
-                inputDimension.value = material.dimension;
-                inputDimension.onchange = function() { updateMaterial(index, 'dimension', this.value); };
-                tdDimension.appendChild(inputDimension);
-                row.appendChild(tdDimension);
-                
-                // No. Parte
-                const tdNoParte = document.createElement('td');
-                const inputNoParte = document.createElement('input');
-                inputNoParte.type = 'text';
-                inputNoParte.value = material.noParte || '';
-                inputNoParte.onchange = function() { updateMaterial(index, 'noParte', this.value); };
-                tdNoParte.appendChild(inputNoParte);
-                row.appendChild(tdNoParte);
-                
-                // Descripcion
-                const tdDescripcion = document.createElement('td');
-                const inputDescripcion = document.createElement('input');
-                inputDescripcion.type = 'text';
-                inputDescripcion.value = material.descripcion || '';
-                inputDescripcion.onchange = function() { updateMaterial(index, 'descripcion', this.value); };
-                tdDescripcion.appendChild(inputDescripcion);
-                row.appendChild(tdDescripcion);
-                
-                // Condicion dropdown
-                const tdCondicion = document.createElement('td');
-                const selectCondicion = document.createElement('select');
-                condicionOptions.forEach(option => {
-                    const optElement = document.createElement('option');
-                    optElement.value = option;
-                    optElement.textContent = option;
-                    if (material.condicion === option) optElement.selected = true;
-                    selectCondicion.appendChild(optElement);
-                });
-                selectCondicion.onchange = function() { updateMaterial(index, 'condicion', this.value); };
-                tdCondicion.appendChild(selectCondicion);
-                row.appendChild(tdCondicion);
-                
-                // Categoria dropdown
-                const tdCategoria = document.createElement('td');
-                const selectCategoria = document.createElement('select');
-                categoriaOptions.forEach(option => {
-                    const optElement = document.createElement('option');
-                    optElement.value = option;
-                    optElement.textContent = option;
-                    if (material.categoria === option) optElement.selected = true;
-                    selectCategoria.appendChild(optElement);
-                });
-                selectCategoria.onchange = function() { updateMaterial(index, 'categoria', this.value); };
-                tdCategoria.appendChild(selectCategoria);
-                row.appendChild(tdCategoria);
-                
-                // Duplicar button
-                const tdDuplicar = document.createElement('td');
-                const btnDuplicar = document.createElement('button');
-                btnDuplicar.className = 'btn-duplicate';
-                btnDuplicar.textContent = '📋 Duplicar';
-                btnDuplicar.title = 'Duplicar partida';
-                btnDuplicar.onclick = function() { duplicateItem(index); };
-                tdDuplicar.appendChild(btnDuplicar);
-                row.appendChild(tdDuplicar);
-                
-                // Eliminar button
-                const tdEliminar = document.createElement('td');
-                const btnEliminar = document.createElement('button');
-                btnEliminar.className = 'btn-delete';
-                btnEliminar.textContent = '🗑️ Eliminar';
-                btnEliminar.title = 'Eliminar partida';
-                btnEliminar.onclick = function() { deleteItem(index); };
-                tdEliminar.appendChild(btnEliminar);
-                row.appendChild(tdEliminar);
-                
-                tbody.appendChild(row);
-            });
-        }
+  const tbody = document.getElementById('reviewTableBody');
+  tbody.innerHTML = '';
+  materials.forEach((material, index) => {
+    const row = document.createElement('tr');
+    // Cantidad
+    const tdCantidad = document.createElement('td');
+    const inputCantidad = document.createElement('input');
+    inputCantidad.type = 'number';
+    inputCantidad.value = material.cantidad;
+    inputCantidad.min = '1';
+    inputCantidad.onchange = function() { updateMaterial(index, 'cantidad', this.value); };
+    tdCantidad.appendChild(inputCantidad);
+    row.appendChild(tdCantidad);
+    // Codigo AX
+    const tdCodigoAX = document.createElement('td');
+    const inputCodigoAX = document.createElement('input');
+    inputCodigoAX.type = 'text';
+    inputCodigoAX.value = material.codigoAx;
+    inputCodigoAX.onchange = function() {
+      updateMaterial(index, 'codigoAx', this.value);
+      autocompleteMaterialNombreFromTable(index);
+    };
+    tdCodigoAX.appendChild(inputCodigoAX);
+    row.appendChild(tdCodigoAX);
+    // Nombre
+    const tdNombre = document.createElement('td');
+    const inputNombre = document.createElement('input');
+    inputNombre.type = 'text';
+    inputNombre.value = material.nombre;
+    inputNombre.onchange = function() { updateMaterial(index, 'nombre', this.value); };
+    tdNombre.appendChild(inputNombre);
+    row.appendChild(tdNombre);
+    // Dimension
+    const tdDimension = document.createElement('td');
+    const inputDimension = document.createElement('input');
+    inputDimension.type = 'text';
+    inputDimension.value = material.dimension;
+    inputDimension.onchange = function() { updateMaterial(index, 'dimension', this.value); };
+    tdDimension.appendChild(inputDimension);
+    row.appendChild(tdDimension);
+    // No. Parte
+    const tdNoParte = document.createElement('td');
+    const inputNoParte = document.createElement('input');
+    inputNoParte.type = 'text';
+    inputNoParte.value = material.noParte || '';
+    inputNoParte.onchange = function() { updateMaterial(index, 'noParte', this.value); };
+    tdNoParte.appendChild(inputNoParte);
+    row.appendChild(tdNoParte);
+    // Descripcion
+    const tdDescripcion = document.createElement('td');
+    const inputDescripcion = document.createElement('input');
+    inputDescripcion.type = 'text';
+    inputDescripcion.value = material.descripcion || '';
+    inputDescripcion.onchange = function() { updateMaterial(index, 'descripcion', this.value); };
+    tdDescripcion.appendChild(inputDescripcion);
+    row.appendChild(tdDescripcion);
+    // Condicion dropdown - HARDCODED
+    const tdCondicion = document.createElement('td');
+    const selectCondicion = document.createElement('select');
+    condicionOptions.forEach(option => {
+      const optElement = document.createElement('option');
+      optElement.value = option;
+      optElement.textContent = option;
+      if (material.condicion === option) optElement.selected = true;
+      selectCondicion.appendChild(optElement);
+    });
+    selectCondicion.onchange = function() { updateMaterial(index, 'condicion', this.value); };
+    tdCondicion.appendChild(selectCondicion);
+    row.appendChild(tdCondicion);
+    // Categoria dropdown - HARDCODED
+    const tdCategoria = document.createElement('td');
+    const selectCategoria = document.createElement('select');
+    categoriaOptions.forEach(option => {
+      const optElement = document.createElement('option');
+      optElement.value = option;
+      optElement.textContent = option;
+      if (material.categoria === option) optElement.selected = true;
+      selectCategoria.appendChild(optElement);
+    });
+    selectCategoria.onchange = function() { updateMaterial(index, 'categoria', this.value); };
+    tdCategoria.appendChild(selectCategoria);
+    row.appendChild(tdCategoria);
+    // Duplicar button
+    const tdDuplicar = document.createElement('td');
+    const btnDuplicar = document.createElement('button');
+    btnDuplicar.className = 'btn-duplicate';
+    btnDuplicar.textContent = '📋 Duplicar';
+    btnDuplicar.title = 'Duplicar partida';
+    btnDuplicar.onclick = function() { duplicateItem(index); };
+    tdDuplicar.appendChild(btnDuplicar);
+    row.appendChild(tdDuplicar);
+    // Eliminar button
+    const tdEliminar = document.createElement('td');
+    const btnEliminar = document.createElement('button');
+    btnEliminar.className = 'btn-delete';
+    btnEliminar.textContent = '🗑️ Eliminar';
+    btnEliminar.title = 'Eliminar partida';
+    btnEliminar.onclick = function() { deleteItem(index); };
+    tdEliminar.appendChild(btnEliminar);
+    row.appendChild(tdEliminar);
+    tbody.appendChild(row);
+  });
+}
 
         // Codigo AX table functions
         function renderCodigoAXTable() {
@@ -2263,32 +2073,27 @@ document.getElementById('materialForm').addEventListener('submit', (e) => {
         }
         
         function createCodigoAXLabel(item) {
-            // READ FROM MEMORY STORAGE - ALWAYS FRESH
-            const currentLeftLogo = memoryStorage.getItem(STORAGE_KEYS.leftLogoUrl) || '';
-            const currentRightLogo = memoryStorage.getItem(STORAGE_KEYS.rightLogoUrl) || '';
-            const currentWarehouseText = memoryStorage.getItem(STORAGE_KEYS.warehouseText) || 'BRONCO RIG-00';
-            
             const labelDiv = document.createElement('div');
             labelDiv.className = 'label-codigoax';
             labelDiv.innerHTML = `
                 <div class="label-container">
                     <div class="label-header">
                         <div class="label-logo-left">
-                            ${currentLeftLogo ? `<img src="${currentLeftLogo}" class="label-logo" alt="Logo izquierdo">` : '<div style="width: 65px; height: 32px;"></div>'}
+                            ${logoLeft ? `<img src="${logoLeft}" class="label-logo" alt="Logo izquierdo">` : '<div style="width: 65px; height: 32px; background: #f0f0f0;"></div>'}
                         </div>
                         <div class="label-title">
-                            <h4>ETIQUETADO ALMACEN</h4>
-                            <p>${currentWarehouseText}</p>
+                            <h4>ETIQUETADO ALMACEN<\/h4>
+                            <p>BRONCO RIG-91<\/p>
                         </div>
                         <div class="label-logo-right">
-                            ${currentRightLogo ? `<img src="${currentRightLogo}" class="label-logo" alt="Logo derecho">` : '<div style="width: 65px; height: 32px;"></div>'}
+                            ${logoRight ? `<img src="${logoRight}" class="label-logo" alt="Logo derecho">` : '<div style="width: 65px; height: 32px; background: #f0f0f0;"></div>'}
                         </div>
                     </div>
                     <div class="label-codigoax-main">
-                        <div class="codigoax-number">${item.codigo_ax}</div>
+                        <div class="codigoax-number">${item.codigo_ax}<\/div>
                     </div>
                     <div class="label-codigoax-nombre">
-                        <div class="codigoax-nombre-text">${item.nombre}</div>
+                        <div class="codigoax-nombre-text">${item.nombre}<\/div>
                     </div>
                 </div>
             `;
@@ -2404,25 +2209,20 @@ document.getElementById('materialForm').addEventListener('submit', (e) => {
         }
 
 function createLabel(material) {
-    // READ FROM MEMORY STORAGE - ALWAYS FRESH
-    const currentLeftLogo = memoryStorage.getItem(STORAGE_KEYS.leftLogoUrl) || '';
-    const currentRightLogo = memoryStorage.getItem(STORAGE_KEYS.rightLogoUrl) || '';
-    const currentWarehouseText = memoryStorage.getItem(STORAGE_KEYS.warehouseText) || 'BRONCO RIG-00';
-    
     const labelDiv = document.createElement('div');
     labelDiv.className = 'label';
     labelDiv.innerHTML = `
         <div class="label-container">
             <div class="label-header">
                 <div class="label-logo-left">
-                    ${currentLeftLogo ? `<img src="${currentLeftLogo}" class="label-logo" alt="Logo izquierdo">` : '<div style="width: 65px; height: 32px;"></div>'}
+                    ${logoLeft ? `<img src="${logoLeft}" class="label-logo" alt="Logo izquierdo">` : '<div style="width: 65px; height: 32px;"></div>'}
                 </div>
                 <div class="label-title">
                     <h4>ETIQUETADO ALMACEN</h4>
-                    <p>${currentWarehouseText}</p>
+                    <p>BRONCO RIG-91</p>
                 </div>
                 <div class="label-logo-right">
-                    ${currentRightLogo ? `<img src="${currentRightLogo}" class="label-logo" alt="Logo derecho">` : '<div style="width: 65px; height: 32px;"></div>'}
+                    ${logoRight ? `<img src="${logoRight}" class="label-logo" alt="Logo derecho">` : '<div style="width: 65px; height: 32px;"></div>'}
                 </div>
             </div>
             <div class="label-body">
@@ -2455,27 +2255,11 @@ function createLabel(material) {
     return labelDiv;
 }
 
-function updateAllLabels() {
-    const printContainer = document.getElementById('printContainer');
-    if (printContainer.classList.contains('active')) {
-        showPrintPreview();
-    }
-}
-
 // Modal functions
 function openConfigModal() {
     const modal = document.getElementById('configModal');
     if (modal) {
         modal.classList.add('active');
-        
-        // Reload current configuration from storage to show in modal
-        const currentConfig = {
-            leftLogo: memoryStorage.getItem(STORAGE_KEYS.leftLogoUrl) || '',
-            rightLogo: memoryStorage.getItem(STORAGE_KEYS.rightLogoUrl) || '',
-            warehouseText: memoryStorage.getItem(STORAGE_KEYS.warehouseText) || 'BRONCO RIG-00'
-        };
-        
-        applyConfigurationToModal(currentConfig);
     }
 }
 
@@ -2483,110 +2267,90 @@ function closeConfigModal() {
     document.getElementById('configModal').classList.remove('active');
 }
 
-function handleLogoUpload(side, input) {
-    const file = input.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const dataUrl = e.target.result;
-        
-        // UPDATE INPUT FIELD
-        const inputId = side === 'left' ? 'leftLogoUrl' : 'rightLogoUrl';
-        const inputField = document.getElementById(inputId);
-        if (inputField) inputField.value = dataUrl;
-        
-        // UPDATE PREVIEW
-        updateLogoPreview(side, dataUrl);
-        
-        // UPDATE GLOBAL VARIABLE
-        if (side === 'left') {
-            leftLogoData = dataUrl;
-        } else {
-            rightLogoData = dataUrl;
-        }
-        
-        // SAVE IMMEDIATELY TO MEMORY STORAGE
-        const storageKey = side === 'left' ? STORAGE_KEYS.leftLogoUrl : STORAGE_KEYS.rightLogoUrl;
-        memoryStorage.setItem(storageKey, dataUrl);
-        
-        console.log(`Logo ${side} uploaded and saved to storage`);
-    };
-    reader.readAsDataURL(file);
+// ============ LOGO HANDLING ============
+function handleLogoUpload(event, side) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const dataUrl = e.target.result;
+            
+            if (side === 'left') {
+                logoLeft = dataUrl;
+                storage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
+                updateLogoPreview('left', logoLeft);
+            } else {
+                logoRight = dataUrl;
+                storage.setItem(STORAGE_KEYS.logoRight, logoRight);
+                updateLogoPreview('right', logoRight);
+            }
+            
+            console.log(`Logo ${side} uploaded and saved to storage`);
+        };
+        reader.readAsDataURL(file);
+    }
 }
 
-function updateLogoPreview(side, url) {
+function handleLogoUrl(event, side) {
+    const url = event.target.value;
+    
+    if (url) {
+        if (side === 'left') {
+            logoLeft = url;
+            storage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
+            updateLogoPreview('left', logoLeft);
+        } else {
+            logoRight = url;
+            storage.setItem(STORAGE_KEYS.logoRight, logoRight);
+            updateLogoPreview('right', logoRight);
+        }
+        
+        console.log(`Logo ${side} URL saved to storage`);
+    }
+}
+
+function clearLogo(side) {
+    if (side === 'left') {
+        logoLeft = '';
+        storage.removeItem(STORAGE_KEYS.logoLeft);
+        const leftInput = document.getElementById('leftLogoUrl');
+        if (leftInput) leftInput.value = '';
+        const leftPreview = document.getElementById('leftLogoPreview');
+        if (leftPreview) {
+            leftPreview.innerHTML = 'Sin logo configurado';
+            leftPreview.classList.add('empty');
+        }
+    } else {
+        logoRight = '';
+        storage.removeItem(STORAGE_KEYS.logoRight);
+        const rightInput = document.getElementById('rightLogoUrl');
+        if (rightInput) rightInput.value = '';
+        const rightPreview = document.getElementById('rightLogoPreview');
+        if (rightPreview) {
+            rightPreview.innerHTML = 'Sin logo configurado';
+            rightPreview.classList.add('empty');
+        }
+    }
+    
+    console.log(`Logo ${side} cleared from storage`);
+}
+
+function updateLogoPreview(side, logoUrl) {
     const previewId = side === 'left' ? 'leftLogoPreview' : 'rightLogoPreview';
     const preview = document.getElementById(previewId);
-    if (url) {
-        preview.innerHTML = `<img src="${url}" alt="${side} logo preview">`;
+    
+    if (preview && logoUrl) {
+        preview.innerHTML = `<img src="${logoUrl}" alt="Logo ${side}">`;
         preview.classList.remove('empty');
-    } else {
+    } else if (preview) {
         preview.innerHTML = 'Sin logo configurado';
         preview.classList.add('empty');
     }
 }
 
 function saveLogoConfig() {
-    console.log('=== Saving configuration ===');
-    
-    // Get values from form
-    const leftLogoUrl = document.getElementById('leftLogoUrl')?.value || '';
-    const rightLogoUrl = document.getElementById('rightLogoUrl')?.value || '';
-    const warehouseTextValue = document.getElementById('warehouseText')?.value || DEFAULT_VALUES.warehouseText;
-    
-    // Save dropdown options
-    const condicionText = document.getElementById('condicionValues')?.value || '';
-    const categoriaText = document.getElementById('categoriaValues')?.value || '';
-    
-    const newCondicionOptions = condicionText.split('\n').map(v => v.trim()).filter(v => v);
-    const newCategoriaOptions = categoriaText.split('\n').map(v => v.trim()).filter(v => v);
-    
-    // Always save to storage when user saves config
-    if (newCondicionOptions.length > 0) {
-        memoryStorage.setItem(STORAGE_KEYS.condicionValues, newCondicionOptions.join('\n'));
-        condicionOptions = newCondicionOptions;
-        console.log('Condicion options saved:', condicionOptions);
-    }
-    
-    if (newCategoriaOptions.length > 0) {
-        memoryStorage.setItem(STORAGE_KEYS.categoriaValues, newCategoriaOptions.join('\n'));
-        categoriaOptions = newCategoriaOptions;
-        console.log('Categoria options saved:', categoriaOptions);
-    }
-    
-    // SAVE TO MEMORY STORAGE WITH CORRECT KEYS
-    memoryStorage.setItem(STORAGE_KEYS.leftLogoUrl, leftLogoUrl);
-    memoryStorage.setItem(STORAGE_KEYS.rightLogoUrl, rightLogoUrl);
-    memoryStorage.setItem(STORAGE_KEYS.warehouseText, warehouseTextValue);
-    
-    // Update global variables
-    leftLogoData = leftLogoUrl;
-    rightLogoData = rightLogoUrl;
-    warehouseText = warehouseTextValue;
-    config.leftLogo = leftLogoUrl;
-    config.rightLogo = rightLogoUrl;
-    config.warehouseText = warehouseTextValue;
-    
-    console.log('Saved to storage:', {
-        leftLogo: leftLogoUrl ? 'saved' : 'empty',
-        rightLogo: rightLogoUrl ? 'saved' : 'empty',
-        warehouseText: warehouseTextValue,
-        condicionOptions: condicionOptions.length,
-        categoriaOptions: categoriaOptions.length
-    });
-    
-    // Re-render tables to reflect new dropdown options
-    if (materials.length > 0) {
-        renderReviewTable();
-    }
-    if (codigoaxItems.length > 0) {
-        renderCodigoAXTable();
-    }
-    
-    alert('Configuración guardada correctamente');
+    alert('Configuración guardada');
     closeConfigModal();
-    updateAllLabels();
 }
 
         // Close modal when clicking outside
