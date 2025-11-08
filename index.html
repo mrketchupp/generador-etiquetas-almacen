@@ -4,4 +4,2374 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Etiquetas de Almacén</title>
-    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M32.5 96l0 149.5c0 17 6.7 33.3 18.7 45.3l192 192c25 25 65.5 25 90.5 0L483.2 333.3c25-25 25-65.5 0-90.5l-192-192C279.2 38.7 263 32 246 32L96.5 32c-35.3 0-64 28.7-64 64zm112 16a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>'>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#7c3aed" d="M32.5 96l0 149.5c0 17 6.7 33.3 18.7 45.3l192 192c25 25 65.5 25 90.5 0L483.2 333.3c25-25 25-65.5 0-90.5l-192-192C279.2 38.7 263 32 246 32L96.5 32c-35.3 0-64 28.7-64 64zm112 16a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>'>
+    <style>
+        :root {
+  /* Primitive Color Tokens */
+  --color-white: rgba(255, 255, 255, 1);
+  --color-black: rgba(0, 0, 0, 1);
+  --color-cream-50: rgba(252, 252, 249, 1);
+  --color-cream-100: rgba(255, 255, 253, 1);
+  --color-gray-200: rgba(245, 245, 245, 1);
+  --color-gray-300: rgba(167, 169, 169, 1);
+  --color-gray-400: rgba(119, 124, 124, 1);
+  --color-slate-500: rgba(98, 108, 113, 1);
+  --color-brown-600: rgba(94, 82, 64, 1);
+  --color-charcoal-700: rgba(31, 33, 33, 1);
+  --color-charcoal-800: rgba(38, 40, 40, 1);
+  --color-slate-900: rgba(19, 52, 59, 1);
+  --color-teal-300: rgba(50, 184, 198, 1);
+  --color-teal-400: rgba(45, 166, 178, 1);
+  --color-teal-500: rgba(33, 128, 141, 1);
+  --color-teal-600: rgba(29, 116, 128, 1);
+  --color-teal-700: rgba(26, 104, 115, 1);
+  --color-teal-800: rgba(41, 150, 161, 1);
+  --color-red-400: rgba(255, 84, 89, 1);
+  --color-red-500: rgba(192, 21, 47, 1);
+  --color-orange-400: rgba(230, 129, 97, 1);
+  --color-orange-500: rgba(168, 75, 47, 1);
+
+  /* RGB versions for opacity control */
+  --color-brown-600-rgb: 94, 82, 64;
+  --color-teal-500-rgb: 33, 128, 141;
+  --color-slate-900-rgb: 19, 52, 59;
+  --color-slate-500-rgb: 98, 108, 113;
+  --color-red-500-rgb: 192, 21, 47;
+  --color-red-400-rgb: 255, 84, 89;
+  --color-orange-500-rgb: 168, 75, 47;
+  --color-orange-400-rgb: 230, 129, 97;
+
+  /* Background color tokens (Light Mode) */
+  --color-bg-1: rgba(59, 130, 246, 0.08);
+  --color-bg-2: rgba(245, 158, 11, 0.08);
+  --color-bg-3: rgba(34, 197, 94, 0.08);
+  --color-bg-4: rgba(239, 68, 68, 0.08);
+  --color-bg-5: rgba(147, 51, 234, 0.08);
+  --color-bg-6: rgba(249, 115, 22, 0.08);
+  --color-bg-7: rgba(236, 72, 153, 0.08);
+  --color-bg-8: rgba(6, 182, 212, 0.08);
+
+  /* Semantic Color Tokens (Light Mode) */
+  --color-background: var(--color-cream-50);
+  --color-surface: var(--color-cream-100);
+  --color-text: var(--color-slate-900);
+  --color-text-secondary: var(--color-slate-500);
+  --color-primary: var(--color-teal-500);
+  --color-primary-hover: var(--color-teal-600);
+  --color-primary-active: var(--color-teal-700);
+  --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+  --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
+  --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+  --color-btn-primary-text: var(--color-cream-50);
+  --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-error: var(--color-red-500);
+  --color-success: var(--color-teal-500);
+  --color-warning: var(--color-orange-500);
+  --color-info: var(--color-slate-500);
+  --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
+  --color-select-caret: rgba(var(--color-slate-900-rgb), 0.8);
+
+  --focus-ring: 0 0 0 3px var(--color-focus-ring);
+  --focus-outline: 2px solid var(--color-primary);
+  --status-bg-opacity: 0.15;
+  --status-border-opacity: 0.25;
+  --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23134252' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  --select-caret-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+  --color-success-rgb: 33, 128, 141;
+  --color-error-rgb: 192, 21, 47;
+  --color-warning-rgb: 168, 75, 47;
+  --color-info-rgb: 98, 108, 113;
+
+  --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-family-mono: "Berkeley Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 30px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 600;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --letter-spacing-tight: -0.01em;
+
+  --space-0: 0;
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  
+  --color-purple: #7C3AED;
+  --color-purple-hover: #6D28D9;
+  --color-purple-active: #5B21B6;
+  --color-blue: #3B82F6;
+  --color-blue-hover: #2563EB;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-gray-400-rgb: 119, 124, 124;
+    --color-teal-300-rgb: 50, 184, 198;
+    --color-gray-300-rgb: 167, 169, 169;
+    --color-gray-200-rgb: 245, 245, 245;
+
+    --color-bg-1: rgba(29, 78, 216, 0.15);
+    --color-bg-2: rgba(180, 83, 9, 0.15);
+    --color-bg-3: rgba(21, 128, 61, 0.15);
+    --color-bg-4: rgba(185, 28, 28, 0.15);
+    --color-bg-5: rgba(107, 33, 168, 0.15);
+    --color-bg-6: rgba(194, 65, 12, 0.15);
+    --color-bg-7: rgba(190, 24, 93, 0.15);
+    --color-bg-8: rgba(8, 145, 178, 0.15);
+
+    --color-background: var(--color-charcoal-700);
+    --color-surface: var(--color-charcoal-800);
+    --color-text: var(--color-gray-200);
+    --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
+    --color-primary: var(--color-teal-300);
+    --color-primary-hover: var(--color-teal-400);
+    --color-primary-active: var(--color-teal-800);
+    --color-secondary: rgba(var(--color-gray-400-rgb), 0.15);
+    --color-secondary-hover: rgba(var(--color-gray-400-rgb), 0.25);
+    --color-secondary-active: rgba(var(--color-gray-400-rgb), 0.3);
+    --color-border: rgba(var(--color-gray-400-rgb), 0.3);
+    --color-error: var(--color-red-400);
+    --color-success: var(--color-teal-300);
+    --color-warning: var(--color-orange-400);
+    --color-info: var(--color-gray-300);
+    --color-focus-ring: rgba(var(--color-teal-300-rgb), 0.4);
+    --color-btn-primary-text: var(--color-slate-900);
+    --color-card-border: rgba(var(--color-gray-400-rgb), 0.2);
+    --color-card-border-inner: rgba(var(--color-gray-400-rgb), 0.15);
+    --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    --button-border-secondary: rgba(var(--color-gray-400-rgb), 0.2);
+    --color-border-secondary: rgba(var(--color-gray-400-rgb), 0.2);
+    --color-select-caret: rgba(var(--color-gray-200-rgb), 0.8);
+
+    --select-caret-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+    --color-success-rgb: var(--color-teal-300-rgb);
+    --color-error-rgb: var(--color-red-400-rgb);
+    --color-warning-rgb: var(--color-orange-400-rgb);
+    --color-info-rgb: var(--color-gray-300-rgb);
+  }
+}
+
+@font-face {
+  font-family: 'FKGroteskNeue';
+  src: url('https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2') format('woff2');
+}
+
+html {
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Custom styles for the app */
+.app-container {
+    min-height: 100vh;
+    background-color: var(--color-background);
+}
+
+.app-header {
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-16) var(--space-24);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.app-logo {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+.config-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: var(--space-8);
+    border-radius: var(--radius-base);
+    transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.config-button:hover {
+    background-color: var(--color-secondary);
+}
+
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-32) var(--space-24);
+}
+
+.step-container {
+    display: none;
+}
+
+.step-container.active {
+    display: block;
+}
+
+/* Step 1 - Form */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-16);
+}
+
+.toggle-buttons {
+    display: flex;
+    gap: var(--space-8);
+}
+
+.toggle-btn {
+    padding: var(--space-10) var(--space-20);
+    border: 2px solid var(--color-purple);
+    background-color: white;
+    color: var(--color-purple);
+    border-radius: var(--radius-base);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    transition: all 0.3s var(--ease-standard);
+}
+
+.toggle-btn.active {
+    background-color: var(--color-purple);
+    color: white;
+    border-color: var(--color-purple);
+}
+
+.toggle-btn:hover {
+    background-color: var(--color-purple);
+    color: white;
+}
+
+@media (prefers-color-scheme: dark) {
+    .toggle-btn {
+        background-color: var(--color-charcoal-800);
+    }
+    .toggle-btn.active {
+        background-color: var(--color-purple);
+    }
+}
+
+.page-title {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    margin: 0 0 var(--space-8) 0;
+    color: var(--color-text);
+}
+
+.page-subtitle {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-32) 0;
+}
+
+.section-header {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-20) 0;
+    color: var(--color-text);
+}
+
+.form-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-24);
+    box-shadow: var(--shadow-sm);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-16);
+    margin-bottom: var(--space-24);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--space-8);
+    color: var(--color-text);
+}
+
+.form-label .optional {
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-normal);
+}
+
+.form-input {
+    padding: var(--space-10) var(--space-12);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-base);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+}
+
+.form-input::placeholder {
+    color: var(--color-text-secondary);
+}
+
+.btn-primary {
+    background-color: var(--color-purple);
+    color: white;
+    padding: var(--space-12) var(--space-24);
+    border: none;
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-purple-hover);
+}
+
+.btn-primary:active {
+    background-color: var(--color-purple-active);
+}
+
+/* Step 2 - Review Table */
+.step2-section {
+    margin-top: var(--space-32);
+    display: none;
+}
+
+.step2-section.visible {
+    display: block;
+}
+
+.table-container {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+    margin-bottom: var(--space-24);
+}
+
+.review-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+.review-table th {
+    background-color: var(--color-secondary);
+    padding: var(--space-12);
+    text-align: left;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.review-table td {
+    padding: var(--space-12);
+    border-bottom: 1px solid var(--color-card-border-inner);
+}
+
+.review-table tr:last-child td {
+    border-bottom: none;
+}
+
+.review-table input[type="text"],
+.review-table input[type="number"],
+.review-table select {
+    width: 100%;
+    padding: var(--space-6) var(--space-8);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+}
+
+.review-table input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.review-table select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: var(--select-caret-light);
+    background-repeat: no-repeat;
+    background-position: right var(--space-8) center;
+    background-size: 14px;
+    padding-right: var(--space-24);
+}
+
+@media (prefers-color-scheme: dark) {
+    .review-table select {
+        background-image: var(--select-caret-dark);
+    }
+}
+
+.action-buttons {
+    display: flex;
+    gap: var(--space-12);
+    margin-top: var(--space-24);
+}
+
+.btn-secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    padding: var(--space-12) var(--space-24);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-32);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-24);
+}
+
+.modal-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    margin: 0;
+    color: var(--color-text);
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: var(--space-4);
+    color: var(--color-text-secondary);
+    line-height: 1;
+}
+
+.close-button:hover {
+    color: var(--color-text);
+}
+
+.logo-section {
+    margin-bottom: var(--space-24);
+}
+
+.logo-section h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-16) 0;
+    color: var(--color-text);
+}
+
+.logo-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+}
+
+.file-upload-wrapper {
+    position: relative;
+}
+
+.file-upload-label {
+    display: inline-block;
+    padding: var(--space-8) var(--space-16);
+    background-color: var(--color-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.file-upload-label:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+.file-upload-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.logo-preview {
+    margin-top: var(--space-12);
+    padding: var(--space-16);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    text-align: center;
+    background-color: var(--color-background);
+}
+
+.logo-preview img {
+    max-width: 150px;
+    max-height: 80px;
+    object-fit: contain;
+}
+
+.logo-preview.empty {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* Print Preview Step 3 */
+.print-preview-container {
+    display: flex;
+    gap: var(--space-24);
+}
+
+.print-sidebar {
+    min-width: 280px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-20);
+    height: fit-content;
+}
+
+.print-sidebar h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-16) 0;
+    color: var(--color-text);
+}
+
+.print-option {
+    margin-bottom: var(--space-16);
+}
+
+.print-option label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--space-8);
+    color: var(--color-text);
+}
+
+.print-option select,
+.print-option input[type="number"] {
+    width: 100%;
+    padding: var(--space-8) var(--space-12);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-sm);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+}
+
+.radio-option input[type="radio"] {
+    width: 16px;
+    height: 16px;
+}
+
+.radio-option label {
+    margin: 0;
+    font-weight: var(--font-weight-normal);
+}
+
+.print-preview-area {
+    flex: 1;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-20);
+    min-height: 600px;
+}
+
+.preview-page {
+    background-color: white;
+    padding: 0.5in;
+    margin: 0 auto var(--space-24) auto;
+    width: 8.5in;
+    min-height: 11in;
+    box-shadow: var(--shadow-md);
+}
+
+.labels-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 3.75in);
+    grid-template-rows: repeat(6, 1.67in);
+    gap: 0.1in;
+    width: 7.6in;
+}
+
+.label {
+    width: 3.75in;
+    height: 1.67in;
+    border: 2px solid black;
+    background: white;
+    padding: 6px;
+    box-sizing: border-box;
+    page-break-inside: avoid;
+    display: flex;
+    flex-direction: column;
+    font-size: 10px;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+.label-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.label-header {
+    display: grid;
+    grid-template-columns: 65px 1fr 65px;
+    gap: 4px;
+    align-items: center;
+    justify-items: center;
+    margin-bottom: 4px;
+    padding-bottom: 3px;
+    /* border-bottom removed */
+}
+
+.label-logo-left,
+.label-logo-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 65px;
+    height: 32px;
+}
+
+.label-logo {
+    max-width: 65px;
+    max-height: 32px;
+    object-fit: contain;
+}
+
+.label-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1;
+}
+
+.label-title h4 {
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+    font-size: 11px;
+    line-height: 1.1;
+    color: black;
+}
+
+.label-title p {
+    margin: 0;
+    padding: 0;
+    font-size: 9px;
+    line-height: 1.1;
+    color: black;
+}
+
+.label-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 10px;
+}
+
+.label-row-two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 2px;
+    font-size: 10px;
+    line-height: 1.2;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 2px;
+}
+
+.label-field-left,
+.label-field-right {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0;
+    color: black;
+}
+
+.label-field {
+    display: flex;
+    margin: 0;
+    padding: 2px 0;
+    font-size: 10px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid #ccc;
+    color: black;
+}
+
+.label-field:last-child {
+    border-bottom: none;
+}
+
+.label-field-label {
+    font-weight: bold;
+    margin-right: 4px;
+    flex-shrink: 0;
+    color: black;
+}
+
+.label-field-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: black;
+}
+
+.label-field strong {
+    font-weight: bold;
+    color: black;
+}
+
+.label-field span {
+    color: black;
+}
+
+.print-actions {
+    display: flex;
+    gap: var(--space-12);
+    margin-top: var(--space-24);
+    justify-content: flex-end;
+}
+
+.btn-blue {
+    background-color: var(--color-blue);
+    color: white;
+    padding: var(--space-12) var(--space-24);
+    border: none;
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.btn-blue:hover {
+    background-color: var(--color-blue-hover);
+}
+
+.btn-duplicate {
+    background: #3B82F6;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.btn-duplicate:hover {
+    background: #2563EB;
+}
+
+.btn-delete {
+    background: #EF4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.btn-delete:hover {
+    background: #DC2626;
+}
+
+/* Codigo AX Label specific styles */
+.label-codigoax {
+    width: 3.75in;
+    height: 1.67in;
+    border: 2px solid black;
+    background: white;
+    padding: 6px;
+    box-sizing: border-box;
+    page-break-inside: avoid;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+.label-codigoax .label-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.label-codigoax .label-header {
+    display: grid;
+    grid-template-columns: 65px 1fr 65px;
+    gap: 4px;
+    align-items: center;
+    justify-items: center;
+    margin-bottom: 4px;
+    padding-bottom: 3px;
+}
+
+/* Large codigo ax number */
+.label-codigoax-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 4px 0;
+}
+
+.codigoax-number {
+    font-size: 48px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1;
+    letter-spacing: 0.15em;
+    word-spacing: 0.2em;
+    color: black;
+}
+
+/* Nombre section */
+.label-codigoax-nombre {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0.6;
+    padding: 4px 2px;
+}
+
+.codigoax-nombre-text {
+    font-size: 12px;
+    text-align: center;
+    white-space: normal;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    color: black;
+}
+
+/* Print container - hidden by default */
+.print-container {
+    display: none;
+    padding: 0.5in;
+}
+
+.print-container.active {
+    display: block;
+}
+
+/* Return button for print view */
+.return-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--color-primary);
+    color: white;
+    padding: var(--space-12) var(--space-24);
+    border: none;
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+}
+
+.return-button:hover {
+    background-color: var(--color-primary-hover);
+}
+
+/* Hide main container when printing */
+.main-content.hidden {
+    display: none;
+}
+
+.app-header.hidden {
+    display: none;
+}
+
+/* Print Styles */
+@media print {
+    /* Hide the main UI container */
+    .main-content,
+    .return-button,
+    .app-header,
+    .config-button {
+        display: none !important;
+    }
+    
+    /* Ensure print container is visible and properly laid out */
+    .print-container {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Ensure print pages are visible */
+    .print-page {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 8.5in;
+        height: 11in;
+        padding: 0.5in;
+        margin: 0;
+        page-break-after: always;
+        background: white;
+    }
+    
+    .print-page:last-child {
+        page-break-after: auto;
+    }
+    
+    /* Ensure labels grid is visible */
+    .labels-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 3.75in) !important;
+        grid-template-rows: repeat(6, 1.67in) !important;
+        gap: 0.1in !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ensure labels are visible */
+    .label,
+    .label-codigoax {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 3.75in;
+        height: 1.67in;
+        border: 2px solid black;
+        padding: 6px;
+        background-color: white;
+        page-break-inside: avoid !important;
+        box-sizing: border-box;
+        flex-direction: column;
+    }
+    
+    .codigoax-number {
+        font-size: 48px !important;
+        letter-spacing: 0.15em !important;
+        word-spacing: 0.2em !important;
+    }
+    
+    .codigoax-nombre-text {
+        font-size: 12px !important;
+    }
+    
+    .label-codigoax-main {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .label-codigoax-nombre {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .label-header {
+        display: grid !important;
+        grid-template-columns: 65px 1fr 65px !important;
+        gap: 4px !important;
+    }
+    
+    .label-title {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .label-row-two-cols {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 5px !important;
+    }
+    
+    /* Ensure label content is visible */
+    .label-header,
+    .label-body,
+    .label-field,
+    .label-row,
+    .label-title {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .label-body {
+        flex-direction: column !important;
+    }
+    
+    /* Page settings */
+    @page {
+        size: letter;
+        margin: 0.5in;
+    }
+    
+    /* Ensure body has no extra styling */
+    body {
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .print-preview-container {
+        flex-direction: column;
+    }
+
+    .preview-page {
+        width: 100%;
+        padding: var(--space-16);
+    }
+
+    .labels-grid {
+        grid-template-columns: 1fr;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="app-logo">Generador de Etiquetas</div>
+            <div class="header-controls">
+                <div class="toggle-buttons">
+                    <button id="materialBtn" class="toggle-btn active" onclick="switchMode('material')">
+                        Material
+                    </button>
+                    <button id="codigoaxBtn" class="toggle-btn" onclick="switchMode('codigoax')">
+                        Codigo AX
+                    </button>
+                </div>
+                <button class="config-button" onclick="openConfigModal()" aria-label="Configuración">⚙️</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Material Labels Section -->
+            <div id="materialSection" class="mode-section">
+                <!-- Step 1: Material Entry Form -->
+                <div id="step1" class="step-container active">
+
+                <h1 class="page-title">Generador de Etiquetas de Material</h1>
+                <p class="page-subtitle">Crea de forma rápida etiquetas para Material</p>
+
+                <h2 class="section-header">Añadir Partida Manualmente</h2>
+
+                <div class="form-card">
+                    <form id="materialForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="cantidad">Cantidad</label>
+                                <input type="number" id="cantidad" class="form-input" required min="1" value="1">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="codigoAx">Codigo AX</label>
+                                <input type="text" id="codigoAx" class="form-input" required placeholder="Ej: 1720" onchange="autocompleteMaterialNombre()">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label" for="nombre">Nombre</label>
+                                <input type="text" id="nombre" class="form-input" required placeholder="Ej: ANILLOS">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label" for="dimension">Dimensión / Clave Almacén</label>
+                                <input type="text" id="dimension" class="form-input" required placeholder="Ej: BX-154">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="noParte">No. Parte <span class="optional">(Opcional)</span></label>
+                                <input type="text" id="noParte" class="form-input" placeholder="Ej: CATERPILLAR">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="descripcion">Descripción <span class="optional">(Opcional)</span></label>
+                                <input type="text" id="descripcion" class="form-input" placeholder="Detalles adicionales">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">Añadir a la Lista de Revisión</button>
+                    </form>
+                </div>
+            </div>
+
+                <!-- Step 2: Review and Edit -->
+                <div id="step2" class="step2-section">
+                <h1 class="page-title">Paso 2: Revisa, selecciona y edita las partidas</h1>
+                <p class="page-subtitle">Modifica los datos si es necesario antes de imprimir.</p>
+
+                <div class="table-container">
+                    <table class="review-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">Cant.</th>
+                                <th style="width: 100px;">Código AX</th>
+                                <th>Nombre</th>
+                                <th>Dimensión</th>
+                                <th>No. Parte</th>
+                                <th>Descripción</th>
+                                <th style="width: 130px;">Condición</th>
+                                <th style="width: 140px;">Categoría</th>
+                                <th style="width: 90px;">Duplicar</th>
+                                <th style="width: 90px;">Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviewTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="showPrintPreview()">Ver Vista Previa de Impresión</button>
+                </div>
+            </div>
+            </div>
+
+            <!-- Codigo AX Labels Section -->
+            <div id="codigoaxSection" class="mode-section" style="display:none;">
+                <!-- Step 1: Codigo AX Entry Form -->
+                <section id="codigoaxStep1" class="step-section">
+                    <h1 class="page-title">Generador de Etiquetas de Código AX</h1>
+                    <p class="page-subtitle">Crea de forma rápida etiquetas para Códigos AX</p>
+
+                    <h2 class="section-header">Añadir Partida Manualmente</h2>
+
+                    <div class="form-card">
+                        <form id="codigoaxForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label" for="axCantidad">Cantidad</label>
+                                    <input type="number" id="axCantidad" class="form-input" required min="1" value="1">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="axCodigoax">Codigo AX</label>
+                                    <input type="text" id="axCodigoax" class="form-input" required placeholder="Ej: 1763" onchange="autocompleteAxNombre()">
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label class="form-label" for="axNombre">Nombre</label>
+                                    <input type="text" id="axNombre" class="form-input" required placeholder="Ej: BOMBA HID DE TRANSFERENCIA">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-primary">Añadir a la Lista de Revisión</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Step 2: Review Table for Codigo AX -->
+                <div id="codigoaxStep2" class="step2-section">
+                    <h1 class="page-title">Paso 2: Revisa, selecciona y edita los códigos</h1>
+                    <p class="page-subtitle">Modifica los datos si es necesario antes de imprimir.</p>
+
+                    <div class="table-container">
+                        <table class="review-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px;">Cant.</th>
+                                    <th style="width: 120px;">Código AX</th>
+                                    <th>Nombre</th>
+                                    <th style="width: 90px;">Duplicar</th>
+                                    <th style="width: 90px;">Eliminar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="codigoaxTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-primary" onclick="showCodigoAXPrintPreview()">Ver Vista Previa de Impresión</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Print Container (hidden by default) -->
+        <div id="printContainer" class="print-container">
+        </div>
+
+        <!-- Step 3: Print Preview (REMOVED) -->
+            <div id="step3" class="step-container">
+                <h1 class="page-title">Vista Previa de Impresión</h1>
+                <p class="page-subtitle">Revisa las etiquetas antes de imprimir.</p>
+
+                <div class="print-preview-container">
+                    <div class="print-sidebar">
+                        <h3>Opciones de Impresión</h3>
+                        
+                        <div class="print-option">
+                            <label>Impresora</label>
+                            <select>
+                                <option>Impresora predeterminada</option>
+                            </select>
+                        </div>
+
+                        <div class="print-option">
+                            <label>Copias</label>
+                            <input type="number" value="1" min="1">
+                        </div>
+
+                        <div class="print-option">
+                            <label>Páginas</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" name="pages" id="allPages" checked>
+                                    <label for="allPages">Todo</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="pages" id="oddPages">
+                                    <label for="oddPages">Solo páginas impares</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="pages" id="evenPages">
+                                    <label for="evenPages">Solo páginas pares</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="print-option">
+                            <label>Imprimir por ambas caras</label>
+                            <select>
+                                <option>Desactivado</option>
+                                <option>Voltear en el borde largo</option>
+                                <option>Voltear en el borde corto</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="print-preview-area" id="printPreviewArea">
+                    </div>
+                </div>
+
+                <div class="print-actions">
+                    <button class="btn-secondary" onclick="goToStep(2)">Cancelar</button>
+                    <button class="btn-blue" onclick="printLabels()">Imprimir</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Configuration Modal -->
+        <div id="configModal" class="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">Configuración de Logos</h2>
+                    <button class="close-button" onclick="closeConfigModal()">×</button>
+                </div>
+
+                <div class="logo-section">
+                    <h3>Logo Izquierdo</h3>
+                    <div class="logo-controls">
+                        <div class="file-upload-wrapper">
+                            <label class="file-upload-label" for="leftLogoFile">Cargar archivo</label>
+                            <input type="file" id="leftLogoFile" class="file-upload-input" accept="image/*" onchange="handleLogoUpload(event, 'left')">
+                        </div>
+                        <p style="font-size: 12px; color: var(--color-text-secondary); margin: 10px 0;">O pega una URL:</p>
+                        <input type="text" id="leftLogoUrl" class="form-input" placeholder="https://ejemplo.com/logo.png" onchange="handleLogoUrl(event, 'left')">
+                        <div id="leftLogoPreview" class="logo-preview empty">Sin logo configurado</div>
+                        <button onclick="clearLogo('left')" class="btn-secondary" style="margin-top: 10px; width: auto;">Limpiar logo</button>
+                    </div>
+                </div>
+
+                <div class="logo-section">
+                    <h3>Logo Derecho</h3>
+                    <div class="logo-controls">
+                        <div class="file-upload-wrapper">
+                            <label class="file-upload-label" for="rightLogoFile">Cargar archivo</label>
+                            <input type="file" id="rightLogoFile" class="file-upload-input" accept="image/*" onchange="handleLogoUpload(event, 'right')">
+                        </div>
+                        <p style="font-size: 12px; color: var(--color-text-secondary); margin: 10px 0;">O pega una URL:</p>
+                        <input type="text" id="rightLogoUrl" class="form-input" placeholder="https://ejemplo.com/logo.png" onchange="handleLogoUrl(event, 'right')">
+                        <div id="rightLogoPreview" class="logo-preview empty">Sin logo configurado</div>
+                        <button onclick="clearLogo('right')" class="btn-secondary" style="margin-top: 10px; width: auto;">Limpiar logo</button>
+                    </div>
+                </div>
+
+                <div class="logo-section">
+                    <h3>Cargar Tabla de Códigos AX</h3>
+                    <p style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 10px;">
+                        Archivo CSV con columnas "Codigo AX" y "Nombre"
+                    </p>
+                    <button onclick="document.getElementById('csvFile').click()" class="btn-secondary" style="width: auto;">Cargar archivo CSV</button>
+                    <input type="file" id="csvFile" accept=".csv" onchange="handleCSVUpload(event)" style="display: none;">
+                    <div id="csvStatus" style="margin-top: 10px; font-size: 12px;"></div>
+                    <button onclick="clearCSV()" class="btn-secondary" style="margin-top: 10px; width: auto;">Limpiar CSV</button>
+                </div>
+
+                <div class="logo-section">
+                    <h3>Texto de Almacen</h3>
+                    <p style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 10px;">
+                        Personaliza el texto que aparece en las etiquetas (ej: BRONCO RIG-91)
+                    </p>
+                    <input type="text" id="headerText" class="form-input" placeholder="BRONCO RIG-91" onchange="updateHeaderText()">
+                    <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 8px;">Este texto aparecerá en todas las etiquetas generadas</p>
+                </div>
+
+                <button class="btn-primary" onclick="saveLogoConfig()">Cerrar Configuración</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ STORAGE KEYS ============
+const STORAGE_KEYS = {
+    logoLeft: 'logoLeft',
+    logoRight: 'logoRight',
+    codigosAX: 'codigosAX',
+    headerText: 'headerText'
+};
+
+// ============ GLOBAL VARIABLES ============
+let currentMode = 'material';
+let materials = [];
+let codigoaxItems = [];
+let logoLeft = localStorage.getItem(STORAGE_KEYS.logoLeft);
+let logoRight = localStorage.getItem(STORAGE_KEYS.logoRight);
+let headerText = localStorage.getItem(STORAGE_KEYS.headerText) || 'BRONCO RIG-91';
+let codigosData = {};
+
+// Hardcoded dropdown values - NOT customizable
+const condicionOptions = ['NUEVO', 'USADO NUEVO', 'RESGUARDO'];
+const categoriaOptions = ['INVENTARIABLE', 'CONSUMIBLES'];
+
+// ============ INITIALIZATION - LOAD CSV DATA ============
+function initCodigosData() {
+  const storedData = localStorage.getItem(STORAGE_KEYS.codigosAX);
+  if (storedData) {
+    try {
+      codigosData = JSON.parse(storedData);
+      console.log('CSV data loaded from localStorage:', Object.keys(codigosData).length, 'entries');
+    } catch (e) {
+      console.error('Error parsing CSV data:', e);
+      codigosData = {};
+    }
+  } else {
+    codigosData = {};
+    console.log('No CSV data in localStorage - starting empty');
+  }
+  updateCSVStatus();
+}
+
+// ============ DOM READY - RESTORE CONFIGURATION ============
+window.addEventListener('DOMContentLoaded', function() {
+    console.log('=== Page loaded, initializing configuration ===');
+    
+    // Restore logos
+    if (logoLeft) {
+        updateLogoPreview('left', logoLeft);
+        const leftInput = document.getElementById('leftLogoUrl');
+        if (leftInput) leftInput.value = logoLeft;
+    }
+    
+    if (logoRight) {
+        updateLogoPreview('right', logoRight);
+        const rightInput = document.getElementById('rightLogoUrl');
+        if (rightInput) rightInput.value = logoRight;
+    }
+    
+    // Restore header text in modal input
+    const headerTextInput = document.getElementById('headerText');
+    if (headerTextInput) {
+        headerTextInput.value = headerText;
+    }
+    
+    // Initialize CSV data
+    initCodigosData();
+    
+    // Check if this is first time - if no configuration, show modal
+    const hasConfiguration = logoLeft || logoRight || Object.keys(codigosData).length > 0;
+    if (!hasConfiguration) {
+        console.log('First time user - opening configuration modal');
+        setTimeout(() => {
+            openConfigModal();
+        }, 500);
+    }
+    
+    console.log('Configuration restored:', {
+        logoLeft: logoLeft ? 'exists' : 'empty',
+        logoRight: logoRight ? 'exists' : 'empty',
+        headerText: headerText,
+        csvEntries: Object.keys(codigosData).length
+    });
+});
+
+function updateCSVStatus() {
+    const statusElement = document.getElementById('csvStatus');
+    const count = Object.keys(codigosData).length;
+    
+    if (statusElement) {
+        if (count > 0) {
+            statusElement.textContent = count + ' códigos AX cargados';
+            statusElement.style.color = '#22c55e';
+        } else {
+            statusElement.textContent = '';
+            statusElement.style.color = '#999';
+        }
+    }
+}
+
+        // Mode switching
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // Update button styles
+            const materialBtn = document.getElementById('materialBtn');
+            const codigoaxBtn = document.getElementById('codigoaxBtn');
+            
+            materialBtn.classList.toggle('active', mode === 'material');
+            codigoaxBtn.classList.toggle('active', mode === 'codigoax');
+            
+            // Show/hide appropriate sections
+            document.getElementById('materialSection').style.display = mode === 'material' ? 'block' : 'none';
+            document.getElementById('codigoaxSection').style.display = mode === 'codigoax' ? 'block' : 'none';
+            
+            // Clear data for new mode
+            if (mode === 'material') {
+                materials = [];
+                const step2 = document.getElementById('step2');
+                step2.classList.remove('visible');
+            } else {
+                codigoaxItems = [];
+                const step2 = document.getElementById('codigoaxStep2');
+                step2.classList.remove('visible');
+            }
+        }
+
+        // Form submission
+document.getElementById('materialForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const material = {
+                cantidad: parseInt(document.getElementById('cantidad').value),
+                codigoAx: document.getElementById('codigoAx').value,
+                nombre: document.getElementById('nombre').value,
+                dimension: document.getElementById('dimension').value,
+                noParte: document.getElementById('noParte').value,
+                descripcion: document.getElementById('descripcion').value,
+                condicion: 'NUEVO',
+                categoria: 'INVENTARIABLE',
+                selected: true
+            };
+            
+            materials.push(material);
+            document.getElementById('materialForm').reset();
+            document.getElementById('cantidad').value = '1';
+            goToStep(2);
+        });
+
+        // Codigo AX Form submission
+        document.getElementById('codigoaxForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const item = {
+                cantidad: parseInt(document.getElementById('axCantidad').value),
+                codigo_ax: document.getElementById('axCodigoax').value,
+                nombre: document.getElementById('axNombre').value
+            };
+            
+            codigoaxItems.push(item);
+            document.getElementById('codigoaxForm').reset();
+            document.getElementById('axCantidad').value = '1';
+            
+            // Show Step 2
+            const step2 = document.getElementById('codigoaxStep2');
+            step2.classList.add('visible');
+            
+            renderCodigoAXTable();
+        });
+
+        // Step navigation - Step 1 always visible, Step 2 appears below
+        function goToStep(stepNumber) {
+            if (stepNumber === 2) {
+                const step2 = document.getElementById('step2');
+                step2.classList.add('visible');
+                renderReviewTable();
+            }
+        }
+
+        // HTML Escaping Function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Material Mode Step 2 Table Autocomplete
+        function autocompleteMaterialNombreFromTable(index) {
+            const row = document.querySelectorAll('#reviewTableBody tr')[index];
+            if (!row) return;
+            
+            const inputs = row.querySelectorAll('input');
+            const codigoaxInput = inputs[1];
+            const nombreInput = inputs[2];
+            
+            if (codigoaxInput && nombreInput) {
+                const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
+                if (autocompletedNombre) {
+                    nombreInput.value = autocompletedNombre;
+                    updateMaterial(index, 'nombre', autocompletedNombre);
+                }
+            }
+        }
+
+        // ============ CSV UPLOAD AND PARSING ============
+        function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const csvText = e.target.result;
+                    const parsedData = parseCSV(csvText);
+                    
+                    if (Object.keys(parsedData).length > 0) {
+                        codigosData = parsedData;
+                        localStorage.setItem(STORAGE_KEYS.codigosAX, JSON.stringify(codigosData));
+                        updateCSVStatus();
+                        alert('Archivo CSV cargado exitosamente. ' + Object.keys(codigosData).length + ' códigos disponibles.');
+                        console.log('CSV uploaded and saved to localStorage');
+                    } else {
+                        alert('No se encontraron datos válidos en el CSV');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const codigosMap = {};
+            
+            if (lines.length < 2) return codigosMap;
+            
+            const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+            const codigoaxIndex = header.findIndex(h => h.includes('codigo') && h.includes('ax'));
+            const nombreIndex = header.findIndex(h => h.includes('nombre'));
+            
+            if (codigoaxIndex === -1 || nombreIndex === -1) return codigosMap;
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                
+                const parts = lines[i].split(',').map(p => p.trim());
+                const codigoax = parts[codigoaxIndex];
+                const nombre = parts[nombreIndex];
+                
+                if (codigoax && nombre) {
+                    codigosMap[codigoax.toUpperCase()] = nombre;
+                }
+            }
+            
+            return codigosMap;
+        }
+        
+        function clearCSV() {
+            codigosData = {};
+            localStorage.removeItem(STORAGE_KEYS.codigosAX);
+            document.getElementById('csvFile').value = '';
+            updateCSVStatus();
+            alert('CSV eliminado.');
+            console.log('CSV cleared from localStorage');
+        }
+
+        function autocompleteNombre(codigoaxValue) {
+            const codigoax = codigoaxValue.trim().toUpperCase();
+            return codigosData[codigoax] || null;
+        }
+
+        // Material Mode Step 1 Autocomplete
+        function autocompleteMaterialNombre() {
+            const codigoaxInput = document.getElementById('codigoAx');
+            const nombreInput = document.getElementById('nombre');
+            
+            if (codigoaxInput && nombreInput) {
+                const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
+                if (autocompletedNombre) {
+                    nombreInput.value = autocompletedNombre;
+                }
+            }
+        }
+
+        // Codigo AX Mode Step 1 Autocomplete
+        function autocompleteAxNombre() {
+            const codigoaxInput = document.getElementById('axCodigoax');
+            const nombreInput = document.getElementById('axNombre');
+            
+            if (codigoaxInput && nombreInput) {
+                const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
+                if (autocompletedNombre) {
+                    nombreInput.value = autocompletedNombre;
+                }
+            }
+        }
+
+        // Material Mode Step 2 Table Autocomplete
+        function tryAutocompleteTableNombre(index) {
+            const row = document.querySelectorAll('#reviewTableBody tr')[index];
+            if (!row) return;
+            
+            const inputs = row.querySelectorAll('input');
+            const codigoaxInput = inputs[1];
+            const nombreInput = inputs[2];
+            
+            if (codigoaxInput && nombreInput) {
+                const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
+                if (autocompletedNombre && nombreInput.value === '') {
+                    nombreInput.value = autocompletedNombre;
+                    updateMaterial(index, 'nombre', autocompletedNombre);
+                }
+            }
+        }
+
+        // Codigo AX Mode Step 2 Table Autocomplete
+        function tryAutocompleteAxTableNombre(index) {
+            const row = document.querySelectorAll('#codigoaxTableBody tr')[index];
+            if (!row) return;
+            
+            const inputs = row.querySelectorAll('input');
+            const codigoaxInput = inputs[1];
+            const nombreInput = inputs[2];
+            
+            if (codigoaxInput && nombreInput) {
+                const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
+                if (autocompletedNombre) {
+                    nombreInput.value = autocompletedNombre;
+                    updateCodigoAXItem(index, 'nombre', autocompletedNombre);
+                }
+            }
+        }
+
+function updateHeaderText() {
+const input = document.getElementById('headerText');
+if (input) {
+headerText = input.value || 'BRONCO RIG-91';
+localStorage.setItem(STORAGE_KEYS.headerText, headerText);
+console.log('Header text actualizado a:', headerText);
+}
+}
+
+        function renderReviewTable() {
+  const tbody = document.getElementById('reviewTableBody');
+  tbody.innerHTML = '';
+  materials.forEach((material, index) => {
+    const row = document.createElement('tr');
+    // Cantidad
+    const tdCantidad = document.createElement('td');
+    const inputCantidad = document.createElement('input');
+    inputCantidad.type = 'number';
+    inputCantidad.value = material.cantidad;
+    inputCantidad.min = '1';
+    inputCantidad.onchange = function() { updateMaterial(index, 'cantidad', this.value); };
+    tdCantidad.appendChild(inputCantidad);
+    row.appendChild(tdCantidad);
+    // Codigo AX
+    const tdCodigoAX = document.createElement('td');
+    const inputCodigoAX = document.createElement('input');
+    inputCodigoAX.type = 'text';
+    inputCodigoAX.value = material.codigoAx;
+    inputCodigoAX.onchange = function() {
+      updateMaterial(index, 'codigoAx', this.value);
+      autocompleteMaterialNombreFromTable(index);
+    };
+    tdCodigoAX.appendChild(inputCodigoAX);
+    row.appendChild(tdCodigoAX);
+    // Nombre
+    const tdNombre = document.createElement('td');
+    const inputNombre = document.createElement('input');
+    inputNombre.type = 'text';
+    inputNombre.value = material.nombre;
+    inputNombre.onchange = function() { updateMaterial(index, 'nombre', this.value); };
+    tdNombre.appendChild(inputNombre);
+    row.appendChild(tdNombre);
+    // Dimension
+    const tdDimension = document.createElement('td');
+    const inputDimension = document.createElement('input');
+    inputDimension.type = 'text';
+    inputDimension.value = material.dimension;
+    inputDimension.onchange = function() { updateMaterial(index, 'dimension', this.value); };
+    tdDimension.appendChild(inputDimension);
+    row.appendChild(tdDimension);
+    // No. Parte
+    const tdNoParte = document.createElement('td');
+    const inputNoParte = document.createElement('input');
+    inputNoParte.type = 'text';
+    inputNoParte.value = material.noParte || '';
+    inputNoParte.onchange = function() { updateMaterial(index, 'noParte', this.value); };
+    tdNoParte.appendChild(inputNoParte);
+    row.appendChild(tdNoParte);
+    // Descripcion
+    const tdDescripcion = document.createElement('td');
+    const inputDescripcion = document.createElement('input');
+    inputDescripcion.type = 'text';
+    inputDescripcion.value = material.descripcion || '';
+    inputDescripcion.onchange = function() { updateMaterial(index, 'descripcion', this.value); };
+    tdDescripcion.appendChild(inputDescripcion);
+    row.appendChild(tdDescripcion);
+    // Condicion dropdown - HARDCODED
+    const tdCondicion = document.createElement('td');
+    const selectCondicion = document.createElement('select');
+    condicionOptions.forEach(option => {
+      const optElement = document.createElement('option');
+      optElement.value = option;
+      optElement.textContent = option;
+      if (material.condicion === option) optElement.selected = true;
+      selectCondicion.appendChild(optElement);
+    });
+    selectCondicion.onchange = function() { updateMaterial(index, 'condicion', this.value); };
+    tdCondicion.appendChild(selectCondicion);
+    row.appendChild(tdCondicion);
+    // Categoria dropdown - HARDCODED
+    const tdCategoria = document.createElement('td');
+    const selectCategoria = document.createElement('select');
+    categoriaOptions.forEach(option => {
+      const optElement = document.createElement('option');
+      optElement.value = option;
+      optElement.textContent = option;
+      if (material.categoria === option) optElement.selected = true;
+      selectCategoria.appendChild(optElement);
+    });
+    selectCategoria.onchange = function() { updateMaterial(index, 'categoria', this.value); };
+    tdCategoria.appendChild(selectCategoria);
+    row.appendChild(tdCategoria);
+    // Duplicar button
+    const tdDuplicar = document.createElement('td');
+    const btnDuplicar = document.createElement('button');
+    btnDuplicar.className = 'btn-duplicate';
+    btnDuplicar.textContent = '📋 Duplicar';
+    btnDuplicar.title = 'Duplicar partida';
+    btnDuplicar.onclick = function() { duplicateItem(index); };
+    tdDuplicar.appendChild(btnDuplicar);
+    row.appendChild(tdDuplicar);
+    // Eliminar button
+    const tdEliminar = document.createElement('td');
+    const btnEliminar = document.createElement('button');
+    btnEliminar.className = 'btn-delete';
+    btnEliminar.textContent = '🗑️ Eliminar';
+    btnEliminar.title = 'Eliminar partida';
+    btnEliminar.onclick = function() { deleteItem(index); };
+    tdEliminar.appendChild(btnEliminar);
+    row.appendChild(tdEliminar);
+    tbody.appendChild(row);
+  });
+}
+
+        // Codigo AX table functions
+        function renderCodigoAXTable() {
+            const tbody = document.getElementById('codigoaxTableBody');
+            tbody.innerHTML = '';
+            
+            codigoaxItems.forEach((item, index) => {
+                const row = document.createElement('tr');
+                
+                // Cantidad
+                const tdCantidad = document.createElement('td');
+                const inputCantidad = document.createElement('input');
+                inputCantidad.type = 'number';
+                inputCantidad.value = item.cantidad;
+                inputCantidad.min = '1';
+                inputCantidad.onchange = function() { updateCodigoAXItem(index, 'cantidad', this.value); };
+                tdCantidad.appendChild(inputCantidad);
+                row.appendChild(tdCantidad);
+                
+                // Codigo AX
+                const tdCodigoAX = document.createElement('td');
+                const inputCodigoAX = document.createElement('input');
+                inputCodigoAX.type = 'text';
+                inputCodigoAX.value = item.codigo_ax;
+                inputCodigoAX.onchange = function() { 
+                    updateCodigoAXItem(index, 'codigo_ax', this.value); 
+                    tryAutocompleteAxTableNombre(index);
+                };
+                tdCodigoAX.appendChild(inputCodigoAX);
+                row.appendChild(tdCodigoAX);
+                
+                // Nombre
+                const tdNombre = document.createElement('td');
+                const inputNombre = document.createElement('input');
+                inputNombre.type = 'text';
+                inputNombre.value = item.nombre;
+                inputNombre.onchange = function() { updateCodigoAXItem(index, 'nombre', this.value); };
+                tdNombre.appendChild(inputNombre);
+                row.appendChild(tdNombre);
+                
+                // Duplicar button
+                const tdDuplicar = document.createElement('td');
+                const btnDuplicar = document.createElement('button');
+                btnDuplicar.className = 'btn-duplicate';
+                btnDuplicar.textContent = '📋 Duplicar';
+                btnDuplicar.title = 'Duplicar código';
+                btnDuplicar.onclick = function() { duplicateCodigoAXItem(index); };
+                tdDuplicar.appendChild(btnDuplicar);
+                row.appendChild(tdDuplicar);
+                
+                // Eliminar button
+                const tdEliminar = document.createElement('td');
+                const btnEliminar = document.createElement('button');
+                btnEliminar.className = 'btn-delete';
+                btnEliminar.textContent = '🗑️ Eliminar';
+                btnEliminar.title = 'Eliminar código';
+                btnEliminar.onclick = function() { deleteCodigoAXItem(index); };
+                tdEliminar.appendChild(btnEliminar);
+                row.appendChild(tdEliminar);
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function updateCodigoAXItem(index, field, value) {
+            codigoaxItems[index][field] = field === 'cantidad' ? parseInt(value) : value;
+        }
+        
+        function duplicateCodigoAXItem(index) {
+            const itemToDuplicate = codigoaxItems[index];
+            const duplicatedItem = { ...itemToDuplicate };
+            codigoaxItems.splice(index + 1, 0, duplicatedItem);
+            renderCodigoAXTable();
+        }
+        
+        function deleteCodigoAXItem(index) {
+            const confirmDelete = confirm('¿Estás seguro de eliminar este código?');
+            if (confirmDelete) {
+                codigoaxItems.splice(index, 1);
+                renderCodigoAXTable();
+            }
+        }
+
+        function duplicateItem(index) {
+            // Get the item to duplicate
+            const itemToDuplicate = materials[index];
+            
+            // Create a copy
+            const duplicatedItem = {
+                cantidad: itemToDuplicate.cantidad,
+                codigoAx: itemToDuplicate.codigoAx,
+                nombre: itemToDuplicate.nombre,
+                dimension: itemToDuplicate.dimension,
+                noParte: itemToDuplicate.noParte,
+                descripcion: itemToDuplicate.descripcion,
+                condicion: itemToDuplicate.condicion,
+                categoria: itemToDuplicate.categoria,
+                selected: true
+            };
+            
+            // Insert the duplicate right after the original
+            materials.splice(index + 1, 0, duplicatedItem);
+            
+            // Re-render the table
+            renderReviewTable();
+        }
+        
+        function deleteItem(index) {
+            // Show confirmation dialog
+            const confirmDelete = confirm('¿Estás seguro de eliminar esta partida?');
+            
+            if (confirmDelete) {
+                // Remove the item
+                materials.splice(index, 1);
+                
+                // Re-render the table
+                renderReviewTable();
+            }
+        }
+
+        function updateMaterial(index, field, value) {
+            materials[index][field] = field === 'cantidad' ? parseInt(value) : value;
+        }
+
+        // Codigo AX Print Preview
+        function showCodigoAXPrintPreview() {
+            if (codigoaxItems.length === 0) {
+                alert('No hay códigos para imprimir');
+                return;
+            }
+            
+            const printContainer = document.getElementById('printContainer');
+            printContainer.innerHTML = '';
+            
+            // Generate labels for each quantity
+            const labels = [];
+            codigoaxItems.forEach(item => {
+                for (let i = 0; i < item.cantidad; i++) {
+                    labels.push(item);
+                }
+            });
+            
+            // Create pages with 12 labels each (6x2 grid)
+            const labelsPerPage = 12;
+            const totalPages = Math.ceil(labels.length / labelsPerPage);
+            
+            for (let page = 0; page < totalPages; page++) {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'print-page';
+                
+                const gridDiv = document.createElement('div');
+                gridDiv.className = 'labels-grid';
+                
+                const startIdx = page * labelsPerPage;
+                const endIdx = Math.min(startIdx + labelsPerPage, labels.length);
+                
+                for (let i = startIdx; i < endIdx; i++) {
+                    const label = createCodigoAXLabel(labels[i]);
+                    gridDiv.appendChild(label);
+                }
+                
+                pageDiv.appendChild(gridDiv);
+                printContainer.appendChild(pageDiv);
+            }
+            
+            // Hide main UI
+            document.querySelector('.app-header').classList.add('hidden');
+            document.querySelector('.main-content').classList.add('hidden');
+            
+            // Show print container
+            printContainer.classList.add('active');
+            printContainer.style.display = 'block';
+            
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    showReturnButton();
+                }, 200);
+            }, 100);
+        }
+        
+        function createCodigoAXLabel(item) {
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'label-codigoax';
+            labelDiv.innerHTML = `
+                <div class="label-container">
+                    <div class="label-header">
+                        <div class="label-logo-left">
+                            ${logoLeft ? `<img src="${logoLeft}" class="label-logo" alt="Logo izquierdo">` : '<div style="width: 65px; height: 32px; background: #f0f0f0;"></div>'}
+                        </div>
+                        <div class="label-title">
+                            <h4>ETIQUETADO ALMACEN<\/h4>
+                            <p>${headerText}<\/p>
+                        </div>
+                        <div class="label-logo-right">
+                            ${logoRight ? `<img src="${logoRight}" class="label-logo" alt="Logo derecho">` : '<div style="width: 65px; height: 32px; background: #f0f0f0;"></div>'}
+                        </div>
+                    </div>
+                    <div class="label-codigoax-main">
+                        <div class="codigoax-number">${item.codigo_ax}<\/div>
+                    </div>
+                    <div class="label-codigoax-nombre">
+                        <div class="codigoax-nombre-text">${item.nombre}<\/div>
+                    </div>
+                </div>
+            `;
+            return labelDiv;
+        }
+
+        // Show print preview and trigger native print dialog
+        function showPrintPreview() {
+            // Print ALL items (no selection needed)
+            if (materials.length === 0) {
+                alert('No hay materiales para imprimir');
+                return;
+            }
+            
+            const selectedMaterials = materials;
+            
+            // Generate labels for print container
+            const printContainer = document.getElementById('printContainer');
+            printContainer.innerHTML = '';
+            
+            // Generate labels for each quantity
+            const labels = [];
+            selectedMaterials.forEach(material => {
+                for (let i = 0; i < material.cantidad; i++) {
+                    labels.push(material);
+                }
+            });
+            
+            // Create pages with 12 labels each (6x2 grid)
+            const labelsPerPage = 12;
+            const totalPages = Math.ceil(labels.length / labelsPerPage);
+            
+            for (let page = 0; page < totalPages; page++) {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'print-page';
+                
+                const gridDiv = document.createElement('div');
+                gridDiv.className = 'labels-grid';
+                
+                const startIdx = page * labelsPerPage;
+                const endIdx = Math.min(startIdx + labelsPerPage, labels.length);
+                
+                for (let i = startIdx; i < endIdx; i++) {
+                    const label = createLabel(labels[i]);
+                    gridDiv.appendChild(label);
+                }
+                
+                pageDiv.appendChild(gridDiv);
+                printContainer.appendChild(pageDiv);
+            }
+            
+            // Hide main UI
+            document.querySelector('.app-header').classList.add('hidden');
+            document.querySelector('.main-content').classList.add('hidden');
+            
+            // Show print container
+            printContainer.classList.add('active');
+            printContainer.style.display = 'block';
+            
+            // Small delay to ensure DOM is updated before printing
+            setTimeout(() => {
+                window.print();
+                // Show return button after print dialog opens
+                setTimeout(() => {
+                    showReturnButton();
+                }, 200);
+            }, 100);
+        }
+        
+        function showReturnButton() {
+            // Check if button already exists
+            let returnBtn = document.querySelector('.return-button');
+            if (!returnBtn) {
+                returnBtn = document.createElement('button');
+                returnBtn.className = 'return-button';
+                returnBtn.textContent = 'Volver';
+                returnBtn.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    padding: 12px 24px;
+                    background: var(--color-purple);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    z-index: 1000;
+                    box-shadow: var(--shadow-lg);
+                `;
+                returnBtn.onclick = returnToEdit;
+                document.body.appendChild(returnBtn);
+            }
+            returnBtn.style.display = 'block';
+        }
+        
+        function returnToEdit() {
+            // Hide return button
+            const returnBtn = document.querySelector('.return-button');
+            if (returnBtn) {
+                returnBtn.style.display = 'none';
+            }
+            
+            // Hide print container
+            const printContainer = document.getElementById('printContainer');
+            printContainer.classList.remove('active');
+            printContainer.style.display = 'none';
+            
+            // Show main UI
+            document.querySelector('.app-header').classList.remove('hidden');
+            document.querySelector('.main-content').classList.remove('hidden');
+        }
+
+function createLabel(material) {
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'label';
+    labelDiv.innerHTML = `
+        <div class="label-container">
+            <div class="label-header">
+                <div class="label-logo-left">
+                    ${logoLeft ? `<img src="${logoLeft}" class="label-logo" alt="Logo izquierdo">` : '<div style="width: 65px; height: 32px;"></div>'}
+                </div>
+                <div class="label-title">
+                    <h4>ETIQUETADO ALMACEN</h4>
+                    <p>${headerText}</p>
+                </div>
+                <div class="label-logo-right">
+                    ${logoRight ? `<img src="${logoRight}" class="label-logo" alt="Logo derecho">` : '<div style="width: 65px; height: 32px;"></div>'}
+                </div>
+            </div>
+            <div class="label-body">
+                <div class="label-row-two-cols">
+                    <div class="label-field-left">
+                        <span class="label-field-label">CODIGO AX:</span> <span class="label-field-value">${material.codigoAx}</span>
+                    </div>
+                    <div class="label-field-right">
+                        <span class="label-field-label">CONDICION:</span> <span class="label-field-value">${material.condicion}</span>
+                    </div>
+                </div>
+                <div class="label-field">
+                    <span class="label-field-label">NOMBRE:</span> <span class="label-field-value">${material.nombre}</span>
+                </div>
+                <div class="label-field">
+                    <span class="label-field-label">DIMENSIÓN:</span> <span class="label-field-value">${material.dimension}</span>
+                </div>
+                <div class="label-field">
+                    <span class="label-field-label">DESCRIPCION:</span> <span class="label-field-value">${material.descripcion || 'N/A'}</span>
+                </div>
+                <div class="label-field">
+                    <span class="label-field-label">NO. PARTE:</span> <span class="label-field-value">${material.noParte || 'N/A'}</span>
+                </div>
+                <div class="label-field">
+                    <span class="label-field-label">CATEGORIA:</span> <span class="label-field-value">${material.categoria}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    return labelDiv;
+}
+
+// Modal functions
+function openConfigModal() {
+    const modal = document.getElementById('configModal');
+    if (modal) {
+        modal.classList.add('active');
+    }
+}
+
+function closeConfigModal() {
+    document.getElementById('configModal').classList.remove('active');
+}
+
+// ============ LOGO HANDLING ============
+function handleLogoUpload(event, side) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const dataUrl = e.target.result;
+            
+            if (side === 'left') {
+                logoLeft = dataUrl;
+                localStorage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
+                updateLogoPreview('left', logoLeft);
+            } else {
+                logoRight = dataUrl;
+                localStorage.setItem(STORAGE_KEYS.logoRight, logoRight);
+                updateLogoPreview('right', logoRight);
+            }
+            
+            console.log(`Logo ${side} uploaded and saved to localStorage`);
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function handleLogoUrl(event, side) {
+    const url = event.target.value;
+    
+    if (url) {
+        if (side === 'left') {
+            logoLeft = url;
+            localStorage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
+            updateLogoPreview('left', logoLeft);
+        } else {
+            logoRight = url;
+            localStorage.setItem(STORAGE_KEYS.logoRight, logoRight);
+            updateLogoPreview('right', logoRight);
+        }
+        
+        console.log(`Logo ${side} URL saved to localStorage`);
+    }
+}
+
+function clearLogo(side) {
+    if (side === 'left') {
+        logoLeft = '';
+        localStorage.removeItem(STORAGE_KEYS.logoLeft);
+        const leftInput = document.getElementById('leftLogoUrl');
+        if (leftInput) leftInput.value = '';
+        const leftPreview = document.getElementById('leftLogoPreview');
+        if (leftPreview) {
+            leftPreview.innerHTML = 'Sin logo configurado';
+            leftPreview.classList.add('empty');
+        }
+    } else {
+        logoRight = '';
+        localStorage.removeItem(STORAGE_KEYS.logoRight);
+        const rightInput = document.getElementById('rightLogoUrl');
+        if (rightInput) rightInput.value = '';
+        const rightPreview = document.getElementById('rightLogoPreview');
+        if (rightPreview) {
+            rightPreview.innerHTML = 'Sin logo configurado';
+            rightPreview.classList.add('empty');
+        }
+    }
+    
+    console.log(`Logo ${side} cleared from localStorage`);
+}
+
+function updateLogoPreview(side, logoUrl) {
+    const previewId = side === 'left' ? 'leftLogoPreview' : 'rightLogoPreview';
+    const preview = document.getElementById(previewId);
+    
+    if (preview && logoUrl) {
+        preview.innerHTML = `<img src="${logoUrl}" alt="Logo ${side}">`;
+        preview.classList.remove('empty');
+    } else if (preview) {
+        preview.innerHTML = 'Sin logo configurado';
+        preview.classList.add('empty');
+    }
+}
+
+function saveLogoConfig() {
+    alert('Configuración guardada');
+    closeConfigModal();
+}
+
+        // Close modal when clicking outside
+        document.getElementById('configModal').addEventListener('click', (e) => {
+            if (e.target.id === 'configModal') {
+                closeConfigModal();
+            }
+        });
+    </script>
+</body>
+</html>
