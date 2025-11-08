@@ -1463,26 +1463,7 @@ body {
     </div>
 
     <script>
-        // ============ STORAGE PERSISTENCE ============
-// NOTE: This environment blocks localStorage, so we use in-memory storage
-// Data persists during the current session but is lost on page reload
-// Pattern follows the exact structure from reference code
-
-const storage = {
-    data: {},
-    getItem: function(key) {
-        return this.data[key] || null;
-    },
-    setItem: function(key, value) {
-        this.data[key] = value;
-        console.log(`Stored: ${key}`);
-    },
-    removeItem: function(key) {
-        delete this.data[key];
-        console.log(`Removed: ${key}`);
-    }
-};
-
+        // ============ STORAGE KEYS ============
 const STORAGE_KEYS = {
     logoLeft: 'logoLeft',
     logoRight: 'logoRight',
@@ -1494,9 +1475,9 @@ const STORAGE_KEYS = {
 let currentMode = 'material';
 let materials = [];
 let codigoaxItems = [];
-let logoLeft = storage.getItem(STORAGE_KEYS.logoLeft);
-let logoRight = storage.getItem(STORAGE_KEYS.logoRight);
-let headerText = storage.getItem(STORAGE_KEYS.headerText) || 'BRONCO RIG-91';
+let logoLeft = localStorage.getItem(STORAGE_KEYS.logoLeft);
+let logoRight = localStorage.getItem(STORAGE_KEYS.logoRight);
+let headerText = localStorage.getItem(STORAGE_KEYS.headerText) || 'BRONCO RIG-91';
 let codigosData = {};
 
 // Hardcoded dropdown values - NOT customizable
@@ -1505,18 +1486,18 @@ const categoriaOptions = ['INVENTARIABLE', 'CONSUMIBLES'];
 
 // ============ INITIALIZATION - LOAD CSV DATA ============
 function initCodigosData() {
-  const storedData = storage.getItem(STORAGE_KEYS.codigosAX);
+  const storedData = localStorage.getItem(STORAGE_KEYS.codigosAX);
   if (storedData) {
     try {
       codigosData = JSON.parse(storedData);
-      console.log('CSV data loaded from storage:', Object.keys(codigosData).length, 'entries');
+      console.log('CSV data loaded from localStorage:', Object.keys(codigosData).length, 'entries');
     } catch (e) {
       console.error('Error parsing CSV data:', e);
       codigosData = {};
     }
   } else {
     codigosData = {};
-    console.log('No CSV data in storage - starting empty');
+    console.log('No CSV data in localStorage - starting empty');
   }
   updateCSVStatus();
 }
@@ -1538,6 +1519,12 @@ window.addEventListener('DOMContentLoaded', function() {
         if (rightInput) rightInput.value = logoRight;
     }
     
+    // Restore header text in modal input
+    const headerTextInput = document.getElementById('headerText');
+    if (headerTextInput) {
+        headerTextInput.value = headerText;
+    }
+    
     // Initialize CSV data
     initCodigosData();
     
@@ -1553,11 +1540,10 @@ window.addEventListener('DOMContentLoaded', function() {
     console.log('Configuration restored:', {
         logoLeft: logoLeft ? 'exists' : 'empty',
         logoRight: logoRight ? 'exists' : 'empty',
+        headerText: headerText,
         csvEntries: Object.keys(codigosData).length
     });
 });
-
-
 
 function updateCSVStatus() {
     const statusElement = document.getElementById('csvStatus');
@@ -1573,10 +1559,6 @@ function updateCSVStatus() {
         }
     }
 }
-
-
-
-
 
         // Mode switching
         function switchMode(mode) {
@@ -1682,7 +1664,6 @@ document.getElementById('materialForm').addEventListener('submit', (e) => {
             }
         }
 
-        // Render review table
         // ============ CSV UPLOAD AND PARSING ============
         function handleCSVUpload(event) {
             const file = event.target.files[0];
@@ -1694,10 +1675,10 @@ document.getElementById('materialForm').addEventListener('submit', (e) => {
                     
                     if (Object.keys(parsedData).length > 0) {
                         codigosData = parsedData;
-                        storage.setItem(STORAGE_KEYS.codigosAX, JSON.stringify(codigosData));
+                        localStorage.setItem(STORAGE_KEYS.codigosAX, JSON.stringify(codigosData));
                         updateCSVStatus();
                         alert('Archivo CSV cargado exitosamente. ' + Object.keys(codigosData).length + ' códigos disponibles.');
-                        console.log('CSV uploaded and saved to storage');
+                        console.log('CSV uploaded and saved to localStorage');
                     } else {
                         alert('No se encontraron datos válidos en el CSV');
                     }
@@ -1735,11 +1716,11 @@ document.getElementById('materialForm').addEventListener('submit', (e) => {
         
         function clearCSV() {
             codigosData = {};
-            storage.removeItem(STORAGE_KEYS.codigosAX);
+            localStorage.removeItem(STORAGE_KEYS.codigosAX);
             document.getElementById('csvFile').value = '';
             updateCSVStatus();
             alert('CSV eliminado.');
-            console.log('CSV cleared from storage');
+            console.log('CSV cleared from localStorage');
         }
 
         function autocompleteNombre(codigoaxValue) {
@@ -1813,7 +1794,7 @@ function updateHeaderText() {
 const input = document.getElementById('headerText');
 if (input) {
 headerText = input.value || 'BRONCO RIG-91';
-storage.setItem(STORAGE_KEYS.headerText, headerText);
+localStorage.setItem(STORAGE_KEYS.headerText, headerText);
 console.log('Header text actualizado a:', headerText);
 }
 }
@@ -2308,15 +2289,15 @@ function handleLogoUpload(event, side) {
             
             if (side === 'left') {
                 logoLeft = dataUrl;
-                storage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
+                localStorage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
                 updateLogoPreview('left', logoLeft);
             } else {
                 logoRight = dataUrl;
-                storage.setItem(STORAGE_KEYS.logoRight, logoRight);
+                localStorage.setItem(STORAGE_KEYS.logoRight, logoRight);
                 updateLogoPreview('right', logoRight);
             }
             
-            console.log(`Logo ${side} uploaded and saved to storage`);
+            console.log(`Logo ${side} uploaded and saved to localStorage`);
         };
         reader.readAsDataURL(file);
     }
@@ -2328,22 +2309,22 @@ function handleLogoUrl(event, side) {
     if (url) {
         if (side === 'left') {
             logoLeft = url;
-            storage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
+            localStorage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
             updateLogoPreview('left', logoLeft);
         } else {
             logoRight = url;
-            storage.setItem(STORAGE_KEYS.logoRight, logoRight);
+            localStorage.setItem(STORAGE_KEYS.logoRight, logoRight);
             updateLogoPreview('right', logoRight);
         }
         
-        console.log(`Logo ${side} URL saved to storage`);
+        console.log(`Logo ${side} URL saved to localStorage`);
     }
 }
 
 function clearLogo(side) {
     if (side === 'left') {
         logoLeft = '';
-        storage.removeItem(STORAGE_KEYS.logoLeft);
+        localStorage.removeItem(STORAGE_KEYS.logoLeft);
         const leftInput = document.getElementById('leftLogoUrl');
         if (leftInput) leftInput.value = '';
         const leftPreview = document.getElementById('leftLogoPreview');
@@ -2353,7 +2334,7 @@ function clearLogo(side) {
         }
     } else {
         logoRight = '';
-        storage.removeItem(STORAGE_KEYS.logoRight);
+        localStorage.removeItem(STORAGE_KEYS.logoRight);
         const rightInput = document.getElementById('rightLogoUrl');
         if (rightInput) rightInput.value = '';
         const rightPreview = document.getElementById('rightLogoPreview');
@@ -2363,7 +2344,7 @@ function clearLogo(side) {
         }
     }
     
-    console.log(`Logo ${side} cleared from storage`);
+    console.log(`Logo ${side} cleared from localStorage`);
 }
 
 function updateLogoPreview(side, logoUrl) {
