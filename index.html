@@ -1204,7 +1204,30 @@ body {
                 <h1 class="page-title">Generador de Etiquetas de Material</h1>
                 <p class="page-subtitle">Crea de forma rápida etiquetas para Material</p>
 
+                
+                <!-- Opción Adicional: Cargar Vale de Material desde Imagen -->
+                <h2 class="section-header">O Cargar Vale desde Imagen</h2>
+                <div class="form-card" style="margin-bottom: 24px;">
+                    <div class="form-group">
+                        <label class="form-label" for="voucherImageInput">Selecciona imagen del vale (.png, .jpg, .jpeg)</label>
+                        <input type="file" id="voucherImageInput" class="form-input" accept="image/png, image/jpeg, image/jpg" style="padding: 8px;">
+                    </div>
+
+                    <div id="imagePreviewContainer" style="margin-top: 12px; display: none;">
+                        <img id="voucherImagePreview" style="max-width: 100%; max-height: 300px; border: 2px solid #ddd; border-radius: 8px; display: block;">
+                    </div>
+
+                    <button type="button" id="processVoucherImageBtn" class="btn-primary" style="margin-top: 16px;" disabled>
+                        📷 Extraer Datos del Vale
+                    </button>
+
+                    <div id="processingStatus" style="margin-top: 12px; padding: 12px; border-radius: 6px; display: none;">
+                        <p style="margin: 0; font-weight: 500;"></p>
+                    </div>
+                </div>
+
                 <h2 class="section-header">Añadir Partida Manualmente</h2>
+
 
                 <div class="form-card">
                     <form id="materialForm">
@@ -2372,6 +2395,195 @@ function saveLogoConfig() {
                 closeConfigModal();
             }
         });
-    </script>
+    
+
+// ============ PROCESAMIENTO DE VALE CON GEMINI ============
+
+// Función para convertir archivo a Base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Manejo de carga de imagen
+document.getElementById('voucherImageInput').addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const preview = document.getElementById('voucherImagePreview');
+    const processBtn = document.getElementById('processVoucherImageBtn');
+
+    if (!file) {
+        previewContainer.style.display = 'none';
+        processBtn.disabled = true;
+        return;
+    }
+
+    // Validar tipo de archivo
+    if (!file.type.match('image/(jpeg|jpg|png)')) {
+        alert('❌ Solo se permiten archivos JPG, JPEG o PNG');
+        event.target.value = '';
+        return;
+    }
+
+    try {
+        // Mostrar preview
+        const base64 = await fileToBase64(file);
+        preview.src = base64;
+        previewContainer.style.display = 'block';
+        processBtn.disabled = false;
+    } catch (error) {
+        alert('Error al cargar la imagen');
+        console.error(error);
+    }
+});
+
+// Procesar imagen con Gemini
+document.getElementById('processVoucherImageBtn').addEventListener('click', async () => {
+    const preview = document.getElementById('voucherImagePreview');
+    const processBtn = document.getElementById('processVoucherImageBtn');
+    const statusDiv = document.getElementById('processingStatus');
+    const statusText = statusDiv.querySelector('p');
+
+    if (!preview.src) {
+        alert('❌ Primero debes cargar una imagen');
+        return;
+    }
+
+    // Solicitar API Key si no existe
+    let apiKey = localStorage.getItem('geminiApiKey');
+    if (!apiKey) {
+        apiKey = prompt('Por favor ingresa tu API Key de Gemini:\n(La puedes obtener en https://aistudio.google.com/apikey)');
+        if (!apiKey) {
+            alert('❌ Necesitas una API Key para procesar la imagen');
+            return;
+        }
+        localStorage.setItem('geminiApiKey', apiKey.trim());
+    }
+
+    // Mostrar estado de procesamiento
+    processBtn.disabled = true;
+    processBtn.textContent = '⏳ Procesando...';
+    statusDiv.style.display = 'block';
+    statusDiv.style.backgroundColor = '#e3f2fd';
+    statusDiv.style.color = '#1976d2';
+    statusText.textContent = 'Analizando imagen con Gemini 2.5 Flash Lite...';
+
+    try {
+        // Extraer datos base64 de la imagen
+        const base64ImageData = preview.src.split(',')[1];
+
+        // Construir el prompt
+        const prompt = `Analiza la siguiente imagen de un vale de material. Extrae la información de la tabla de materiales. Las columnas relevantes son 'CANTIDAD', 'CODIGO' (la segunda columna, no la que dice 'OC'), 'DESCRIPCION DEL MATERIAL', y 'CLAVE ALMACEN'. Devuelve el resultado como un array de objetos JSON. Asegúrate de que los valores de 'cantidad' sean numéricos.`;
+
+        // Construir el payload para Gemini API
+        const payload = {
+            contents: [{
+                parts: [
+                    { text: prompt },
+                    { 
+                        inline_data: { 
+                            mime_type: "image/jpeg", 
+                            data: base64ImageData 
+                        } 
+                    }
+                ]
+            }],
+            generationConfig: {
+                response_mime_type: "application/json",
+                response_schema: {
+                    type: "ARRAY",
+                    items: {
+                        type: "OBJECT",
+                        properties: {
+                            cantidad: { type: "NUMBER" },
+                            codigo: { type: "STRING" },
+                            descripcion: { type: "STRING" },
+                            claveAlmacen: { type: "STRING" }
+                        },
+                        required: ["cantidad", "codigo", "descripcion", "claveAlmacen"]
+                    }
+                }
+            }
+        };
+
+        // Llamar a la API de Gemini
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Error de API: ${errorData.error?.message || response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Extraer los materiales del JSON de respuesta
+        let extractedMaterials = null;
+
+        if (data.candidates && data.candidates.length > 0) {
+            const candidate = data.candidates[0];
+            if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+                const textContent = candidate.content.parts[0].text;
+                extractedMaterials = JSON.parse(textContent);
+            }
+        }
+
+        if (!extractedMaterials || !Array.isArray(extractedMaterials) || extractedMaterials.length === 0) {
+            throw new Error('No se pudieron extraer materiales de la imagen');
+        }
+
+        // Agregar los materiales extraídos al array global
+        extractedMaterials.forEach(item => {
+            const material = {
+                cantidad: item.cantidad || 1,
+                codigoAx: item.codigo || '',
+                nombre: item.descripcion || '',
+                dimension: item.claveAlmacen || '',
+                noParte: '',
+                descripcion: item.descripcion || '',
+                condicion: 'NUEVO',
+                categoria: 'INVENTARIABLE',
+                selected: true
+            };
+            materials.push(material);
+        });
+
+        // Mostrar estado de éxito
+        statusDiv.style.backgroundColor = '#e8f5e9';
+        statusDiv.style.color = '#2e7d32';
+        statusText.textContent = `✅ Se extrajeron ${extractedMaterials.length} materiales correctamente`;
+
+        // Ir automáticamente al paso 2
+        setTimeout(() => {
+            goToStep(2);
+        }, 1500);
+
+    } catch (error) {
+        console.error('Error al procesar imagen:', error);
+        statusDiv.style.backgroundColor = '#ffebee';
+        statusDiv.style.color = '#c62828';
+        statusText.textContent = `❌ Error: ${error.message}`;
+
+        // Si el error es de API Key inválida, limpiar
+        if (error.message.includes('API key') || error.message.includes('401')) {
+            localStorage.removeItem('geminiApiKey');
+            statusText.textContent += ' (API Key inválida - se ha eliminado)';
+        }
+    } finally {
+        processBtn.disabled = false;
+        processBtn.textContent = '📷 Extraer Datos del Vale';
+    }
+});
+
+</script>
 </body>
 </html>
