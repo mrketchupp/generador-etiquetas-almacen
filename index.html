@@ -1206,10 +1206,10 @@ body {
 
                 
                 <!-- Opción Adicional: Cargar Vale de Material desde Imagen -->
-                <h2 class="section-header">O Cargar Vale desde Imagen</h2>
+                <h2 class="section-header">Cargar Imagen de Materiales</h2>
                 <div class="form-card" style="margin-bottom: 24px;">
                     <div class="form-group">
-                        <label class="form-label" for="voucherImageInput">Selecciona imagen del vale (.png, .jpg, .jpeg)</label>
+                        <label class="form-label" for="voucherImageInput">Selecciona la imagen (.png, .jpg, .jpeg)</label>
                         <input type="file" id="voucherImageInput" class="form-input" accept="image/png, image/jpeg, image/jpg" style="padding: 8px;">
                     </div>
 
@@ -1221,7 +1221,7 @@ body {
                     </div>
 
                     <button type="button" id="processVoucherImageBtn" class="btn-primary" style="margin-top: 16px;" disabled>
-                        📷 Extraer Datos del Vale
+                        📷 Obtener Datos
                     </button>
 
                     <div id="processingStatus" style="margin-top: 12px; padding: 12px; border-radius: 6px; display: none;">
@@ -2554,7 +2554,7 @@ document.getElementById('processVoucherImageBtn').addEventListener('click', asyn
     statusDiv.style.display = 'block';
     statusDiv.style.backgroundColor = '#e3f2fd';
     statusDiv.style.color = '#1976d2';
-    statusText.textContent = 'Analizando imagen con Gemini 2.5 Flash Lite...';
+    statusText.textContent = 'Analizando imagen ...';
 
     try {
         // Extraer datos base64 de la imagen
@@ -2595,7 +2595,7 @@ document.getElementById('processVoucherImageBtn').addEventListener('click', asyn
         };
 
         // Llamar a la API de Gemini
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
