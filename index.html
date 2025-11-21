@@ -712,11 +712,11 @@ body {
     box-shadow: var(--shadow-md);
 }
 
-/* MODIFICACIÓN PRINCIPAL: Grid 2x10 con dimensiones J-5163 (5.1cm x 10.2cm = 2in x 4in) */
+/* MODIFICACIÓN: Grid 5x2 con dimensiones J-5163 (5.1cm x 10.2cm = 2in x 4in) */
 .labels-grid {
     display: grid;
-    grid-template-columns: repeat(2, 2in);
-    grid-template-rows: repeat(10, 4in);
+    grid-template-columns: repeat(5, 2in);
+    grid-template-rows: repeat(2, 4in);
     gap: 0.125in;
     width: 100%;
     justify-content: center;
@@ -1026,7 +1026,7 @@ body {
     display: none;
 }
 
-/* Print Styles - MODIFICADO para grid 2x10 */
+/* Print Styles - MODIFICADO para grid 5x2 */
 @media print {
     .main-content,
     .return-button,
@@ -1061,8 +1061,8 @@ body {
     
     .labels-grid {
         display: grid !important;
-        grid-template-columns: repeat(2, 2in) !important;
-        grid-template-rows: repeat(10, 4in) !important;
+        grid-template-columns: repeat(5, 2in) !important;
+        grid-template-rows: repeat(2, 4in) !important;
         gap: 0.125in !important;
         visibility: visible !important;
         opacity: 1 !important;
@@ -2081,8 +2081,8 @@ console.log('Header text actualizado a:', headerText);
                 }
             });
             
-            // MODIFICADO: 20 etiquetas por página (2x10)
-            const labelsPerPage = 20;
+            // MODIFICADO: 10 etiquetas por página (5x2)
+            const labelsPerPage = 10;
             const totalPages = Math.ceil(labels.length / labelsPerPage);
             
             for (let page = 0; page < totalPages; page++) {
@@ -2170,8 +2170,8 @@ console.log('Header text actualizado a:', headerText);
                 }
             });
             
-            // MODIFICADO: 20 etiquetas por página (2x10)
-            const labelsPerPage = 20;
+            // MODIFICADO: 10 etiquetas por página (5x2)
+            const labelsPerPage = 10;
             const totalPages = Math.ceil(labels.length / labelsPerPage);
             
             for (let page = 0; page < totalPages; page++) {
