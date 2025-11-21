@@ -712,19 +712,19 @@ body {
     box-shadow: var(--shadow-md);
 }
 
-/* MODIFICACIÓN: Grid 2x5 con dimensiones J-5163 (ancho: 5.1cm, alto: 10.2cm = 2in x 4in) */
+/* MODIFICACIÓN: Grid 2 filas x 5 columnas - HORIZONTAL (4in ancho x 2in alto) */
 .labels-grid {
     display: grid;
-    grid-template-columns: repeat(2, 2in);
-    grid-template-rows: repeat(5, 4in);
+    grid-template-columns: repeat(5, 4in);
+    grid-template-rows: repeat(2, 2in);
     gap: 0.125in;
     width: 100%;
     justify-content: center;
 }
 
 .label {
-    width: 2in;
-    height: 4in;
+    width: 4in;
+    height: 2in;
     border: 2px solid black;
     background: white;
     padding: 4px;
@@ -915,10 +915,10 @@ body {
     background: #DC2626;
 }
 
-/* Codigo AX Label specific styles */
+/* Codigo AX Label specific styles - HORIZONTAL */
 .label-codigoax {
-    width: 2in;
-    height: 4in;
+    width: 4in;
+    height: 2in;
     border: 2px solid black;
     background: white;
     padding: 4px;
@@ -1026,7 +1026,7 @@ body {
     display: none;
 }
 
-/* Print Styles - MODIFICADO para grid 2x5 según plantilla real */
+/* Print Styles - MODIFICADO para grid 2 filas x 5 columnas HORIZONTAL */
 @media print {
     .main-content,
     .return-button,
@@ -1061,8 +1061,8 @@ body {
     
     .labels-grid {
         display: grid !important;
-        grid-template-columns: repeat(2, 2in) !important;
-        grid-template-rows: repeat(5, 4in) !important;
+        grid-template-columns: repeat(5, 4in) !important;
+        grid-template-rows: repeat(2, 2in) !important;
         gap: 0.125in !important;
         visibility: visible !important;
         opacity: 1 !important;
@@ -1074,8 +1074,8 @@ body {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
-        width: 2in;
-        height: 4in;
+        width: 4in;
+        height: 2in;
         border: 2px solid black;
         padding: 4px;
         background-color: white;
@@ -2081,7 +2081,7 @@ console.log('Header text actualizado a:', headerText);
                 }
             });
             
-            // MODIFICADO: 10 etiquetas por página (2x5)
+            // MODIFICADO: 10 etiquetas por página (2 filas x 5 columnas)
             const labelsPerPage = 10;
             const totalPages = Math.ceil(labels.length / labelsPerPage);
             
@@ -2170,7 +2170,7 @@ console.log('Header text actualizado a:', headerText);
                 }
             });
             
-            // MODIFICADO: 10 etiquetas por página (2x5)
+            // MODIFICADO: 10 etiquetas por página (2 filas x 5 columnas)
             const labelsPerPage = 10;
             const totalPages = Math.ceil(labels.length / labelsPerPage);
             
