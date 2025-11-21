@@ -712,25 +712,27 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+/* MODIFICACIÓN PRINCIPAL: Grid 2x10 con dimensiones J-5163 (5.1cm x 10.2cm = 2in x 4in) */
 .labels-grid {
     display: grid;
-    grid-template-columns: repeat(2, 3.75in);
-    grid-template-rows: repeat(6, 1.67in);
-    gap: 0.1in;
-    width: 7.6in;
+    grid-template-columns: repeat(2, 2in);
+    grid-template-rows: repeat(10, 4in);
+    gap: 0.125in;
+    width: 100%;
+    justify-content: center;
 }
 
 .label {
-    width: 3.75in;
-    height: 1.67in;
+    width: 2in;
+    height: 4in;
     border: 2px solid black;
     background: white;
-    padding: 6px;
+    padding: 4px;
     box-sizing: border-box;
     page-break-inside: avoid;
     display: flex;
     flex-direction: column;
-    font-size: 10px;
+    font-size: 9px;
     font-family: Arial, sans-serif;
     overflow: hidden;
 }
@@ -744,13 +746,12 @@ body {
 
 .label-header {
     display: grid;
-    grid-template-columns: 65px 1fr 65px;
-    gap: 4px;
+    grid-template-columns: 50px 1fr 50px;
+    gap: 3px;
     align-items: center;
     justify-items: center;
-    margin-bottom: 4px;
-    padding-bottom: 3px;
-    /* border-bottom removed */
+    margin-bottom: 3px;
+    padding-bottom: 2px;
 }
 
 .label-logo-left,
@@ -758,13 +759,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 65px;
-    height: 32px;
+    width: 50px;
+    height: 28px;
 }
 
 .label-logo {
-    max-width: 65px;
-    max-height: 32px;
+    max-width: 50px;
+    max-height: 28px;
     object-fit: contain;
 }
 
@@ -781,7 +782,7 @@ body {
     margin: 0;
     padding: 0;
     font-weight: bold;
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1.1;
     color: black;
 }
@@ -789,7 +790,7 @@ body {
 .label-title p {
     margin: 0;
     padding: 0;
-    font-size: 9px;
+    font-size: 8px;
     line-height: 1.1;
     color: black;
 }
@@ -799,15 +800,15 @@ body {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    font-size: 10px;
+    font-size: 9px;
 }
 
 .label-row-two-cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 5px;
+    gap: 4px;
     margin-bottom: 2px;
-    font-size: 10px;
+    font-size: 9px;
     line-height: 1.2;
     border-bottom: 1px solid #ccc;
     padding-bottom: 2px;
@@ -826,7 +827,7 @@ body {
     display: flex;
     margin: 0;
     padding: 2px 0;
-    font-size: 10px;
+    font-size: 9px;
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
@@ -841,7 +842,7 @@ body {
 
 .label-field-label {
     font-weight: bold;
-    margin-right: 4px;
+    margin-right: 3px;
     flex-shrink: 0;
     color: black;
 }
@@ -916,11 +917,11 @@ body {
 
 /* Codigo AX Label specific styles */
 .label-codigoax {
-    width: 3.75in;
-    height: 1.67in;
+    width: 2in;
+    height: 4in;
     border: 2px solid black;
     background: white;
-    padding: 6px;
+    padding: 4px;
     box-sizing: border-box;
     page-break-inside: avoid;
     display: flex;
@@ -938,12 +939,12 @@ body {
 
 .label-codigoax .label-header {
     display: grid;
-    grid-template-columns: 65px 1fr 65px;
-    gap: 4px;
+    grid-template-columns: 50px 1fr 50px;
+    gap: 3px;
     align-items: center;
     justify-items: center;
-    margin-bottom: 4px;
-    padding-bottom: 3px;
+    margin-bottom: 3px;
+    padding-bottom: 2px;
 }
 
 /* Large codigo ax number */
@@ -956,7 +957,7 @@ body {
 }
 
 .codigoax-number {
-    font-size: 48px;
+    font-size: 56px;
     font-weight: bold;
     text-align: center;
     line-height: 1;
@@ -975,12 +976,12 @@ body {
 }
 
 .codigoax-nombre-text {
-    font-size: 12px;
+    font-size: 13px;
     text-align: center;
     white-space: normal;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     color: black;
 }
@@ -1025,9 +1026,8 @@ body {
     display: none;
 }
 
-/* Print Styles */
+/* Print Styles - MODIFICADO para grid 2x10 */
 @media print {
-    /* Hide the main UI container */
     .main-content,
     .return-button,
     .app-header,
@@ -1035,7 +1035,6 @@ body {
         display: none !important;
     }
     
-    /* Ensure print container is visible and properly laid out */
     .print-container {
         display: block !important;
         visibility: visible !important;
@@ -1044,7 +1043,6 @@ body {
         margin: 0 !important;
     }
     
-    /* Ensure print pages are visible */
     .print-page {
         display: block !important;
         visibility: visible !important;
@@ -1061,26 +1059,25 @@ body {
         page-break-after: auto;
     }
     
-    /* Ensure labels grid is visible */
     .labels-grid {
         display: grid !important;
-        grid-template-columns: repeat(2, 3.75in) !important;
-        grid-template-rows: repeat(6, 1.67in) !important;
-        gap: 0.1in !important;
+        grid-template-columns: repeat(2, 2in) !important;
+        grid-template-rows: repeat(10, 4in) !important;
+        gap: 0.125in !important;
         visibility: visible !important;
         opacity: 1 !important;
+        justify-content: center;
     }
     
-    /* Ensure labels are visible */
     .label,
     .label-codigoax {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
-        width: 3.75in;
-        height: 1.67in;
+        width: 2in;
+        height: 4in;
         border: 2px solid black;
-        padding: 6px;
+        padding: 4px;
         background-color: white;
         page-break-inside: avoid !important;
         box-sizing: border-box;
@@ -1088,13 +1085,13 @@ body {
     }
     
     .codigoax-number {
-        font-size: 48px !important;
+        font-size: 56px !important;
         letter-spacing: 0.15em !important;
         word-spacing: 0.2em !important;
     }
     
     .codigoax-nombre-text {
-        font-size: 12px !important;
+        font-size: 13px !important;
     }
     
     .label-codigoax-main {
@@ -1111,8 +1108,8 @@ body {
     
     .label-header {
         display: grid !important;
-        grid-template-columns: 65px 1fr 65px !important;
-        gap: 4px !important;
+        grid-template-columns: 50px 1fr 50px !important;
+        gap: 3px !important;
     }
     
     .label-title {
@@ -1125,10 +1122,9 @@ body {
     .label-row-two-cols {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
-        gap: 5px !important;
+        gap: 4px !important;
     }
     
-    /* Ensure label content is visible */
     .label-header,
     .label-body,
     .label-field,
@@ -1143,13 +1139,11 @@ body {
         flex-direction: column !important;
     }
     
-    /* Page settings */
     @page {
         size: letter;
         margin: 0.5in;
     }
     
-    /* Ensure body has no extra styling */
     body {
         margin: 0;
         padding: 0;
@@ -2087,8 +2081,8 @@ console.log('Header text actualizado a:', headerText);
                 }
             });
             
-            // Create pages with 12 labels each (6x2 grid)
-            const labelsPerPage = 12;
+            // MODIFICADO: 20 etiquetas por página (2x10)
+            const labelsPerPage = 20;
             const totalPages = Math.ceil(labels.length / labelsPerPage);
             
             for (let page = 0; page < totalPages; page++) {
@@ -2133,14 +2127,14 @@ console.log('Header text actualizado a:', headerText);
                 <div class="label-container">
                     <div class="label-header">
                         <div class="label-logo-left">
-                            ${logoLeft ? `<img src="${logoLeft}" class="label-logo" alt="Logo izquierdo">` : '<div style="width: 65px; height: 32px; background: #f0f0f0;"></div>'}
+                            ${logoLeft ? `<img src="${logoLeft}" class="label-logo" alt="Logo izquierdo">` : '<div style="width: 50px; height: 28px; background: #f0f0f0;"></div>'}
                         </div>
                         <div class="label-title">
                             <h4>ETIQUETADO ALMACEN<\/h4>
                             <p>${headerText}<\/p>
                         </div>
                         <div class="label-logo-right">
-                            ${logoRight ? `<img src="${logoRight}" class="label-logo" alt="Logo derecho">` : '<div style="width: 65px; height: 32px; background: #f0f0f0;"></div>'}
+                            ${logoRight ? `<img src="${logoRight}" class="label-logo" alt="Logo derecho">` : '<div style="width: 50px; height: 28px; background: #f0f0f0;"></div>'}
                         </div>
                     </div>
                     <div class="label-codigoax-main">
@@ -2176,8 +2170,8 @@ console.log('Header text actualizado a:', headerText);
                 }
             });
             
-            // Create pages with 12 labels each (6x2 grid)
-            const labelsPerPage = 12;
+            // MODIFICADO: 20 etiquetas por página (2x10)
+            const labelsPerPage = 20;
             const totalPages = Math.ceil(labels.length / labelsPerPage);
             
             for (let page = 0; page < totalPages; page++) {
@@ -2269,14 +2263,14 @@ function createLabel(material) {
         <div class="label-container">
             <div class="label-header">
                 <div class="label-logo-left">
-                    ${logoLeft ? `<img src="${logoLeft}" class="label-logo" alt="Logo izquierdo">` : '<div style="width: 65px; height: 32px;"></div>'}
+                    ${logoLeft ? `<img src="${logoLeft}" class="label-logo" alt="Logo izquierdo">` : '<div style="width: 50px; height: 28px;"></div>'}
                 </div>
                 <div class="label-title">
                     <h4>ETIQUETADO ALMACEN</h4>
                     <p>${headerText}</p>
                 </div>
                 <div class="label-logo-right">
-                    ${logoRight ? `<img src="${logoRight}" class="label-logo" alt="Logo derecho">` : '<div style="width: 65px; height: 32px;"></div>'}
+                    ${logoRight ? `<img src="${logoRight}" class="label-logo" alt="Logo derecho">` : '<div style="width: 50px; height: 28px;"></div>'}
                 </div>
             </div>
             <div class="label-body">
@@ -2682,6 +2676,6 @@ window.openConfigModal = function() {
     loadGeminiApiKey();
 };
 
-</script>
+    </script>
 </body>
 </html>
