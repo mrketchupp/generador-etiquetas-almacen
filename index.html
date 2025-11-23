@@ -715,14 +715,14 @@ body {
 .labels-grid {
     display: grid;
     grid-template-columns: repeat(2, 3.75in);
-    grid-template-rows: repeat(6, 1.67in);
+    grid-template-rows: repeat(5, 2.0in);
     gap: 0.1in;
     width: 7.6in;
 }
 
 .label {
     width: 3.75in;
-    height: 1.67in;
+    height: 2.0in;
     border: 2px solid black;
     background: white;
     padding: 6px;
@@ -917,7 +917,7 @@ body {
 /* Codigo AX Label specific styles */
 .label-codigoax {
     width: 3.75in;
-    height: 1.67in;
+    height: 2.0in;
     border: 2px solid black;
     background: white;
     padding: 6px;
@@ -1065,7 +1065,7 @@ body {
     .labels-grid {
         display: grid !important;
         grid-template-columns: repeat(2, 3.75in) !important;
-        grid-template-rows: repeat(6, 1.67in) !important;
+        grid-template-rows: repeat(5, 2.0in) !important;
         gap: 0.1in !important;
         visibility: visible !important;
         opacity: 1 !important;
@@ -1078,7 +1078,7 @@ body {
         visibility: visible !important;
         opacity: 1 !important;
         width: 3.75in;
-        height: 1.67in;
+        height: 2.0in;
         border: 2px solid black;
         padding: 6px;
         background-color: white;
@@ -2087,8 +2087,8 @@ console.log('Header text actualizado a:', headerText);
                 }
             });
             
-            // Create pages with 12 labels each (6x2 grid)
-            const labelsPerPage = 12;
+            // Create pages with 10 labels each (2x5 grid)
+            const labelsPerPage = 10;
             const totalPages = Math.ceil(labels.length / labelsPerPage);
             
             for (let page = 0; page < totalPages; page++) {
@@ -2176,8 +2176,8 @@ console.log('Header text actualizado a:', headerText);
                 }
             });
             
-            // Create pages with 12 labels each (6x2 grid)
-            const labelsPerPage = 12;
+            // Create pages with 10 labels each (2x5 grid)
+            const labelsPerPage = 10;
             const totalPages = Math.ceil(labels.length / labelsPerPage);
             
             for (let page = 0; page < totalPages; page++) {
