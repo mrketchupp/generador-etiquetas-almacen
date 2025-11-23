@@ -705,7 +705,7 @@ body {
 
 .preview-page {
     background-color: white;
-    padding: 0.5in;
+    padding: 0.5in 0.156in;
     margin: 0 auto var(--space-24) auto;
     width: 8.5in;
     min-height: 11in;
@@ -714,15 +714,15 @@ body {
 
 .labels-grid {
     display: grid;
-    grid-template-columns: repeat(2, 3.75in);
-    grid-template-rows: repeat(5, 2.0in);
-    gap: 0.1in;
-    width: 7.6in;
+    grid-template-columns: repeat(2, 4in);
+    grid-template-rows: repeat(5, 2in);
+    gap: 0in 0.188in;
+    margin-left: 0.156in;
 }
 
 .label {
-    width: 3.75in;
-    height: 2.0in;
+    width: 4in;
+    height: 2in;
     border: 2px solid black;
     background: white;
     padding: 6px;
@@ -916,8 +916,8 @@ body {
 
 /* Codigo AX Label specific styles */
 .label-codigoax {
-    width: 3.75in;
-    height: 2.0in;
+    width: 4in;
+    height: 2in;
     border: 2px solid black;
     background: white;
     padding: 6px;
@@ -988,7 +988,7 @@ body {
 /* Print container - hidden by default */
 .print-container {
     display: none;
-    padding: 0.5in;
+    padding: 0.5in 0.156in;
 }
 
 .print-container.active {
@@ -1051,7 +1051,7 @@ body {
         opacity: 1 !important;
         width: 8.5in;
         height: 11in;
-        padding: 0.5in;
+        padding: 0.5in 0.156in;
         margin: 0;
         page-break-after: always;
         background: white;
@@ -1064,9 +1064,10 @@ body {
     /* Ensure labels grid is visible */
     .labels-grid {
         display: grid !important;
-        grid-template-columns: repeat(2, 3.75in) !important;
-        grid-template-rows: repeat(5, 2.0in) !important;
-        gap: 0.1in !important;
+        grid-template-columns: repeat(2, 4in) !important;
+        grid-template-rows: repeat(5, 2in) !important;
+        gap: 0in 0.188in !important;
+        margin-left: 0.156in !important;
         visibility: visible !important;
         opacity: 1 !important;
     }
@@ -1077,8 +1078,8 @@ body {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
-        width: 3.75in;
-        height: 2.0in;
+        width: 4in;
+        height: 2in;
         border: 2px solid black;
         padding: 6px;
         background-color: white;
@@ -1146,7 +1147,7 @@ body {
     /* Page settings */
     @page {
         size: letter;
-        margin: 0.5in;
+        margin: 0.5in 0.156in;
     }
     
     /* Ensure body has no extra styling */
