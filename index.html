@@ -1247,6 +1247,8 @@
                         Codigo AX
                     </button>
                 </div>
+                <button class="config-button" onclick="openLayoutConfigModal()" aria-label="Diseño de Plantilla"
+                    style="margin-right: 8px;">📏</button>
                 <button class="config-button" onclick="openConfigModal()" aria-label="Configuración">⚙️</button>
             </div>
         </header>
@@ -1498,20 +1500,15 @@
         </div>
         </main>
 
-        <!-- Configuration Modal -->
+        <!-- General Configuration Modal -->
         <div id="configModal" class="modal-overlay">
             <div class="modal">
                 <div class="modal-header">
-                    <h2 class="modal-title">Configuración</h2>
+                    <h2 class="modal-title">Configuración General</h2>
                     <button class="close-button" onclick="closeConfigModal()">×</button>
                 </div>
 
-                <div class="tabs-nav">
-                    <button class="tab-btn active" onclick="switchConfigTab('general')">General</button>
-                    <button class="tab-btn" onclick="switchConfigTab('layout')">Diseño de Plantilla</button>
-                </div>
-
-                <div id="tab-general" class="config-tab active">
+                <div class="logo-section">
                     <h3>Logo Izquierdo</h3>
                     <div class="logo-controls">
                         <div class="file-upload-wrapper">
@@ -1591,10 +1588,22 @@
                     <div id="apiKeyStatus"
                         style="margin-top: 10px; font-size: 12px; padding: 8px; border-radius: 4px; display: none;">
                     </div>
-                </div> <!-- End logo-section -->
-            </div> <!-- End tab-general -->
+                </div>
 
-            <div id="tab-layout" class="config-tab">
+                <div style="margin-top: 20px; border-top: 1px solid var(--color-border); padding-top: 20px;">
+                    <button class="btn-primary" onclick="saveLogoConfig()">Guardar y Cerrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Layout Configuration Modal -->
+        <div id="layoutConfigModal" class="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">Diseño de Plantilla</h2>
+                    <button class="close-button" onclick="closeLayoutConfigModal()">×</button>
+                </div>
+
                 <div class="logo-section">
                     <h3>Márgenes y Retícula</h3>
                     <div class="form-grid">
@@ -1603,772 +1612,752 @@
                             <input type="text" id="cfgPageMargin" class="form-input" placeholder="0.5in"
                                 onchange="updateLabelConfig('pageMargin', this.value)">
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cfgGridGap">Espacio entre Etiquetas</label>
-                        <input type="text" id="cfgGridGap" class="form-input" placeholder="0.1in"
-                            onchange="updateLabelConfig('gridGap', this.value)">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cfgGridColumns">Columnas</label>
-                        <input type="number" id="cfgGridColumns" class="form-input" min="1" max="10"
-                            onchange="updateLabelConfig('gridColumns', this.value)">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cfgGridRows">Filas</label>
-                        <input type="number" id="cfgGridRows" class="form-input" min="1" max="20"
-                            onchange="updateLabelConfig('gridRows', this.value)">
-                    </div>
-                </div>
-            </div>
-
-            <div class="logo-section">
-                <h3>Dimensiones de Etiqueta</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label" for="cfgLabelWidth">Ancho</label>
-                        <input type="text" id="cfgLabelWidth" class="form-input" placeholder="3.75in"
-                            onchange="updateLabelConfig('labelWidth', this.value)">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cfgLabelHeight">Alto</label>
-                        <input type="text" id="cfgLabelHeight" class="form-input" placeholder="1.67in"
-                            onchange="updateLabelConfig('labelHeight', this.value)">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cfgFontSizeLabel">Tamaño Fuente Base</label>
-                        <input type="text" id="cfgFontSizeLabel" class="form-input" placeholder="10px"
-                            onchange="updateLabelConfig('fontSizeLabel', this.value)">
+                        <div class="form-group">
+                            <label class="form-label" for="cfgGridGap">Espacio entre Etiquetas</label>
+                            <input type="text" id="cfgGridGap" class="form-input" placeholder="0.1in"
+                                onchange="updateLabelConfig('gridGap', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="cfgGridColumns">Columnas</label>
+                            <input type="number" id="cfgGridColumns" class="form-input" min="1" max="10"
+                                onchange="updateLabelConfig('gridColumns', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="cfgGridRows">Filas</label>
+                            <input type="number" id="cfgGridRows" class="form-input" min="1" max="20"
+                                onchange="updateLabelConfig('gridRows', this.value)">
+                        </div>
                     </div>
                 </div>
+
+                <div class="logo-section">
+                    <h3>Dimensiones de Etiqueta</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="cfgLabelWidth">Ancho</label>
+                            <input type="text" id="cfgLabelWidth" class="form-input" placeholder="3.75in"
+                                onchange="updateLabelConfig('labelWidth', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="cfgLabelHeight">Alto</label>
+                            <input type="text" id="cfgLabelHeight" class="form-input" placeholder="1.67in"
+                                onchange="updateLabelConfig('labelHeight', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="cfgFontSizeLabel">Tamaño Fuente Base</label>
+                            <input type="text" id="cfgFontSizeLabel" class="form-input" placeholder="10px"
+                                onchange="updateLabelConfig('fontSizeLabel', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-secondary" onclick="resetLabelConfig()"
+                    style="width: 100%; margin-top: 10px;">Restaurar
+                    Valores por Defecto</button>
+
+                <div style="margin-top: 20px; border-top: 1px solid var(--color-border); padding-top: 20px;">
+                    <button class="btn-primary" onclick="saveLayoutConfig()">Guardar y Cerrar</button>
+                </div>
             </div>
-
-            <button class="btn-secondary" onclick="resetLabelConfig()" style="width: 100%; margin-top: 10px;">Restaurar
-                Valores por Defecto</button>
         </div>
 
-        <div style="margin-top: 20px; border-top: 1px solid var(--color-border); padding-top: 20px;">
-            <button class="btn-primary" onclick="saveLogoConfig()">Guardar y Cerrar</button>
-        </div>
-    </div>
-    </div>
-    </div>
+        <script>
+            // ============ STORAGE KEYS ============
+            const STORAGE_KEYS = {
+                logoLeft: 'logoLeft',
+                logoRight: 'logoRight',
+                codigosAX: 'codigosAX',
+                headerText: 'headerText'
+            };
 
-    <script>
-        // ============ STORAGE KEYS ============
-        const STORAGE_KEYS = {
-            logoLeft: 'logoLeft',
-            logoRight: 'logoRight',
-            codigosAX: 'codigosAX',
-            headerText: 'headerText'
-        };
+            // ============ GLOBAL VARIABLES ============
+            let currentMode = 'material';
+            let materials = [];
+            let codigoaxItems = [];
+            let logoLeft = localStorage.getItem(STORAGE_KEYS.logoLeft);
+            let logoRight = localStorage.getItem(STORAGE_KEYS.logoRight);
+            let headerText = localStorage.getItem(STORAGE_KEYS.headerText) || 'BRONCO RIG-91';
+            let codigosData = {};
 
-        // ============ GLOBAL VARIABLES ============
-        let currentMode = 'material';
-        let materials = [];
-        let codigoaxItems = [];
-        let logoLeft = localStorage.getItem(STORAGE_KEYS.logoLeft);
-        let logoRight = localStorage.getItem(STORAGE_KEYS.logoRight);
-        let headerText = localStorage.getItem(STORAGE_KEYS.headerText) || 'BRONCO RIG-91';
-        let codigosData = {};
+            // Label Layout Configuration
+            const DEFAULT_LABEL_CONFIG = {
+                pageMargin: '0.5in',
+                gridColumns: 2,
+                gridRows: 6,
+                labelWidth: '3.75in',
+                labelHeight: '1.67in',
+                gridGap: '0.1in',
+                fontSizeLabel: '10px'
+            };
 
-        // Label Layout Configuration
-        const DEFAULT_LABEL_CONFIG = {
-            pageMargin: '0.5in',
-            gridColumns: 2,
-            gridRows: 6,
-            labelWidth: '3.75in',
-            labelHeight: '1.67in',
-            gridGap: '0.1in',
-            fontSizeLabel: '10px'
-        };
+            let currentLabelConfig = { ...DEFAULT_LABEL_CONFIG };
 
-        let currentLabelConfig = { ...DEFAULT_LABEL_CONFIG };
+            // Hardcoded dropdown values - NOT customizable
+            const condicionOptions = ['NUEVO', 'USADO NUEVO', 'RESGUARDO'];
+            const categoriaOptions = ['INVENTARIABLE', 'CONSUMIBLES'];
 
-        // Hardcoded dropdown values - NOT customizable
-        const condicionOptions = ['NUEVO', 'USADO NUEVO', 'RESGUARDO'];
-        const categoriaOptions = ['INVENTARIABLE', 'CONSUMIBLES'];
-
-        // ============ INITIALIZATION - LOAD CSV DATA ============
-        function initCodigosData() {
-            const storedData = localStorage.getItem(STORAGE_KEYS.codigosAX);
-            if (storedData) {
-                try {
-                    codigosData = JSON.parse(storedData);
-                    console.log('CSV data loaded from localStorage:', Object.keys(codigosData).length, 'entries');
-                } catch (e) {
-                    console.error('Error parsing CSV data:', e);
+            // ============ INITIALIZATION - LOAD CSV DATA ============
+            function initCodigosData() {
+                const storedData = localStorage.getItem(STORAGE_KEYS.codigosAX);
+                if (storedData) {
+                    try {
+                        codigosData = JSON.parse(storedData);
+                        console.log('CSV data loaded from localStorage:', Object.keys(codigosData).length, 'entries');
+                    } catch (e) {
+                        console.error('Error parsing CSV data:', e);
+                        codigosData = {};
+                    }
+                } else {
                     codigosData = {};
+                    console.log('No CSV data in localStorage - starting empty');
                 }
-            } else {
-                codigosData = {};
-                console.log('No CSV data in localStorage - starting empty');
-            }
-            updateCSVStatus();
-        }
-
-        // ============ DOM READY - RESTORE CONFIGURATION ============
-        window.addEventListener('DOMContentLoaded', function () {
-            console.log('=== Page loaded, initializing configuration ===');
-
-            // Restore logos
-            if (logoLeft) {
-                updateLogoPreview('left', logoLeft);
-                const leftInput = document.getElementById('leftLogoUrl');
-                if (leftInput) leftInput.value = logoLeft;
+                updateCSVStatus();
             }
 
-            if (logoRight) {
-                updateLogoPreview('right', logoRight);
-                const rightInput = document.getElementById('rightLogoUrl');
-                if (rightInput) rightInput.value = logoRight;
-            }
+            // ============ DOM READY - RESTORE CONFIGURATION ============
+            window.addEventListener('DOMContentLoaded', function () {
+                console.log('=== Page loaded, initializing configuration ===');
 
-            // Restore header text in modal input
-            const headerTextInput = document.getElementById('headerText');
-            if (headerTextInput) {
-                headerTextInput.value = headerText;
-            }
+                // Restore logos
+                if (logoLeft) {
+                    updateLogoPreview('left', logoLeft);
+                    const leftInput = document.getElementById('leftLogoUrl');
+                    if (leftInput) leftInput.value = logoLeft;
+                }
 
-            // Initialize CSV data
-            initCodigosData();
+                if (logoRight) {
+                    updateLogoPreview('right', logoRight);
+                    const rightInput = document.getElementById('rightLogoUrl');
+                    if (rightInput) rightInput.value = logoRight;
+                }
 
-            // Check if this is first time - if no configuration, show modal
-            const hasConfiguration = logoLeft || logoRight || Object.keys(codigosData).length > 0;
-            if (!hasConfiguration) {
-                console.log('First time user - opening configuration modal');
-                setTimeout(() => {
-                    openConfigModal();
-                }, 500);
-            }
+                // Restore header text in modal input
+                const headerTextInput = document.getElementById('headerText');
+                if (headerTextInput) {
+                    headerTextInput.value = headerText;
+                }
 
-            // Initialize Label Config
-            initLabelConfig();
+                // Initialize CSV data
+                initCodigosData();
 
-            console.log('Configuration restored:', {
-                logoLeft: logoLeft ? 'exists' : 'empty',
-                logoRight: logoRight ? 'exists' : 'empty',
-                headerText: headerText,
-                csvEntries: Object.keys(codigosData).length,
-                labelConfig: currentLabelConfig
+                // Check if this is first time - if no configuration, show modal
+                const hasConfiguration = logoLeft || logoRight || Object.keys(codigosData).length > 0;
+                if (!hasConfiguration) {
+                    console.log('First time user - opening configuration modal');
+                    setTimeout(() => {
+                        openConfigModal();
+                    }, 500);
+                }
+
+                // Initialize Label Config
+                initLabelConfig();
+
+                console.log('Configuration restored:', {
+                    logoLeft: logoLeft ? 'exists' : 'empty',
+                    logoRight: logoRight ? 'exists' : 'empty',
+                    headerText: headerText,
+                    csvEntries: Object.keys(codigosData).length,
+                    labelConfig: currentLabelConfig
+                });
             });
-        });
 
-        // ============ LABEL CONFIGURATION FUNCTIONS ============
+            // ============ LABEL CONFIGURATION FUNCTIONS ============
 
-        function initLabelConfig() {
-            const storedConfig = localStorage.getItem(STORAGE_KEYS.labelConfig);
-            if (storedConfig) {
-                try {
-                    const parsed = JSON.parse(storedConfig);
-                    currentLabelConfig = { ...DEFAULT_LABEL_CONFIG, ...parsed };
-                } catch (e) {
-                    console.error('Error parsing label config:', e);
+            function initLabelConfig() {
+                const storedConfig = localStorage.getItem(STORAGE_KEYS.labelConfig);
+                if (storedConfig) {
+                    try {
+                        const parsed = JSON.parse(storedConfig);
+                        currentLabelConfig = { ...DEFAULT_LABEL_CONFIG, ...parsed };
+                    } catch (e) {
+                        console.error('Error parsing label config:', e);
+                        currentLabelConfig = { ...DEFAULT_LABEL_CONFIG };
+                    }
+                } else {
                     currentLabelConfig = { ...DEFAULT_LABEL_CONFIG };
                 }
-            } else {
+                applyLabelConfig(currentLabelConfig);
+                populateConfigForm(currentLabelConfig);
+            }
+
+            function applyLabelConfig(config) {
+                const root = document.documentElement;
+                root.style.setProperty('--page-margin', config.pageMargin);
+                root.style.setProperty('--grid-columns', config.gridColumns);
+                root.style.setProperty('--grid-rows', config.gridRows);
+                root.style.setProperty('--label-width', config.labelWidth);
+                root.style.setProperty('--label-height', config.labelHeight);
+                root.style.setProperty('--grid-gap', config.gridGap);
+                root.style.setProperty('--font-size-label', config.fontSizeLabel);
+            }
+
+            function populateConfigForm(config) {
+                if (document.getElementById('cfgPageMargin')) document.getElementById('cfgPageMargin').value = config.pageMargin;
+                if (document.getElementById('cfgGridGap')) document.getElementById('cfgGridGap').value = config.gridGap;
+                if (document.getElementById('cfgGridColumns')) document.getElementById('cfgGridColumns').value = config.gridColumns;
+                if (document.getElementById('cfgGridRows')) document.getElementById('cfgGridRows').value = config.gridRows;
+                if (document.getElementById('cfgLabelWidth')) document.getElementById('cfgLabelWidth').value = config.labelWidth;
+                if (document.getElementById('cfgLabelHeight')) document.getElementById('cfgLabelHeight').value = config.labelHeight;
+                if (document.getElementById('cfgFontSizeLabel')) document.getElementById('cfgFontSizeLabel').value = config.fontSizeLabel;
+            }
+
+            function updateLabelConfig(key, value) {
+                currentLabelConfig[key] = value;
+                applyLabelConfig(currentLabelConfig);
+                // Auto-save on change? The requirement says "Save this config in localStorage".
+                // We can save on modal close (saveLogoConfig) or on every change. 
+                // Let's save on close to match "Logos" behavior, but apply immediately for preview (as per instructions).
+            }
+
+            function resetLabelConfig() {
                 currentLabelConfig = { ...DEFAULT_LABEL_CONFIG };
+                applyLabelConfig(currentLabelConfig);
+                populateConfigForm(currentLabelConfig);
             }
-            applyLabelConfig(currentLabelConfig);
-            populateConfigForm(currentLabelConfig);
-        }
 
-        function applyLabelConfig(config) {
-            const root = document.documentElement;
-            root.style.setProperty('--page-margin', config.pageMargin);
-            root.style.setProperty('--grid-columns', config.gridColumns);
-            root.style.setProperty('--grid-rows', config.gridRows);
-            root.style.setProperty('--label-width', config.labelWidth);
-            root.style.setProperty('--label-height', config.labelHeight);
-            root.style.setProperty('--grid-gap', config.gridGap);
-            root.style.setProperty('--font-size-label', config.fontSizeLabel);
-        }
+            function updateCSVStatus() {
+                const statusElement = document.getElementById('csvStatus');
+                const count = Object.keys(codigosData).length;
 
-        function populateConfigForm(config) {
-            if (document.getElementById('cfgPageMargin')) document.getElementById('cfgPageMargin').value = config.pageMargin;
-            if (document.getElementById('cfgGridGap')) document.getElementById('cfgGridGap').value = config.gridGap;
-            if (document.getElementById('cfgGridColumns')) document.getElementById('cfgGridColumns').value = config.gridColumns;
-            if (document.getElementById('cfgGridRows')) document.getElementById('cfgGridRows').value = config.gridRows;
-            if (document.getElementById('cfgLabelWidth')) document.getElementById('cfgLabelWidth').value = config.labelWidth;
-            if (document.getElementById('cfgLabelHeight')) document.getElementById('cfgLabelHeight').value = config.labelHeight;
-            if (document.getElementById('cfgFontSizeLabel')) document.getElementById('cfgFontSizeLabel').value = config.fontSizeLabel;
-        }
-
-        function updateLabelConfig(key, value) {
-            currentLabelConfig[key] = value;
-            applyLabelConfig(currentLabelConfig);
-            // Auto-save on change? The requirement says "Save this config in localStorage".
-            // We can save on modal close (saveLogoConfig) or on every change. 
-            // Let's save on close to match "Logos" behavior, but apply immediately for preview (as per instructions).
-        }
-
-        function resetLabelConfig() {
-            currentLabelConfig = { ...DEFAULT_LABEL_CONFIG };
-            applyLabelConfig(currentLabelConfig);
-            populateConfigForm(currentLabelConfig);
-        }
-
-        // Config Tabs Logic
-        function switchConfigTab(tabName) {
-            // Update buttons
-            const buttons = document.querySelectorAll('.tabs-nav .tab-btn'); // More specific selector
-            buttons.forEach(btn => btn.classList.remove('active'));
-
-            // Activate the correct button and tab content
-            if (tabName === 'general') {
-                document.querySelector('.tabs-nav .tab-btn:nth-child(1)').classList.add('active');
-                document.getElementById('tab-general').classList.add('active');
-                document.getElementById('tab-layout').classList.remove('active');
-            } else if (tabName === 'layout') {
-                document.querySelector('.tabs-nav .tab-btn:nth-child(2)').classList.add('active');
-                document.getElementById('tab-general').classList.remove('active');
-                document.getElementById('tab-layout').classList.add('active');
-            }
-        }
-
-        function updateCSVStatus() {
-            const statusElement = document.getElementById('csvStatus');
-            const count = Object.keys(codigosData).length;
-
-            if (statusElement) {
-                if (count > 0) {
-                    statusElement.textContent = count + ' códigos AX cargados';
-                    statusElement.style.color = '#22c55e';
-                } else {
-                    statusElement.textContent = '';
-                    statusElement.style.color = '#999';
-                }
-            }
-        }
-
-        // Mode switching
-        function switchMode(mode) {
-            currentMode = mode;
-
-            // Update button styles
-            const materialBtn = document.getElementById('materialBtn');
-            const codigoaxBtn = document.getElementById('codigoaxBtn');
-
-            materialBtn.classList.toggle('active', mode === 'material');
-            codigoaxBtn.classList.toggle('active', mode === 'codigoax');
-
-            // Show/hide appropriate sections
-            document.getElementById('materialSection').style.display = mode === 'material' ? 'block' : 'none';
-            document.getElementById('codigoaxSection').style.display = mode === 'codigoax' ? 'block' : 'none';
-
-            // Clear data for new mode
-            if (mode === 'material') {
-                materials = [];
-                const step2 = document.getElementById('step2');
-                step2.classList.remove('visible');
-            } else {
-                codigoaxItems = [];
-                const step2 = document.getElementById('codigoaxStep2');
-                step2.classList.remove('visible');
-            }
-        }
-
-        // Form submission
-        document.getElementById('materialForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const material = {
-                cantidad: parseInt(document.getElementById('cantidad').value),
-                codigoAx: document.getElementById('codigoAx').value,
-                nombre: document.getElementById('nombre').value,
-                dimension: document.getElementById('dimension').value,
-                noParte: document.getElementById('noParte').value,
-                descripcion: document.getElementById('descripcion').value,
-                condicion: 'NUEVO',
-                categoria: 'INVENTARIABLE',
-                selected: true
-            };
-
-            materials.push(material);
-            document.getElementById('materialForm').reset();
-            document.getElementById('cantidad').value = '1';
-            goToStep(2);
-        });
-
-        // Codigo AX Form submission
-        document.getElementById('codigoaxForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const item = {
-                cantidad: parseInt(document.getElementById('axCantidad').value),
-                codigo_ax: document.getElementById('axCodigoax').value,
-                nombre: document.getElementById('axNombre').value
-            };
-
-            codigoaxItems.push(item);
-            document.getElementById('codigoaxForm').reset();
-            document.getElementById('axCantidad').value = '1';
-
-            // Show Step 2
-            const step2 = document.getElementById('codigoaxStep2');
-            step2.classList.add('visible');
-
-            renderCodigoAXTable();
-        });
-
-        // Step navigation - Step 1 always visible, Step 2 appears below
-        function goToStep(stepNumber) {
-            if (stepNumber === 2) {
-                const step2 = document.getElementById('step2');
-                step2.classList.add('visible');
-                renderReviewTable();
-            }
-        }
-
-        // HTML Escaping Function
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Material Mode Step 2 Table Autocomplete
-        function autocompleteMaterialNombreFromTable(index) {
-            const row = document.querySelectorAll('#reviewTableBody tr')[index];
-            if (!row) return;
-
-            const inputs = row.querySelectorAll('input');
-            const codigoaxInput = inputs[1];
-            const nombreInput = inputs[2];
-
-            if (codigoaxInput && nombreInput) {
-                const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
-                if (autocompletedNombre) {
-                    nombreInput.value = autocompletedNombre;
-                    updateMaterial(index, 'nombre', autocompletedNombre);
-                }
-            }
-        }
-
-        // ============ CSV UPLOAD AND PARSING ============
-        function handleCSVUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const csvText = e.target.result;
-                    const parsedData = parseCSV(csvText);
-
-                    if (Object.keys(parsedData).length > 0) {
-                        codigosData = parsedData;
-                        localStorage.setItem(STORAGE_KEYS.codigosAX, JSON.stringify(codigosData));
-                        updateCSVStatus();
-                        alert('Archivo CSV cargado exitosamente. ' + Object.keys(codigosData).length + ' códigos disponibles.');
-                        console.log('CSV uploaded and saved to localStorage');
+                if (statusElement) {
+                    if (count > 0) {
+                        statusElement.textContent = count + ' códigos AX cargados';
+                        statusElement.style.color = '#22c55e';
                     } else {
-                        alert('No se encontraron datos válidos en el CSV');
+                        statusElement.textContent = '';
+                        statusElement.style.color = '#999';
                     }
+                }
+            }
+
+            // Mode switching
+            function switchMode(mode) {
+                currentMode = mode;
+
+                // Update button styles
+                const materialBtn = document.getElementById('materialBtn');
+                const codigoaxBtn = document.getElementById('codigoaxBtn');
+
+                materialBtn.classList.toggle('active', mode === 'material');
+                codigoaxBtn.classList.toggle('active', mode === 'codigoax');
+
+                // Show/hide appropriate sections
+                document.getElementById('materialSection').style.display = mode === 'material' ? 'block' : 'none';
+                document.getElementById('codigoaxSection').style.display = mode === 'codigoax' ? 'block' : 'none';
+
+                // Clear data for new mode
+                if (mode === 'material') {
+                    materials = [];
+                    const step2 = document.getElementById('step2');
+                    step2.classList.remove('visible');
+                } else {
+                    codigoaxItems = [];
+                    const step2 = document.getElementById('codigoaxStep2');
+                    step2.classList.remove('visible');
+                }
+            }
+
+            // Form submission
+            document.getElementById('materialForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const material = {
+                    cantidad: parseInt(document.getElementById('cantidad').value),
+                    codigoAx: document.getElementById('codigoAx').value,
+                    nombre: document.getElementById('nombre').value,
+                    dimension: document.getElementById('dimension').value,
+                    noParte: document.getElementById('noParte').value,
+                    descripcion: document.getElementById('descripcion').value,
+                    condicion: 'NUEVO',
+                    categoria: 'INVENTARIABLE',
+                    selected: true
                 };
-                reader.readAsText(file);
-            }
-        }
 
-        function parseCSV(csv) {
-            const lines = csv.trim().split('\n');
-            const codigosMap = {};
-
-            if (lines.length < 2) return codigosMap;
-
-            const header = lines[0].split(',').map(h => h.trim().toLowerCase());
-            const codigoaxIndex = header.findIndex(h => h.includes('codigo') && h.includes('ax'));
-            const nombreIndex = header.findIndex(h => h.includes('nombre'));
-
-            if (codigoaxIndex === -1 || nombreIndex === -1) return codigosMap;
-
-            for (let i = 1; i < lines.length; i++) {
-                if (lines[i].trim() === '') continue;
-
-                const parts = lines[i].split(',').map(p => p.trim());
-                const codigoax = parts[codigoaxIndex];
-                const nombre = parts[nombreIndex];
-
-                if (codigoax && nombre) {
-                    codigosMap[codigoax.toUpperCase()] = nombre;
-                }
-            }
-
-            return codigosMap;
-        }
-
-        function clearCSV() {
-            codigosData = {};
-            localStorage.removeItem(STORAGE_KEYS.codigosAX);
-            document.getElementById('csvFile').value = '';
-            updateCSVStatus();
-            alert('CSV eliminado.');
-            console.log('CSV cleared from localStorage');
-        }
-
-        function autocompleteNombre(codigoaxValue) {
-            const codigoax = codigoaxValue.trim().toUpperCase();
-            return codigosData[codigoax] || null;
-        }
-
-        // Material Mode Step 1 Autocomplete
-        function autocompleteMaterialNombre() {
-            const codigoaxInput = document.getElementById('codigoAx');
-            const nombreInput = document.getElementById('nombre');
-
-            if (codigoaxInput && nombreInput) {
-                const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
-                if (autocompletedNombre) {
-                    nombreInput.value = autocompletedNombre;
-                }
-            }
-        }
-
-        // Codigo AX Mode Step 1 Autocomplete
-        function autocompleteAxNombre() {
-            const codigoaxInput = document.getElementById('axCodigoax');
-            const nombreInput = document.getElementById('axNombre');
-
-            if (codigoaxInput && nombreInput) {
-                const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
-                if (autocompletedNombre) {
-                    nombreInput.value = autocompletedNombre;
-                }
-            }
-        }
-
-        // Material Mode Step 2 Table Autocomplete
-        function tryAutocompleteTableNombre(index) {
-            const row = document.querySelectorAll('#reviewTableBody tr')[index];
-            if (!row) return;
-
-            const inputs = row.querySelectorAll('input');
-            const codigoaxInput = inputs[1];
-            const nombreInput = inputs[2];
-
-            if (codigoaxInput && nombreInput) {
-                const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
-                if (autocompletedNombre && nombreInput.value === '') {
-                    nombreInput.value = autocompletedNombre;
-                    updateMaterial(index, 'nombre', autocompletedNombre);
-                }
-            }
-        }
-
-        // Codigo AX Mode Step 2 Table Autocomplete
-        function tryAutocompleteAxTableNombre(index) {
-            const row = document.querySelectorAll('#codigoaxTableBody tr')[index];
-            if (!row) return;
-
-            const inputs = row.querySelectorAll('input');
-            const codigoaxInput = inputs[1];
-            const nombreInput = inputs[2];
-
-            if (codigoaxInput && nombreInput) {
-                const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
-                if (autocompletedNombre) {
-                    nombreInput.value = autocompletedNombre;
-                    updateCodigoAXItem(index, 'nombre', autocompletedNombre);
-                }
-            }
-        }
-
-        function updateHeaderText() {
-            const input = document.getElementById('headerText');
-            if (input) {
-                headerText = input.value || 'BRONCO RIG-91';
-                localStorage.setItem(STORAGE_KEYS.headerText, headerText);
-                console.log('Header text actualizado a:', headerText);
-            }
-        }
-
-        function renderReviewTable() {
-            const tbody = document.getElementById('reviewTableBody');
-            tbody.innerHTML = '';
-            materials.forEach((material, index) => {
-                const row = document.createElement('tr');
-                // Cantidad
-                const tdCantidad = document.createElement('td');
-                const inputCantidad = document.createElement('input');
-                inputCantidad.type = 'number';
-                inputCantidad.value = material.cantidad;
-                inputCantidad.min = '1';
-                inputCantidad.onchange = function () { updateMaterial(index, 'cantidad', this.value); };
-                tdCantidad.appendChild(inputCantidad);
-                row.appendChild(tdCantidad);
-                // Codigo AX
-                const tdCodigoAX = document.createElement('td');
-                const inputCodigoAX = document.createElement('input');
-                inputCodigoAX.type = 'text';
-                inputCodigoAX.value = material.codigoAx;
-                inputCodigoAX.onchange = function () {
-                    updateMaterial(index, 'codigoAx', this.value);
-                    autocompleteMaterialNombreFromTable(index);
-                };
-                tdCodigoAX.appendChild(inputCodigoAX);
-                row.appendChild(tdCodigoAX);
-                // Nombre
-                const tdNombre = document.createElement('td');
-                const inputNombre = document.createElement('input');
-                inputNombre.type = 'text';
-                inputNombre.value = material.nombre;
-                inputNombre.onchange = function () { updateMaterial(index, 'nombre', this.value); };
-                tdNombre.appendChild(inputNombre);
-                row.appendChild(tdNombre);
-                // Dimension
-                const tdDimension = document.createElement('td');
-                const inputDimension = document.createElement('input');
-                inputDimension.type = 'text';
-                inputDimension.value = material.dimension;
-                inputDimension.onchange = function () { updateMaterial(index, 'dimension', this.value); };
-                tdDimension.appendChild(inputDimension);
-                row.appendChild(tdDimension);
-                // No. Parte
-                const tdNoParte = document.createElement('td');
-                const inputNoParte = document.createElement('input');
-                inputNoParte.type = 'text';
-                inputNoParte.value = material.noParte || '';
-                inputNoParte.onchange = function () { updateMaterial(index, 'noParte', this.value); };
-                tdNoParte.appendChild(inputNoParte);
-                row.appendChild(tdNoParte);
-                // Descripcion
-                const tdDescripcion = document.createElement('td');
-                const inputDescripcion = document.createElement('input');
-                inputDescripcion.type = 'text';
-                inputDescripcion.value = material.descripcion || '';
-                inputDescripcion.onchange = function () { updateMaterial(index, 'descripcion', this.value); };
-                tdDescripcion.appendChild(inputDescripcion);
-                row.appendChild(tdDescripcion);
-                // Condicion dropdown - HARDCODED
-                const tdCondicion = document.createElement('td');
-                const selectCondicion = document.createElement('select');
-                condicionOptions.forEach(option => {
-                    const optElement = document.createElement('option');
-                    optElement.value = option;
-                    optElement.textContent = option;
-                    if (material.condicion === option) optElement.selected = true;
-                    selectCondicion.appendChild(optElement);
-                });
-                selectCondicion.onchange = function () { updateMaterial(index, 'condicion', this.value); };
-                tdCondicion.appendChild(selectCondicion);
-                row.appendChild(tdCondicion);
-                // Categoria dropdown - HARDCODED
-                const tdCategoria = document.createElement('td');
-                const selectCategoria = document.createElement('select');
-                categoriaOptions.forEach(option => {
-                    const optElement = document.createElement('option');
-                    optElement.value = option;
-                    optElement.textContent = option;
-                    if (material.categoria === option) optElement.selected = true;
-                    selectCategoria.appendChild(optElement);
-                });
-                selectCategoria.onchange = function () { updateMaterial(index, 'categoria', this.value); };
-                tdCategoria.appendChild(selectCategoria);
-                row.appendChild(tdCategoria);
-                // Duplicar button
-                const tdDuplicar = document.createElement('td');
-                const btnDuplicar = document.createElement('button');
-                btnDuplicar.className = 'btn-duplicate';
-                btnDuplicar.textContent = '📋 Duplicar';
-                btnDuplicar.title = 'Duplicar partida';
-                btnDuplicar.onclick = function () { duplicateItem(index); };
-                tdDuplicar.appendChild(btnDuplicar);
-                row.appendChild(tdDuplicar);
-                // Eliminar button
-                const tdEliminar = document.createElement('td');
-                const btnEliminar = document.createElement('button');
-                btnEliminar.className = 'btn-delete';
-                btnEliminar.textContent = '🗑️ Eliminar';
-                btnEliminar.title = 'Eliminar partida';
-                btnEliminar.onclick = function () { deleteItem(index); };
-                tdEliminar.appendChild(btnEliminar);
-                row.appendChild(tdEliminar);
-                tbody.appendChild(row);
+                materials.push(material);
+                document.getElementById('materialForm').reset();
+                document.getElementById('cantidad').value = '1';
+                goToStep(2);
             });
-        }
 
-        // Codigo AX table functions
-        function renderCodigoAXTable() {
-            const tbody = document.getElementById('codigoaxTableBody');
-            tbody.innerHTML = '';
+            // Codigo AX Form submission
+            document.getElementById('codigoaxForm').addEventListener('submit', (e) => {
+                e.preventDefault();
 
-            codigoaxItems.forEach((item, index) => {
-                const row = document.createElement('tr');
-
-                // Cantidad
-                const tdCantidad = document.createElement('td');
-                const inputCantidad = document.createElement('input');
-                inputCantidad.type = 'number';
-                inputCantidad.value = item.cantidad;
-                inputCantidad.min = '1';
-                inputCantidad.onchange = function () { updateCodigoAXItem(index, 'cantidad', this.value); };
-                tdCantidad.appendChild(inputCantidad);
-                row.appendChild(tdCantidad);
-
-                // Codigo AX
-                const tdCodigoAX = document.createElement('td');
-                const inputCodigoAX = document.createElement('input');
-                inputCodigoAX.type = 'text';
-                inputCodigoAX.value = item.codigo_ax;
-                inputCodigoAX.onchange = function () {
-                    updateCodigoAXItem(index, 'codigo_ax', this.value);
-                    tryAutocompleteAxTableNombre(index);
+                const item = {
+                    cantidad: parseInt(document.getElementById('axCantidad').value),
+                    codigo_ax: document.getElementById('axCodigoax').value,
+                    nombre: document.getElementById('axNombre').value
                 };
-                tdCodigoAX.appendChild(inputCodigoAX);
-                row.appendChild(tdCodigoAX);
 
-                // Nombre
-                const tdNombre = document.createElement('td');
-                const inputNombre = document.createElement('input');
-                inputNombre.type = 'text';
-                inputNombre.value = item.nombre;
-                inputNombre.onchange = function () { updateCodigoAXItem(index, 'nombre', this.value); };
-                tdNombre.appendChild(inputNombre);
-                row.appendChild(tdNombre);
+                codigoaxItems.push(item);
+                document.getElementById('codigoaxForm').reset();
+                document.getElementById('axCantidad').value = '1';
 
-                // Duplicar button
-                const tdDuplicar = document.createElement('td');
-                const btnDuplicar = document.createElement('button');
-                btnDuplicar.className = 'btn-duplicate';
-                btnDuplicar.textContent = '📋 Duplicar';
-                btnDuplicar.title = 'Duplicar código';
-                btnDuplicar.onclick = function () { duplicateCodigoAXItem(index); };
-                tdDuplicar.appendChild(btnDuplicar);
-                row.appendChild(tdDuplicar);
+                // Show Step 2
+                const step2 = document.getElementById('codigoaxStep2');
+                step2.classList.add('visible');
 
-                // Eliminar button
-                const tdEliminar = document.createElement('td');
-                const btnEliminar = document.createElement('button');
-                btnEliminar.className = 'btn-delete';
-                btnEliminar.textContent = '🗑️ Eliminar';
-                btnEliminar.title = 'Eliminar código';
-                btnEliminar.onclick = function () { deleteCodigoAXItem(index); };
-                tdEliminar.appendChild(btnEliminar);
-                row.appendChild(tdEliminar);
-
-                tbody.appendChild(row);
+                renderCodigoAXTable();
             });
-        }
 
-        function updateCodigoAXItem(index, field, value) {
-            codigoaxItems[index][field] = field === 'cantidad' ? parseInt(value) : value;
-        }
+            // Step navigation - Step 1 always visible, Step 2 appears below
+            function goToStep(stepNumber) {
+                if (stepNumber === 2) {
+                    const step2 = document.getElementById('step2');
+                    step2.classList.add('visible');
+                    renderReviewTable();
+                }
+            }
 
-        function duplicateCodigoAXItem(index) {
-            const itemToDuplicate = codigoaxItems[index];
-            const duplicatedItem = { ...itemToDuplicate };
-            codigoaxItems.splice(index + 1, 0, duplicatedItem);
-            renderCodigoAXTable();
-        }
+            // HTML Escaping Function
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
 
-        function deleteCodigoAXItem(index) {
-            const confirmDelete = confirm('¿Estás seguro de eliminar este código?');
-            if (confirmDelete) {
-                codigoaxItems.splice(index, 1);
+            // Material Mode Step 2 Table Autocomplete
+            function autocompleteMaterialNombreFromTable(index) {
+                const row = document.querySelectorAll('#reviewTableBody tr')[index];
+                if (!row) return;
+
+                const inputs = row.querySelectorAll('input');
+                const codigoaxInput = inputs[1];
+                const nombreInput = inputs[2];
+
+                if (codigoaxInput && nombreInput) {
+                    const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
+                    if (autocompletedNombre) {
+                        nombreInput.value = autocompletedNombre;
+                        updateMaterial(index, 'nombre', autocompletedNombre);
+                    }
+                }
+            }
+
+            // ============ CSV UPLOAD AND PARSING ============
+            function handleCSVUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const csvText = e.target.result;
+                        const parsedData = parseCSV(csvText);
+
+                        if (Object.keys(parsedData).length > 0) {
+                            codigosData = parsedData;
+                            localStorage.setItem(STORAGE_KEYS.codigosAX, JSON.stringify(codigosData));
+                            updateCSVStatus();
+                            alert('Archivo CSV cargado exitosamente. ' + Object.keys(codigosData).length + ' códigos disponibles.');
+                            console.log('CSV uploaded and saved to localStorage');
+                        } else {
+                            alert('No se encontraron datos válidos en el CSV');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            }
+
+            function parseCSV(csv) {
+                const lines = csv.trim().split('\n');
+                const codigosMap = {};
+
+                if (lines.length < 2) return codigosMap;
+
+                const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+                const codigoaxIndex = header.findIndex(h => h.includes('codigo') && h.includes('ax'));
+                const nombreIndex = header.findIndex(h => h.includes('nombre'));
+
+                if (codigoaxIndex === -1 || nombreIndex === -1) return codigosMap;
+
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+
+                    const parts = lines[i].split(',').map(p => p.trim());
+                    const codigoax = parts[codigoaxIndex];
+                    const nombre = parts[nombreIndex];
+
+                    if (codigoax && nombre) {
+                        codigosMap[codigoax.toUpperCase()] = nombre;
+                    }
+                }
+
+                return codigosMap;
+            }
+
+            function clearCSV() {
+                codigosData = {};
+                localStorage.removeItem(STORAGE_KEYS.codigosAX);
+                document.getElementById('csvFile').value = '';
+                updateCSVStatus();
+                alert('CSV eliminado.');
+                console.log('CSV cleared from localStorage');
+            }
+
+            function autocompleteNombre(codigoaxValue) {
+                const codigoax = codigoaxValue.trim().toUpperCase();
+                return codigosData[codigoax] || null;
+            }
+
+            // Material Mode Step 1 Autocomplete
+            function autocompleteMaterialNombre() {
+                const codigoaxInput = document.getElementById('codigoAx');
+                const nombreInput = document.getElementById('nombre');
+
+                if (codigoaxInput && nombreInput) {
+                    const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
+                    if (autocompletedNombre) {
+                        nombreInput.value = autocompletedNombre;
+                    }
+                }
+            }
+
+            // Codigo AX Mode Step 1 Autocomplete
+            function autocompleteAxNombre() {
+                const codigoaxInput = document.getElementById('axCodigoax');
+                const nombreInput = document.getElementById('axNombre');
+
+                if (codigoaxInput && nombreInput) {
+                    const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
+                    if (autocompletedNombre) {
+                        nombreInput.value = autocompletedNombre;
+                    }
+                }
+            }
+
+            // Material Mode Step 2 Table Autocomplete
+            function tryAutocompleteTableNombre(index) {
+                const row = document.querySelectorAll('#reviewTableBody tr')[index];
+                if (!row) return;
+
+                const inputs = row.querySelectorAll('input');
+                const codigoaxInput = inputs[1];
+                const nombreInput = inputs[2];
+
+                if (codigoaxInput && nombreInput) {
+                    const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
+                    if (autocompletedNombre && nombreInput.value === '') {
+                        nombreInput.value = autocompletedNombre;
+                        updateMaterial(index, 'nombre', autocompletedNombre);
+                    }
+                }
+            }
+
+            // Codigo AX Mode Step 2 Table Autocomplete
+            function tryAutocompleteAxTableNombre(index) {
+                const row = document.querySelectorAll('#codigoaxTableBody tr')[index];
+                if (!row) return;
+
+                const inputs = row.querySelectorAll('input');
+                const codigoaxInput = inputs[1];
+                const nombreInput = inputs[2];
+
+                if (codigoaxInput && nombreInput) {
+                    const autocompletedNombre = autocompleteNombre(codigoaxInput.value);
+                    if (autocompletedNombre) {
+                        nombreInput.value = autocompletedNombre;
+                        updateCodigoAXItem(index, 'nombre', autocompletedNombre);
+                    }
+                }
+            }
+
+            function updateHeaderText() {
+                const input = document.getElementById('headerText');
+                if (input) {
+                    headerText = input.value || 'BRONCO RIG-91';
+                    localStorage.setItem(STORAGE_KEYS.headerText, headerText);
+                    console.log('Header text actualizado a:', headerText);
+                }
+            }
+
+            function renderReviewTable() {
+                const tbody = document.getElementById('reviewTableBody');
+                tbody.innerHTML = '';
+                materials.forEach((material, index) => {
+                    const row = document.createElement('tr');
+                    // Cantidad
+                    const tdCantidad = document.createElement('td');
+                    const inputCantidad = document.createElement('input');
+                    inputCantidad.type = 'number';
+                    inputCantidad.value = material.cantidad;
+                    inputCantidad.min = '1';
+                    inputCantidad.onchange = function () { updateMaterial(index, 'cantidad', this.value); };
+                    tdCantidad.appendChild(inputCantidad);
+                    row.appendChild(tdCantidad);
+                    // Codigo AX
+                    const tdCodigoAX = document.createElement('td');
+                    const inputCodigoAX = document.createElement('input');
+                    inputCodigoAX.type = 'text';
+                    inputCodigoAX.value = material.codigoAx;
+                    inputCodigoAX.onchange = function () {
+                        updateMaterial(index, 'codigoAx', this.value);
+                        autocompleteMaterialNombreFromTable(index);
+                    };
+                    tdCodigoAX.appendChild(inputCodigoAX);
+                    row.appendChild(tdCodigoAX);
+                    // Nombre
+                    const tdNombre = document.createElement('td');
+                    const inputNombre = document.createElement('input');
+                    inputNombre.type = 'text';
+                    inputNombre.value = material.nombre;
+                    inputNombre.onchange = function () { updateMaterial(index, 'nombre', this.value); };
+                    tdNombre.appendChild(inputNombre);
+                    row.appendChild(tdNombre);
+                    // Dimension
+                    const tdDimension = document.createElement('td');
+                    const inputDimension = document.createElement('input');
+                    inputDimension.type = 'text';
+                    inputDimension.value = material.dimension;
+                    inputDimension.onchange = function () { updateMaterial(index, 'dimension', this.value); };
+                    tdDimension.appendChild(inputDimension);
+                    row.appendChild(tdDimension);
+                    // No. Parte
+                    const tdNoParte = document.createElement('td');
+                    const inputNoParte = document.createElement('input');
+                    inputNoParte.type = 'text';
+                    inputNoParte.value = material.noParte || '';
+                    inputNoParte.onchange = function () { updateMaterial(index, 'noParte', this.value); };
+                    tdNoParte.appendChild(inputNoParte);
+                    row.appendChild(tdNoParte);
+                    // Descripcion
+                    const tdDescripcion = document.createElement('td');
+                    const inputDescripcion = document.createElement('input');
+                    inputDescripcion.type = 'text';
+                    inputDescripcion.value = material.descripcion || '';
+                    inputDescripcion.onchange = function () { updateMaterial(index, 'descripcion', this.value); };
+                    tdDescripcion.appendChild(inputDescripcion);
+                    row.appendChild(tdDescripcion);
+                    // Condicion dropdown - HARDCODED
+                    const tdCondicion = document.createElement('td');
+                    const selectCondicion = document.createElement('select');
+                    condicionOptions.forEach(option => {
+                        const optElement = document.createElement('option');
+                        optElement.value = option;
+                        optElement.textContent = option;
+                        if (material.condicion === option) optElement.selected = true;
+                        selectCondicion.appendChild(optElement);
+                    });
+                    selectCondicion.onchange = function () { updateMaterial(index, 'condicion', this.value); };
+                    tdCondicion.appendChild(selectCondicion);
+                    row.appendChild(tdCondicion);
+                    // Categoria dropdown - HARDCODED
+                    const tdCategoria = document.createElement('td');
+                    const selectCategoria = document.createElement('select');
+                    categoriaOptions.forEach(option => {
+                        const optElement = document.createElement('option');
+                        optElement.value = option;
+                        optElement.textContent = option;
+                        if (material.categoria === option) optElement.selected = true;
+                        selectCategoria.appendChild(optElement);
+                    });
+                    selectCategoria.onchange = function () { updateMaterial(index, 'categoria', this.value); };
+                    tdCategoria.appendChild(selectCategoria);
+                    row.appendChild(tdCategoria);
+                    // Duplicar button
+                    const tdDuplicar = document.createElement('td');
+                    const btnDuplicar = document.createElement('button');
+                    btnDuplicar.className = 'btn-duplicate';
+                    btnDuplicar.textContent = '📋 Duplicar';
+                    btnDuplicar.title = 'Duplicar partida';
+                    btnDuplicar.onclick = function () { duplicateItem(index); };
+                    tdDuplicar.appendChild(btnDuplicar);
+                    row.appendChild(tdDuplicar);
+                    // Eliminar button
+                    const tdEliminar = document.createElement('td');
+                    const btnEliminar = document.createElement('button');
+                    btnEliminar.className = 'btn-delete';
+                    btnEliminar.textContent = '🗑️ Eliminar';
+                    btnEliminar.title = 'Eliminar partida';
+                    btnEliminar.onclick = function () { deleteItem(index); };
+                    tdEliminar.appendChild(btnEliminar);
+                    row.appendChild(tdEliminar);
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Codigo AX table functions
+            function renderCodigoAXTable() {
+                const tbody = document.getElementById('codigoaxTableBody');
+                tbody.innerHTML = '';
+
+                codigoaxItems.forEach((item, index) => {
+                    const row = document.createElement('tr');
+
+                    // Cantidad
+                    const tdCantidad = document.createElement('td');
+                    const inputCantidad = document.createElement('input');
+                    inputCantidad.type = 'number';
+                    inputCantidad.value = item.cantidad;
+                    inputCantidad.min = '1';
+                    inputCantidad.onchange = function () { updateCodigoAXItem(index, 'cantidad', this.value); };
+                    tdCantidad.appendChild(inputCantidad);
+                    row.appendChild(tdCantidad);
+
+                    // Codigo AX
+                    const tdCodigoAX = document.createElement('td');
+                    const inputCodigoAX = document.createElement('input');
+                    inputCodigoAX.type = 'text';
+                    inputCodigoAX.value = item.codigo_ax;
+                    inputCodigoAX.onchange = function () {
+                        updateCodigoAXItem(index, 'codigo_ax', this.value);
+                        tryAutocompleteAxTableNombre(index);
+                    };
+                    tdCodigoAX.appendChild(inputCodigoAX);
+                    row.appendChild(tdCodigoAX);
+
+                    // Nombre
+                    const tdNombre = document.createElement('td');
+                    const inputNombre = document.createElement('input');
+                    inputNombre.type = 'text';
+                    inputNombre.value = item.nombre;
+                    inputNombre.onchange = function () { updateCodigoAXItem(index, 'nombre', this.value); };
+                    tdNombre.appendChild(inputNombre);
+                    row.appendChild(tdNombre);
+
+                    // Duplicar button
+                    const tdDuplicar = document.createElement('td');
+                    const btnDuplicar = document.createElement('button');
+                    btnDuplicar.className = 'btn-duplicate';
+                    btnDuplicar.textContent = '📋 Duplicar';
+                    btnDuplicar.title = 'Duplicar código';
+                    btnDuplicar.onclick = function () { duplicateCodigoAXItem(index); };
+                    tdDuplicar.appendChild(btnDuplicar);
+                    row.appendChild(tdDuplicar);
+
+                    // Eliminar button
+                    const tdEliminar = document.createElement('td');
+                    const btnEliminar = document.createElement('button');
+                    btnEliminar.className = 'btn-delete';
+                    btnEliminar.textContent = '🗑️ Eliminar';
+                    btnEliminar.title = 'Eliminar código';
+                    btnEliminar.onclick = function () { deleteCodigoAXItem(index); };
+                    tdEliminar.appendChild(btnEliminar);
+                    row.appendChild(tdEliminar);
+
+                    tbody.appendChild(row);
+                });
+            }
+
+            function updateCodigoAXItem(index, field, value) {
+                codigoaxItems[index][field] = field === 'cantidad' ? parseInt(value) : value;
+            }
+
+            function duplicateCodigoAXItem(index) {
+                const itemToDuplicate = codigoaxItems[index];
+                const duplicatedItem = { ...itemToDuplicate };
+                codigoaxItems.splice(index + 1, 0, duplicatedItem);
                 renderCodigoAXTable();
             }
-        }
 
-        function duplicateItem(index) {
-            // Get the item to duplicate
-            const itemToDuplicate = materials[index];
+            function deleteCodigoAXItem(index) {
+                const confirmDelete = confirm('¿Estás seguro de eliminar este código?');
+                if (confirmDelete) {
+                    codigoaxItems.splice(index, 1);
+                    renderCodigoAXTable();
+                }
+            }
 
-            // Create a copy
-            const duplicatedItem = {
-                cantidad: itemToDuplicate.cantidad,
-                codigoAx: itemToDuplicate.codigoAx,
-                nombre: itemToDuplicate.nombre,
-                dimension: itemToDuplicate.dimension,
-                noParte: itemToDuplicate.noParte,
-                descripcion: itemToDuplicate.descripcion,
-                condicion: itemToDuplicate.condicion,
-                categoria: itemToDuplicate.categoria,
-                selected: true
-            };
+            function duplicateItem(index) {
+                // Get the item to duplicate
+                const itemToDuplicate = materials[index];
 
-            // Insert the duplicate right after the original
-            materials.splice(index + 1, 0, duplicatedItem);
+                // Create a copy
+                const duplicatedItem = {
+                    cantidad: itemToDuplicate.cantidad,
+                    codigoAx: itemToDuplicate.codigoAx,
+                    nombre: itemToDuplicate.nombre,
+                    dimension: itemToDuplicate.dimension,
+                    noParte: itemToDuplicate.noParte,
+                    descripcion: itemToDuplicate.descripcion,
+                    condicion: itemToDuplicate.condicion,
+                    categoria: itemToDuplicate.categoria,
+                    selected: true
+                };
 
-            // Re-render the table
-            renderReviewTable();
-        }
-
-        function deleteItem(index) {
-            // Show confirmation dialog
-            const confirmDelete = confirm('¿Estás seguro de eliminar esta partida?');
-
-            if (confirmDelete) {
-                // Remove the item
-                materials.splice(index, 1);
+                // Insert the duplicate right after the original
+                materials.splice(index + 1, 0, duplicatedItem);
 
                 // Re-render the table
                 renderReviewTable();
             }
-        }
 
-        function updateMaterial(index, field, value) {
-            materials[index][field] = field === 'cantidad' ? parseInt(value) : value;
-        }
+            function deleteItem(index) {
+                // Show confirmation dialog
+                const confirmDelete = confirm('¿Estás seguro de eliminar esta partida?');
 
-        // Codigo AX Print Preview
-        function showCodigoAXPrintPreview() {
-            if (codigoaxItems.length === 0) {
-                alert('No hay códigos para imprimir');
-                return;
+                if (confirmDelete) {
+                    // Remove the item
+                    materials.splice(index, 1);
+
+                    // Re-render the table
+                    renderReviewTable();
+                }
             }
 
-            const printContainer = document.getElementById('printContainer');
-            printContainer.innerHTML = '';
-
-            // Generate labels for each quantity
-            const labels = [];
-            codigoaxItems.forEach(item => {
-                for (let i = 0; i < item.cantidad; i++) {
-                    labels.push(item);
-                }
-            });
-
-            // Create pages
-            const labelsPerPage = parseInt(currentLabelConfig.gridColumns) * parseInt(currentLabelConfig.gridRows);
-            const totalPages = Math.ceil(labels.length / labelsPerPage);
-
-            for (let page = 0; page < totalPages; page++) {
-                const pageDiv = document.createElement('div');
-                pageDiv.className = 'print-page';
-
-                const gridDiv = document.createElement('div');
-                gridDiv.className = 'labels-grid';
-
-                const startIdx = page * labelsPerPage;
-                const endIdx = Math.min(startIdx + labelsPerPage, labels.length);
-
-                for (let i = startIdx; i < endIdx; i++) {
-                    const label = createCodigoAXLabel(labels[i]);
-                    gridDiv.appendChild(label);
-                }
-
-                pageDiv.appendChild(gridDiv);
-                printContainer.appendChild(pageDiv);
+            function updateMaterial(index, field, value) {
+                materials[index][field] = field === 'cantidad' ? parseInt(value) : value;
             }
 
-            // Hide main UI
-            document.querySelector('.app-header').classList.add('hidden');
-            document.querySelector('.main-content').classList.add('hidden');
+            // Codigo AX Print Preview
+            function showCodigoAXPrintPreview() {
+                if (codigoaxItems.length === 0) {
+                    alert('No hay códigos para imprimir');
+                    return;
+                }
 
-            // Show print container
-            printContainer.classList.add('active');
-            printContainer.style.display = 'block';
+                const printContainer = document.getElementById('printContainer');
+                printContainer.innerHTML = '';
 
-            setTimeout(() => {
-                window.print();
+                // Generate labels for each quantity
+                const labels = [];
+                codigoaxItems.forEach(item => {
+                    for (let i = 0; i < item.cantidad; i++) {
+                        labels.push(item);
+                    }
+                });
+
+                // Create pages
+                const labelsPerPage = parseInt(currentLabelConfig.gridColumns) * parseInt(currentLabelConfig.gridRows);
+                const totalPages = Math.ceil(labels.length / labelsPerPage);
+
+                for (let page = 0; page < totalPages; page++) {
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'print-page';
+
+                    const gridDiv = document.createElement('div');
+                    gridDiv.className = 'labels-grid';
+
+                    const startIdx = page * labelsPerPage;
+                    const endIdx = Math.min(startIdx + labelsPerPage, labels.length);
+
+                    for (let i = startIdx; i < endIdx; i++) {
+                        const label = createCodigoAXLabel(labels[i]);
+                        gridDiv.appendChild(label);
+                    }
+
+                    pageDiv.appendChild(gridDiv);
+                    printContainer.appendChild(pageDiv);
+                }
+
+                // Hide main UI
+                document.querySelector('.app-header').classList.add('hidden');
+                document.querySelector('.main-content').classList.add('hidden');
+
+                // Show print container
+                printContainer.classList.add('active');
+                printContainer.style.display = 'block';
+
                 setTimeout(() => {
-                    showReturnButton();
-                }, 200);
-            }, 100);
-        }
+                    window.print();
+                    setTimeout(() => {
+                        showReturnButton();
+                    }, 200);
+                }, 100);
+            }
 
-        function createCodigoAXLabel(item) {
-            const labelDiv = document.createElement('div');
-            labelDiv.className = 'label-codigoax';
-            labelDiv.innerHTML = `
+            function createCodigoAXLabel(item) {
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'label-codigoax';
+                labelDiv.innerHTML = `
                 <div class="label-container">
                     <div class="label-header">
                         <div class="label-logo-left">
@@ -2390,80 +2379,80 @@
                     </div>
                 </div>
             `;
-            return labelDiv;
-        }
-
-        // Show print preview and trigger native print dialog
-        function showPrintPreview() {
-            // Print ALL items (no selection needed)
-            if (materials.length === 0) {
-                alert('No hay materiales para imprimir');
-                return;
+                return labelDiv;
             }
 
-            const selectedMaterials = materials;
-
-            // Generate labels for print container
-            const printContainer = document.getElementById('printContainer');
-            printContainer.innerHTML = '';
-
-            // Generate labels for each quantity
-            const labels = [];
-            selectedMaterials.forEach(material => {
-                for (let i = 0; i < material.cantidad; i++) {
-                    labels.push(material);
-                }
-            });
-
-            // Create pages
-            const labelsPerPage = parseInt(currentLabelConfig.gridColumns) * parseInt(currentLabelConfig.gridRows);
-            const totalPages = Math.ceil(labels.length / labelsPerPage);
-
-            for (let page = 0; page < totalPages; page++) {
-                const pageDiv = document.createElement('div');
-                pageDiv.className = 'print-page';
-
-                const gridDiv = document.createElement('div');
-                gridDiv.className = 'labels-grid';
-
-                const startIdx = page * labelsPerPage;
-                const endIdx = Math.min(startIdx + labelsPerPage, labels.length);
-
-                for (let i = startIdx; i < endIdx; i++) {
-                    const label = createLabel(labels[i]);
-                    gridDiv.appendChild(label);
+            // Show print preview and trigger native print dialog
+            function showPrintPreview() {
+                // Print ALL items (no selection needed)
+                if (materials.length === 0) {
+                    alert('No hay materiales para imprimir');
+                    return;
                 }
 
-                pageDiv.appendChild(gridDiv);
-                printContainer.appendChild(pageDiv);
-            }
+                const selectedMaterials = materials;
 
-            // Hide main UI
-            document.querySelector('.app-header').classList.add('hidden');
-            document.querySelector('.main-content').classList.add('hidden');
+                // Generate labels for print container
+                const printContainer = document.getElementById('printContainer');
+                printContainer.innerHTML = '';
 
-            // Show print container
-            printContainer.classList.add('active');
-            printContainer.style.display = 'block';
+                // Generate labels for each quantity
+                const labels = [];
+                selectedMaterials.forEach(material => {
+                    for (let i = 0; i < material.cantidad; i++) {
+                        labels.push(material);
+                    }
+                });
 
-            // Small delay to ensure DOM is updated before printing
-            setTimeout(() => {
-                window.print();
-                // Show return button after print dialog opens
+                // Create pages
+                const labelsPerPage = parseInt(currentLabelConfig.gridColumns) * parseInt(currentLabelConfig.gridRows);
+                const totalPages = Math.ceil(labels.length / labelsPerPage);
+
+                for (let page = 0; page < totalPages; page++) {
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'print-page';
+
+                    const gridDiv = document.createElement('div');
+                    gridDiv.className = 'labels-grid';
+
+                    const startIdx = page * labelsPerPage;
+                    const endIdx = Math.min(startIdx + labelsPerPage, labels.length);
+
+                    for (let i = startIdx; i < endIdx; i++) {
+                        const label = createLabel(labels[i]);
+                        gridDiv.appendChild(label);
+                    }
+
+                    pageDiv.appendChild(gridDiv);
+                    printContainer.appendChild(pageDiv);
+                }
+
+                // Hide main UI
+                document.querySelector('.app-header').classList.add('hidden');
+                document.querySelector('.main-content').classList.add('hidden');
+
+                // Show print container
+                printContainer.classList.add('active');
+                printContainer.style.display = 'block';
+
+                // Small delay to ensure DOM is updated before printing
                 setTimeout(() => {
-                    showReturnButton();
-                }, 200);
-            }, 100);
-        }
+                    window.print();
+                    // Show return button after print dialog opens
+                    setTimeout(() => {
+                        showReturnButton();
+                    }, 200);
+                }, 100);
+            }
 
-        function showReturnButton() {
-            // Check if button already exists
-            let returnBtn = document.querySelector('.return-button');
-            if (!returnBtn) {
-                returnBtn = document.createElement('button');
-                returnBtn.className = 'return-button';
-                returnBtn.textContent = 'Volver';
-                returnBtn.style.cssText = `
+            function showReturnButton() {
+                // Check if button already exists
+                let returnBtn = document.querySelector('.return-button');
+                if (!returnBtn) {
+                    returnBtn = document.createElement('button');
+                    returnBtn.className = 'return-button';
+                    returnBtn.textContent = 'Volver';
+                    returnBtn.style.cssText = `
                     position: fixed;
                     top: 20px;
                     left: 50%;
@@ -2478,33 +2467,33 @@
                     z-index: 1000;
                     box-shadow: var(--shadow-lg);
                 `;
-                returnBtn.onclick = returnToEdit;
-                document.body.appendChild(returnBtn);
-            }
-            returnBtn.style.display = 'block';
-        }
-
-        function returnToEdit() {
-            // Hide return button
-            const returnBtn = document.querySelector('.return-button');
-            if (returnBtn) {
-                returnBtn.style.display = 'none';
+                    returnBtn.onclick = returnToEdit;
+                    document.body.appendChild(returnBtn);
+                }
+                returnBtn.style.display = 'block';
             }
 
-            // Hide print container
-            const printContainer = document.getElementById('printContainer');
-            printContainer.classList.remove('active');
-            printContainer.style.display = 'none';
+            function returnToEdit() {
+                // Hide return button
+                const returnBtn = document.querySelector('.return-button');
+                if (returnBtn) {
+                    returnBtn.style.display = 'none';
+                }
 
-            // Show main UI
-            document.querySelector('.app-header').classList.remove('hidden');
-            document.querySelector('.main-content').classList.remove('hidden');
-        }
+                // Hide print container
+                const printContainer = document.getElementById('printContainer');
+                printContainer.classList.remove('active');
+                printContainer.style.display = 'none';
 
-        function createLabel(material) {
-            const labelDiv = document.createElement('div');
-            labelDiv.className = 'label';
-            labelDiv.innerHTML = `
+                // Show main UI
+                document.querySelector('.app-header').classList.remove('hidden');
+                document.querySelector('.main-content').classList.remove('hidden');
+            }
+
+            function createLabel(material) {
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'label';
+                labelDiv.innerHTML = `
         <div class="label-container">
             <div class="label-header">
                 <div class="label-logo-left">
@@ -2545,387 +2534,417 @@
             </div>
         </div>
     `;
-            return labelDiv;
-        }
-
-        // Modal functions
-        function openConfigModal() {
-            const modal = document.getElementById('configModal');
-            if (modal) {
-                modal.classList.add('active');
+                return labelDiv;
             }
-        }
 
-        function closeConfigModal() {
-            document.getElementById('configModal').classList.remove('active');
-        }
+            // Modal functions
+            function openConfigModal() {
+                const modal = document.getElementById('configModal');
+                if (modal) {
+                    modal.classList.add('active');
+                }
+            }
 
-        // ============ LOGO HANDLING ============
-        function handleLogoUpload(event, side) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const dataUrl = e.target.result;
+            function closeConfigModal() {
+                document.getElementById('configModal').classList.remove('active');
+            }
 
+            function saveLogoConfig() {
+                closeConfigModal();
+            }
+
+            // ============ LAYOUT CONFIG MODAL FUNCTIONS ============
+            function openLayoutConfigModal() {
+                const modal = document.getElementById('layoutConfigModal');
+                if (modal) {
+                    modal.classList.add('active');
+                    // Ensure form is populated with current config
+                    populateConfigForm(currentLabelConfig);
+                }
+            }
+
+            function closeLayoutConfigModal() {
+                document.getElementById('layoutConfigModal').classList.remove('active');
+            }
+
+            function saveLayoutConfig() {
+                // Settings are already applied in real-time.
+                // We just need to save to localStorage to persist.
+                localStorage.setItem(STORAGE_KEYS.labelConfig, JSON.stringify(currentLabelConfig));
+                console.log('Layout config saved to localStorage');
+                closeLayoutConfigModal();
+            }
+
+            function closeConfigModal() {
+                document.getElementById('configModal').classList.remove('active');
+            }
+
+            // ============ LOGO HANDLING ============
+            function handleLogoUpload(event, side) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const dataUrl = e.target.result;
+
+                        if (side === 'left') {
+                            logoLeft = dataUrl;
+                            localStorage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
+                            updateLogoPreview('left', logoLeft);
+                        } else {
+                            logoRight = dataUrl;
+                            localStorage.setItem(STORAGE_KEYS.logoRight, logoRight);
+                            updateLogoPreview('right', logoRight);
+                        }
+
+                        console.log(`Logo ${side} uploaded and saved to localStorage`);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            function handleLogoUrl(event, side) {
+                const url = event.target.value;
+
+                if (url) {
                     if (side === 'left') {
-                        logoLeft = dataUrl;
+                        logoLeft = url;
                         localStorage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
                         updateLogoPreview('left', logoLeft);
                     } else {
-                        logoRight = dataUrl;
+                        logoRight = url;
                         localStorage.setItem(STORAGE_KEYS.logoRight, logoRight);
                         updateLogoPreview('right', logoRight);
                     }
 
-                    console.log(`Logo ${side} uploaded and saved to localStorage`);
-                };
-                reader.readAsDataURL(file);
+                    console.log(`Logo ${side} URL saved to localStorage`);
+                }
             }
-        }
 
-        function handleLogoUrl(event, side) {
-            const url = event.target.value;
-
-            if (url) {
+            function clearLogo(side) {
                 if (side === 'left') {
-                    logoLeft = url;
-                    localStorage.setItem(STORAGE_KEYS.logoLeft, logoLeft);
-                    updateLogoPreview('left', logoLeft);
+                    logoLeft = '';
+                    localStorage.removeItem(STORAGE_KEYS.logoLeft);
+                    const leftInput = document.getElementById('leftLogoUrl');
+                    if (leftInput) leftInput.value = '';
+                    const leftPreview = document.getElementById('leftLogoPreview');
+                    if (leftPreview) {
+                        leftPreview.innerHTML = 'Sin logo configurado';
+                        leftPreview.classList.add('empty');
+                    }
                 } else {
-                    logoRight = url;
-                    localStorage.setItem(STORAGE_KEYS.logoRight, logoRight);
-                    updateLogoPreview('right', logoRight);
+                    logoRight = '';
+                    localStorage.removeItem(STORAGE_KEYS.logoRight);
+                    const rightInput = document.getElementById('rightLogoUrl');
+                    if (rightInput) rightInput.value = '';
+                    const rightPreview = document.getElementById('rightLogoPreview');
+                    if (rightPreview) {
+                        rightPreview.innerHTML = 'Sin logo configurado';
+                        rightPreview.classList.add('empty');
+                    }
                 }
 
-                console.log(`Logo ${side} URL saved to localStorage`);
+                console.log(`Logo ${side} cleared from localStorage`);
             }
-        }
 
-        function clearLogo(side) {
-            if (side === 'left') {
-                logoLeft = '';
-                localStorage.removeItem(STORAGE_KEYS.logoLeft);
-                const leftInput = document.getElementById('leftLogoUrl');
-                if (leftInput) leftInput.value = '';
-                const leftPreview = document.getElementById('leftLogoPreview');
-                if (leftPreview) {
-                    leftPreview.innerHTML = 'Sin logo configurado';
-                    leftPreview.classList.add('empty');
-                }
-            } else {
-                logoRight = '';
-                localStorage.removeItem(STORAGE_KEYS.logoRight);
-                const rightInput = document.getElementById('rightLogoUrl');
-                if (rightInput) rightInput.value = '';
-                const rightPreview = document.getElementById('rightLogoPreview');
-                if (rightPreview) {
-                    rightPreview.innerHTML = 'Sin logo configurado';
-                    rightPreview.classList.add('empty');
+            function updateLogoPreview(side, logoUrl) {
+                const previewId = side === 'left' ? 'leftLogoPreview' : 'rightLogoPreview';
+                const preview = document.getElementById(previewId);
+
+                if (preview && logoUrl) {
+                    preview.innerHTML = `<img src="${logoUrl}" alt="Logo ${side}">`;
+                    preview.classList.remove('empty');
+                } else if (preview) {
+                    preview.innerHTML = 'Sin logo configurado';
+                    preview.classList.add('empty');
                 }
             }
 
-            console.log(`Logo ${side} cleared from localStorage`);
-        }
+            function saveLogoConfig() {
+                // Save Label Config
+                localStorage.setItem(STORAGE_KEYS.labelConfig, JSON.stringify(currentLabelConfig));
+                console.log('Label config saved:', currentLabelConfig);
 
-        function updateLogoPreview(side, logoUrl) {
-            const previewId = side === 'left' ? 'leftLogoPreview' : 'rightLogoPreview';
-            const preview = document.getElementById(previewId);
-
-            if (preview && logoUrl) {
-                preview.innerHTML = `<img src="${logoUrl}" alt="Logo ${side}">`;
-                preview.classList.remove('empty');
-            } else if (preview) {
-                preview.innerHTML = 'Sin logo configurado';
-                preview.classList.add('empty');
-            }
-        }
-
-        function saveLogoConfig() {
-            // Save Label Config
-            localStorage.setItem(STORAGE_KEYS.labelConfig, JSON.stringify(currentLabelConfig));
-            console.log('Label config saved:', currentLabelConfig);
-
-            alert('Configuración guardada');
-            closeConfigModal();
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('configModal').addEventListener('click', (e) => {
-            if (e.target.id === 'configModal') {
+                alert('Configuración guardada');
                 closeConfigModal();
             }
-        });
 
-
-        // ============ GESTIÓN DE API KEY DE GEMINI ============
-
-        function saveGeminiApiKey() {
-            const apiKeyInput = document.getElementById('geminiApiKeyInput');
-            const statusDiv = document.getElementById('apiKeyStatus');
-            const apiKey = apiKeyInput.value.trim();
-
-            if (!apiKey) {
-                statusDiv.style.display = 'block';
-                statusDiv.style.backgroundColor = '#ffebee';
-                statusDiv.style.color = '#c62828';
-                statusDiv.textContent = '❌ Por favor ingresa una API Key válida';
-                return;
-            }
-
-            localStorage.setItem('geminiApiKey', apiKey);
-            statusDiv.style.display = 'block';
-            statusDiv.style.backgroundColor = '#e8f5e9';
-            statusDiv.style.color = '#2e7d32';
-            statusDiv.textContent = '✅ API Key guardada correctamente';
-
-            // Habilitar botón de procesar si hay imagen cargada
-            const preview = document.getElementById('voucherImagePreview');
-            const processBtn = document.getElementById('processVoucherImageBtn');
-            if (preview && preview.src) {
-                processBtn.disabled = false;
-            }
-        }
-
-        function clearGeminiApiKey() {
-            localStorage.removeItem('geminiApiKey');
-            document.getElementById('geminiApiKeyInput').value = '';
-            const statusDiv = document.getElementById('apiKeyStatus');
-            statusDiv.style.display = 'block';
-            statusDiv.style.backgroundColor = '#fff3e0';
-            statusDiv.style.color = '#e65100';
-            statusDiv.textContent = '🗑️ API Key eliminada';
-
-            // Deshabilitar botón de procesar
-            document.getElementById('processVoucherImageBtn').disabled = true;
-        }
-
-        function loadGeminiApiKey() {
-            const apiKey = localStorage.getItem('geminiApiKey');
-            if (apiKey) {
-                document.getElementById('geminiApiKeyInput').value = apiKey;
-            }
-        }
-
-        // ============ PROCESAMIENTO DE IMAGEN DE VALE ============
-
-        // Función para convertir archivo a Base64
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
+            // Close modal when clicking outside
+            document.getElementById('configModal').addEventListener('click', (e) => {
+                if (e.target.id === 'configModal') {
+                    closeConfigModal();
+                }
             });
-        }
 
-        // Manejo de carga de imagen
-        document.getElementById('voucherImageInput').addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            const previewContainer = document.getElementById('imagePreviewContainer');
-            const preview = document.getElementById('voucherImagePreview');
-            const processBtn = document.getElementById('processVoucherImageBtn');
 
-            if (!file) {
-                previewContainer.style.display = 'none';
-                processBtn.disabled = true;
-                return;
-            }
+            // ============ GESTIÓN DE API KEY DE GEMINI ============
 
-            // Validar tipo de archivo
-            if (!file.type.match('image/(jpeg|jpg|png)')) {
-                alert('❌ Solo se permiten archivos JPG, JPEG o PNG');
-                event.target.value = '';
-                return;
-            }
+            function saveGeminiApiKey() {
+                const apiKeyInput = document.getElementById('geminiApiKeyInput');
+                const statusDiv = document.getElementById('apiKeyStatus');
+                const apiKey = apiKeyInput.value.trim();
 
-            try {
-                // Mostrar preview
-                const base64 = await fileToBase64(file);
-                preview.src = base64;
-                previewContainer.style.display = 'block';
-
-                // Habilitar botón solo si hay API Key
-                const apiKey = localStorage.getItem('geminiApiKey');
-                processBtn.disabled = !apiKey;
-            } catch (error) {
-                alert('Error al cargar la imagen');
-                console.error(error);
-            }
-        });
-
-        // Botón para borrar imagen
-        document.getElementById('clearImageBtn').addEventListener('click', () => {
-            const fileInput = document.getElementById('voucherImageInput');
-            const preview = document.getElementById('voucherImagePreview');
-            const previewContainer = document.getElementById('imagePreviewContainer');
-            const processBtn = document.getElementById('processVoucherImageBtn');
-            const statusDiv = document.getElementById('processingStatus');
-
-            // Limpiar input y preview
-            fileInput.value = '';
-            preview.src = '';
-            previewContainer.style.display = 'none';
-            processBtn.disabled = true;
-            statusDiv.style.display = 'none';
-        });
-
-        // Procesar imagen con Gemini
-        document.getElementById('processVoucherImageBtn').addEventListener('click', async () => {
-            const preview = document.getElementById('voucherImagePreview');
-            const processBtn = document.getElementById('processVoucherImageBtn');
-            const statusDiv = document.getElementById('processingStatus');
-            const statusText = statusDiv.querySelector('p');
-
-            if (!preview.src) {
-                alert('❌ Primero debes cargar una imagen');
-                return;
-            }
-
-            // Verificar API Key
-            const apiKey = localStorage.getItem('geminiApiKey');
-            if (!apiKey) {
-                // Abrir modal de configuración
-                alert('⚠️ Necesitas configurar tu API Key de Gemini primero');
-                openConfigModal();
-                return;
-            }
-
-            // Mostrar estado de procesamiento
-            processBtn.disabled = true;
-            processBtn.textContent = '⏳ Procesando...';
-            statusDiv.style.display = 'block';
-            statusDiv.style.backgroundColor = '#e3f2fd';
-            statusDiv.style.color = '#1976d2';
-            statusText.textContent = 'Analizando imagen ...';
-
-            try {
-                // Extraer datos base64 de la imagen
-                const base64ImageData = preview.src.split(',')[1];
-
-                // Construir el prompt
-                const prompt = `Analiza la siguiente imagen de un vale de material. Extrae la información de la tabla de materiales. Las columnas relevantes son 'CANTIDAD', 'CODIGO' (la segunda columna, no la que dice 'OC'), 'DESCRIPCION DEL MATERIAL', y 'CLAVE ALMACEN'. Devuelve el resultado como un array de objetos JSON. Asegúrate de que los valores de 'cantidad' sean numéricos.`;
-
-                // Construir el payload para Gemini API
-                const payload = {
-                    contents: [{
-                        parts: [
-                            { text: prompt },
-                            {
-                                inline_data: {
-                                    mime_type: "image/jpeg",
-                                    data: base64ImageData
-                                }
-                            }
-                        ]
-                    }],
-                    generationConfig: {
-                        response_mime_type: "application/json",
-                        response_schema: {
-                            type: "ARRAY",
-                            items: {
-                                type: "OBJECT",
-                                properties: {
-                                    cantidad: { type: "NUMBER" },
-                                    codigo: { type: "STRING" },
-                                    descripcion: { type: "STRING" },
-                                    claveAlmacen: { type: "STRING" }
-                                },
-                                required: ["cantidad", "codigo", "descripcion", "claveAlmacen"]
-                            }
-                        }
-                    }
-                };
-
-                // Llamar a la API de Gemini
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`Error de API: ${errorData.error?.message || response.statusText}`);
+                if (!apiKey) {
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.backgroundColor = '#ffebee';
+                    statusDiv.style.color = '#c62828';
+                    statusDiv.textContent = '❌ Por favor ingresa una API Key válida';
+                    return;
                 }
 
-                const data = await response.json();
-
-                // Extraer los materiales del JSON de respuesta
-                let extractedMaterials = null;
-
-                if (data.candidates && data.candidates.length > 0) {
-                    const candidate = data.candidates[0];
-                    if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
-                        const textContent = candidate.content.parts[0].text;
-                        extractedMaterials = JSON.parse(textContent);
-                    }
-                }
-
-                if (!extractedMaterials || !Array.isArray(extractedMaterials) || extractedMaterials.length === 0) {
-                    throw new Error('No se pudieron extraer materiales de la imagen');
-                }
-
-                // Agregar los materiales extraídos al array global
-                extractedMaterials.forEach(item => {
-                    const material = {
-                        cantidad: item.cantidad || 1,
-                        codigoAx: item.codigo || '',
-                        nombre: item.descripcion || '',
-                        dimension: item.claveAlmacen || '',
-                        noParte: '',
-                        descripcion: item.descripcion || '',
-                        condicion: 'NUEVO',
-                        categoria: 'INVENTARIABLE',
-                        selected: true
-                    };
-                    materials.push(material);
-                });
-
-                // Mostrar estado de éxito
+                localStorage.setItem('geminiApiKey', apiKey);
+                statusDiv.style.display = 'block';
                 statusDiv.style.backgroundColor = '#e8f5e9';
                 statusDiv.style.color = '#2e7d32';
-                statusText.textContent = `✅ Se extrajeron ${extractedMaterials.length} materiales correctamente`;
+                statusDiv.textContent = '✅ API Key guardada correctamente';
 
-                // Ir automáticamente al paso 2
-                setTimeout(() => {
-                    goToStep(2);
-                }, 1500);
-
-            } catch (error) {
-                console.error('Error al procesar imagen:', error);
-                statusDiv.style.backgroundColor = '#ffebee';
-                statusDiv.style.color = '#c62828';
-                statusText.textContent = `❌ Error: ${error.message}`;
-
-                // Si el error es de API Key inválida, limpiar y abrir modal
-                if (error.message.includes('API key') || error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
-                    localStorage.removeItem('geminiApiKey');
-                    statusText.textContent += ' - Verifica tu API Key en Configuración';
-                    setTimeout(() => {
-                        openConfigModal();
-                    }, 2000);
+                // Habilitar botón de procesar si hay imagen cargada
+                const preview = document.getElementById('voucherImagePreview');
+                const processBtn = document.getElementById('processVoucherImageBtn');
+                if (preview && preview.src) {
+                    processBtn.disabled = false;
                 }
-            } finally {
-                processBtn.disabled = false;
-                processBtn.textContent = '📷 Extraer Datos del Vale';
             }
-        });
 
-        // Cargar API Key al abrir el modal de configuración
-        const originalOpenConfigModal = window.openConfigModal;
-        window.openConfigModal = function () {
-            if (originalOpenConfigModal) {
-                originalOpenConfigModal();
-            } else {
-                document.getElementById('configModal').style.display = 'flex';
+            function clearGeminiApiKey() {
+                localStorage.removeItem('geminiApiKey');
+                document.getElementById('geminiApiKeyInput').value = '';
+                const statusDiv = document.getElementById('apiKeyStatus');
+                statusDiv.style.display = 'block';
+                statusDiv.style.backgroundColor = '#fff3e0';
+                statusDiv.style.color = '#e65100';
+                statusDiv.textContent = '🗑️ API Key eliminada';
+
+                // Deshabilitar botón de procesar
+                document.getElementById('processVoucherImageBtn').disabled = true;
             }
-            loadGeminiApiKey();
-        };
 
-    </script>
+            function loadGeminiApiKey() {
+                const apiKey = localStorage.getItem('geminiApiKey');
+                if (apiKey) {
+                    document.getElementById('geminiApiKeyInput').value = apiKey;
+                }
+            }
+
+            // ============ PROCESAMIENTO DE IMAGEN DE VALE ============
+
+            // Función para convertir archivo a Base64
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // Manejo de carga de imagen
+            document.getElementById('voucherImageInput').addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                const preview = document.getElementById('voucherImagePreview');
+                const processBtn = document.getElementById('processVoucherImageBtn');
+
+                if (!file) {
+                    previewContainer.style.display = 'none';
+                    processBtn.disabled = true;
+                    return;
+                }
+
+                // Validar tipo de archivo
+                if (!file.type.match('image/(jpeg|jpg|png)')) {
+                    alert('❌ Solo se permiten archivos JPG, JPEG o PNG');
+                    event.target.value = '';
+                    return;
+                }
+
+                try {
+                    // Mostrar preview
+                    const base64 = await fileToBase64(file);
+                    preview.src = base64;
+                    previewContainer.style.display = 'block';
+
+                    // Habilitar botón solo si hay API Key
+                    const apiKey = localStorage.getItem('geminiApiKey');
+                    processBtn.disabled = !apiKey;
+                } catch (error) {
+                    alert('Error al cargar la imagen');
+                    console.error(error);
+                }
+            });
+
+            // Botón para borrar imagen
+            document.getElementById('clearImageBtn').addEventListener('click', () => {
+                const fileInput = document.getElementById('voucherImageInput');
+                const preview = document.getElementById('voucherImagePreview');
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                const processBtn = document.getElementById('processVoucherImageBtn');
+                const statusDiv = document.getElementById('processingStatus');
+
+                // Limpiar input y preview
+                fileInput.value = '';
+                preview.src = '';
+                previewContainer.style.display = 'none';
+                processBtn.disabled = true;
+                statusDiv.style.display = 'none';
+            });
+
+            // Procesar imagen con Gemini
+            document.getElementById('processVoucherImageBtn').addEventListener('click', async () => {
+                const preview = document.getElementById('voucherImagePreview');
+                const processBtn = document.getElementById('processVoucherImageBtn');
+                const statusDiv = document.getElementById('processingStatus');
+                const statusText = statusDiv.querySelector('p');
+
+                if (!preview.src) {
+                    alert('❌ Primero debes cargar una imagen');
+                    return;
+                }
+
+                // Verificar API Key
+                const apiKey = localStorage.getItem('geminiApiKey');
+                if (!apiKey) {
+                    // Abrir modal de configuración
+                    alert('⚠️ Necesitas configurar tu API Key de Gemini primero');
+                    openConfigModal();
+                    return;
+                }
+
+                // Mostrar estado de procesamiento
+                processBtn.disabled = true;
+                processBtn.textContent = '⏳ Procesando...';
+                statusDiv.style.display = 'block';
+                statusDiv.style.backgroundColor = '#e3f2fd';
+                statusDiv.style.color = '#1976d2';
+                statusText.textContent = 'Analizando imagen ...';
+
+                try {
+                    // Extraer datos base64 de la imagen
+                    const base64ImageData = preview.src.split(',')[1];
+
+                    // Construir el prompt
+                    const prompt = `Analiza la siguiente imagen de un vale de material. Extrae la información de la tabla de materiales. Las columnas relevantes son 'CANTIDAD', 'CODIGO' (la segunda columna, no la que dice 'OC'), 'DESCRIPCION DEL MATERIAL', y 'CLAVE ALMACEN'. Devuelve el resultado como un array de objetos JSON. Asegúrate de que los valores de 'cantidad' sean numéricos.`;
+
+                    // Construir el payload para Gemini API
+                    const payload = {
+                        contents: [{
+                            parts: [
+                                { text: prompt },
+                                {
+                                    inline_data: {
+                                        mime_type: "image/jpeg",
+                                        data: base64ImageData
+                                    }
+                                }
+                            ]
+                        }],
+                        generationConfig: {
+                            response_mime_type: "application/json",
+                            response_schema: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        cantidad: { type: "NUMBER" },
+                                        codigo: { type: "STRING" },
+                                        descripcion: { type: "STRING" },
+                                        claveAlmacen: { type: "STRING" }
+                                    },
+                                    required: ["cantidad", "codigo", "descripcion", "claveAlmacen"]
+                                }
+                            }
+                        }
+                    };
+
+                    // Llamar a la API de Gemini
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`Error de API: ${errorData.error?.message || response.statusText}`);
+                    }
+
+                    const data = await response.json();
+
+                    // Extraer los materiales del JSON de respuesta
+                    let extractedMaterials = null;
+
+                    if (data.candidates && data.candidates.length > 0) {
+                        const candidate = data.candidates[0];
+                        if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+                            const textContent = candidate.content.parts[0].text;
+                            extractedMaterials = JSON.parse(textContent);
+                        }
+                    }
+
+                    if (!extractedMaterials || !Array.isArray(extractedMaterials) || extractedMaterials.length === 0) {
+                        throw new Error('No se pudieron extraer materiales de la imagen');
+                    }
+
+                    // Agregar los materiales extraídos al array global
+                    extractedMaterials.forEach(item => {
+                        const material = {
+                            cantidad: item.cantidad || 1,
+                            codigoAx: item.codigo || '',
+                            nombre: item.descripcion || '',
+                            dimension: item.claveAlmacen || '',
+                            noParte: '',
+                            descripcion: item.descripcion || '',
+                            condicion: 'NUEVO',
+                            categoria: 'INVENTARIABLE',
+                            selected: true
+                        };
+                        materials.push(material);
+                    });
+
+                    // Mostrar estado de éxito
+                    statusDiv.style.backgroundColor = '#e8f5e9';
+                    statusDiv.style.color = '#2e7d32';
+                    statusText.textContent = `✅ Se extrajeron ${extractedMaterials.length} materiales correctamente`;
+
+                    // Ir automáticamente al paso 2
+                    setTimeout(() => {
+                        goToStep(2);
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Error al procesar imagen:', error);
+                    statusDiv.style.backgroundColor = '#ffebee';
+                    statusDiv.style.color = '#c62828';
+                    statusText.textContent = `❌ Error: ${error.message}`;
+
+                    // Si el error es de API Key inválida, limpiar y abrir modal
+                    if (error.message.includes('API key') || error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
+                        localStorage.removeItem('geminiApiKey');
+                        statusText.textContent += ' - Verifica tu API Key en Configuración';
+                        setTimeout(() => {
+                            openConfigModal();
+                        }, 2000);
+                    }
+                } finally {
+                    processBtn.disabled = false;
+                    processBtn.textContent = '📷 Extraer Datos del Vale';
+                }
+            });
+
+            // Cargar API Key al abrir el modal de configuración
+            const originalOpenConfigModal = window.openConfigModal;
+            window.openConfigModal = function () {
+                if (originalOpenConfigModal) {
+                    originalOpenConfigModal();
+                } else {
+                    document.getElementById('configModal').style.display = 'flex';
+                }
+                loadGeminiApiKey();
+            };
+
+        </script>
 </body>
 
 </html>
