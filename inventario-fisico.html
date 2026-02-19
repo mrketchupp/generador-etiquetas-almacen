@@ -297,7 +297,7 @@
         <div id="searchModal" class="modal">
             <div class="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-md w-full mx-4" style="background: var(--color-bg-elevated)">
                 <h2 class="text-2xl font-bold mb-4">Buscar artículo</h2>
-                <input type="text" id="searchInput" placeholder="ITEM, Código o Descripción" class="w-full p-3 rounded mb-4" style="background: var(--color-bg-surface); color: var(--color-text-primary); border: 2px solid var(--color-primary)">
+                <input type="text" id="searchInput" placeholder="ITEM, Código, Descripción, Tamaño, Color o N/P" class="w-full p-3 rounded mb-4" style="background: var(--color-bg-surface); color: var(--color-text-primary); border: 2px solid var(--color-primary)">
                 <div id="searchResults" class="max-h-96 overflow-y-auto"></div>
                 <button onclick="closeSearchModal()" class="w-full py-3 rounded mt-4" style="background: var(--color-bg-surface)">Cerrar</button>
             </div>
@@ -693,17 +693,28 @@
                 article.item.toLowerCase().includes(query) ||
                 article.codigoAX.toLowerCase().includes(query) ||
                 article.descripcion.toLowerCase().includes(query) ||
-                article.tamano.toLowerCase().includes(query) ||
-                article.color.toLowerCase().includes(query) ||
-                article.np.toLowerCase().includes(query)
+                (article.tamano && article.tamano.toLowerCase().includes(query)) ||
+                (article.color && article.color.toLowerCase().includes(query)) ||
+                (article.np && article.np.toLowerCase().includes(query))
             );
             
             matches.forEach((article, index) => {
                 const div = document.createElement('div');
                 div.className = 'list-item';
+                
+                // Construir línea de detalles adicionales
+                const details = [];
+                if (article.tamano) details.push(`Tamaño: ${article.tamano}`);
+                if (article.color) details.push(`Color: ${article.color}`);
+                if (article.np) details.push(`N/P: ${article.np}`);
+                const detailsLine = details.length > 0 ? details.join(' | ') : '';
+                
                 div.innerHTML = `
-                    <div class="font-bold">${article.codigoAX}</div>
-                    <div class="text-sm" style="color: var(--color-text-muted)">${article.descripcion}</div>
+                    <div>
+                        <div class="font-bold">${article.codigoAX}</div>
+                        <div class="text-sm" style="color: var(--color-text-muted)">${article.descripcion}</div>
+                        ${detailsLine ? `<div class="text-xs mt-1" style="color: var(--color-text-muted); opacity: 0.8">${detailsLine}</div>` : ''}
+                    </div>
                 `;
                 div.onclick = () => {
                     currentIndex = articles.indexOf(article);
