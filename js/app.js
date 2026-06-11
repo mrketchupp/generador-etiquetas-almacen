@@ -347,16 +347,18 @@ const App = (() => {
         try {
             const items = await Gemini.extractMaterials(voucherDataUrl, apiKey);
             for (const item of items) {
+                const oc = String(item.oc || '').trim();
                 Store.state.materials.push({
                     id: Utils.uid(),
                     cantidad: clampInt(item.cantidad, 1, 1),
                     codigoAx: String(item.codigo || '').trim(),
                     // DESCRIPCION DEL MATERIAL del vale → Nombre de la etiqueta;
-                    // O.C. del vale → Descripción de la etiqueta.
+                    // O.C. del vale → Descripción de la etiqueta, con prefijo
+                    // "OC:" para que se entienda a qué se refiere el valor.
                     nombre: String(item.descripcion || '').trim(),
                     dimension: String(item.claveAlmacen || '').trim(),
                     noParte: '',
-                    descripcion: String(item.oc || '').trim(),
+                    descripcion: oc ? `OC: ${oc}` : '',
                     condicion: 'NUEVO',
                     categoria: 'INVENTARIABLE',
                 });
