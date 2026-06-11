@@ -300,11 +300,14 @@ select.input:focus {
 /* ============ Tablas de revisión ============ */
 .section-head {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 12px;
     margin-bottom: 12px;
+}
+
+.section-head > :last-child {
+    margin-left: auto;
 }
 
 .count-badge {
@@ -461,6 +464,20 @@ dialog.modal::backdrop {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+/* Evita el desborde horizontal en móvil: los input[type=file] tienen un
+   ancho mínimo intrínseco mayor que la pantalla si no se les limita. */
+.inline-controls > .input {
+    min-width: 0;
+}
+
+dialog.modal .input {
+    max-width: 100%;
+}
+
+dialog.modal {
+    overflow-x: hidden;
 }
 
 /* ============ Vista previa de impresión ============ */

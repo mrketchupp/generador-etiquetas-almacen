@@ -25,22 +25,23 @@ const Gemini = (() => {
         'gemini-2.5-flash',
     ];
 
-    const PROMPT = "Analiza la siguiente imagen de un vale de material. Extrae la información de la tabla de materiales. " +
-        "Las columnas relevantes son 'CANTIDAD', 'CODIGO' (la segunda columna, no la que dice 'OC'), " +
-        "'DESCRIPCION DEL MATERIAL' y 'CLAVE ALMACEN'. Devuelve el resultado como un array de objetos JSON. " +
-        "Asegúrate de que los valores de 'cantidad' sean numéricos.";
+    const PROMPT = "Analiza la siguiente imagen de un vale de material. Extrae la información de la tabla de materiales, un objeto por renglón. " +
+        "Las columnas relevantes son 'O.C.', 'CANTIDAD', 'CODIGO', 'DESCRIPCION DEL MATERIAL' y 'CLAVE ALMACEN'. " +
+        "Devuelve el resultado como un array de objetos JSON. Asegúrate de que los valores de 'cantidad' sean numéricos. " +
+        "'oc' es el valor de la columna O.C. (déjalo como cadena vacía si el renglón no tiene).";
 
     const RESPONSE_SCHEMA = {
         type: 'ARRAY',
         items: {
             type: 'OBJECT',
             properties: {
+                oc: { type: 'STRING' },
                 cantidad: { type: 'NUMBER' },
                 codigo: { type: 'STRING' },
                 descripcion: { type: 'STRING' },
                 claveAlmacen: { type: 'STRING' },
             },
-            required: ['cantidad', 'codigo', 'descripcion', 'claveAlmacen'],
+            required: ['oc', 'cantidad', 'codigo', 'descripcion', 'claveAlmacen'],
         },
     };
 
