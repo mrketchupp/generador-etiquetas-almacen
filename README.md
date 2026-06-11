@@ -9,7 +9,7 @@ Aplicación web (100 % cliente, sin backend) para generar e imprimir etiquetas d
 
 ## Funciones
 
-- Alta manual de partidas y extracción automática desde la **foto de un vale de material** usando la API de Gemini (requiere API Key propia).
+- Alta manual de partidas y extracción automática desde la **foto de un vale de material** usando la API de Gemini (requiere API Key propia). El modelo se detecta automáticamente consultando `ListModels`, así la app sigue funcionando cuando Google renombra o retira modelos.
 - Tabla de revisión editable con duplicar/eliminar. La lista **se conserva al recargar** la página.
 - Autocompletado de nombres a partir de un **CSV** con columnas «Codigo AX» y «Nombre».
 - Logos izquierdo/derecho (archivo o URL) y texto de almacén personalizable.

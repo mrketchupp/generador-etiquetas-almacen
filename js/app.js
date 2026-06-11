@@ -277,6 +277,7 @@ const App = (() => {
                 return;
             }
             Store.state.settings.geminiApiKey = key;
+            Store.state.settings.geminiModel = ''; // se resuelve de nuevo con la nueva key
             Store.save();
             updateGeminiUi();
             toast('API Key guardada', 'success');
@@ -284,6 +285,7 @@ const App = (() => {
 
         $('geminiKeyClear').addEventListener('click', () => {
             Store.state.settings.geminiApiKey = '';
+            Store.state.settings.geminiModel = '';
             $('geminiKeyInput').value = '';
             Store.save();
             updateGeminiUi();

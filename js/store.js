@@ -53,6 +53,7 @@ const Store = (() => {
             logoLeft: '',
             logoRight: '',
             geminiApiKey: '',
+            geminiModel: '',
             layout: { ...DEFAULT_LAYOUT },
         },
     };
