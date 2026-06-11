@@ -145,5 +145,5 @@ const Tables = (() => {
         updateCounters();
     }
 
-    return { renderMaterials, renderAx };
+    return { renderMaterials, renderAx, CONDICIONES, CATEGORIAS };
 })();

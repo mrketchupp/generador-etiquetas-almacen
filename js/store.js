@@ -18,18 +18,29 @@ const Store = (() => {
     // desbordes), estas dimensiones sí entran en el área útil de la hoja.
     const DEFAULT_LAYOUT = {
         pageSize: 'letter',
-        marginMm: 10,
+        marginTopMm: 10,
+        marginLeftMm: 10,
         labelWidthMm: 92,
         labelHeightMm: 39,
-        gapMm: 4,
+        gapXMm: 4,
+        gapYMm: 4,
         fontSizePx: 10,
+        showBorder: true,
     };
 
     const LAYOUT_PRESETS = [
         { id: 'carta-2x6', label: 'Carta · 2 × 6 (92 × 39 mm) — estándar', layout: { ...DEFAULT_LAYOUT } },
-        { id: 'carta-3x8', label: 'Carta · 3 × 8 (60 × 30 mm) — compacta', layout: { pageSize: 'letter', marginMm: 10, labelWidthMm: 60, labelHeightMm: 30, gapMm: 2.5, fontSizePx: 8 } },
-        { id: 'carta-1x4', label: 'Carta · 1 × 4 (180 × 58 mm) — grande', layout: { pageSize: 'letter', marginMm: 12.7, labelWidthMm: 180, labelHeightMm: 58, gapMm: 5, fontSizePx: 13 } },
-        { id: 'a4-2x6', label: 'A4 · 2 × 6 (93 × 42 mm)', layout: { pageSize: 'a4', marginMm: 10, labelWidthMm: 93, labelHeightMm: 42, gapMm: 3, fontSizePx: 10 } },
+        {
+            // Hojas precortadas J-5163 / Avery 5163: etiqueta de 4 × 2 in,
+            // margen superior 0.5 in, lateral 5/32 in, separación horizontal
+            // 3/16 in y vertical 0. Sin borde para no marcar el precorte.
+            id: 'carta-2x5-j5163',
+            label: 'Carta · 2 × 5 precortada (102 × 51 mm, J-5163 / Avery 5163)',
+            layout: { pageSize: 'letter', marginTopMm: 12.7, marginLeftMm: 3.97, labelWidthMm: 101.6, labelHeightMm: 50.8, gapXMm: 4.76, gapYMm: 0, fontSizePx: 11, showBorder: false },
+        },
+        { id: 'carta-3x8', label: 'Carta · 3 × 8 (60 × 30 mm) — compacta', layout: { pageSize: 'letter', marginTopMm: 10, marginLeftMm: 10, labelWidthMm: 60, labelHeightMm: 30, gapXMm: 2.5, gapYMm: 2.5, fontSizePx: 8, showBorder: true } },
+        { id: 'carta-1x4', label: 'Carta · 1 × 4 (180 × 58 mm) — grande', layout: { pageSize: 'letter', marginTopMm: 12.7, marginLeftMm: 12.7, labelWidthMm: 180, labelHeightMm: 58, gapXMm: 5, gapYMm: 5, fontSizePx: 13, showBorder: true } },
+        { id: 'a4-2x6', label: 'A4 · 2 × 6 (93 × 42 mm)', layout: { pageSize: 'a4', marginTopMm: 10, marginLeftMm: 10, labelWidthMm: 93, labelHeightMm: 42, gapXMm: 3, gapYMm: 3, fontSizePx: 10, showBorder: true } },
     ];
 
     const DEFAULT_STATE = {
@@ -50,6 +61,28 @@ const Store = (() => {
         return JSON.parse(JSON.stringify(DEFAULT_STATE));
     }
 
+    /**
+     * Normaliza un layout guardado al modelo actual. Acepta el modelo
+     * anterior con margen y separación uniformes (marginMm / gapMm) y lo
+     * convierte a los campos por eje.
+     */
+    function normalizeLayout(raw) {
+        const layout = { ...DEFAULT_LAYOUT };
+        if (!raw || typeof raw !== 'object') return layout;
+        if (typeof raw.marginMm === 'number') {
+            layout.marginTopMm = raw.marginMm;
+            layout.marginLeftMm = raw.marginMm;
+        }
+        if (typeof raw.gapMm === 'number') {
+            layout.gapXMm = raw.gapMm;
+            layout.gapYMm = raw.gapMm;
+        }
+        for (const key of Object.keys(DEFAULT_LAYOUT)) {
+            if (raw[key] !== undefined) layout[key] = raw[key];
+        }
+        return layout;
+    }
+
     function load() {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -62,7 +95,7 @@ const Store = (() => {
                 settings: {
                     ...base.settings,
                     ...(parsed.settings || {}),
-                    layout: { ...DEFAULT_LAYOUT, ...((parsed.settings || {}).layout || {}) },
+                    layout: normalizeLayout((parsed.settings || {}).layout),
                 },
             };
         } catch (error) {

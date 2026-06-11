@@ -90,8 +90,10 @@ const App = (() => {
     // ---------- Modal de diseño de plantilla ----------
 
     const LAYOUT_FIELDS = [
-        ['cfgMargin', 'marginMm', 0],
-        ['cfgGap', 'gapMm', 0],
+        ['cfgMarginTop', 'marginTopMm', 0],
+        ['cfgMarginLeft', 'marginLeftMm', 0],
+        ['cfgGapX', 'gapXMm', 0],
+        ['cfgGapY', 'gapYMm', 0],
         ['cfgLabelWidth', 'labelWidthMm', 5],
         ['cfgLabelHeight', 'labelHeightMm', 5],
     ];
@@ -101,6 +103,7 @@ const App = (() => {
         $('cfgPageSize').value = layout.pageSize;
         for (const [id, key] of LAYOUT_FIELDS) $(id).value = layout[key];
         $('cfgFontSize').value = layout.fontSizePx;
+        $('cfgShowBorder').checked = layout.showBorder !== false;
         updateLayoutSummary();
     }
 
@@ -154,6 +157,11 @@ const App = (() => {
             const parsed = parseFloat($('cfgFontSize').value);
             layout.fontSizePx = Number.isFinite(parsed) ? Math.max(5, parsed) : layout.fontSizePx;
             $('cfgFontSize').value = layout.fontSizePx;
+            applyLayoutChanges();
+        });
+
+        $('cfgShowBorder').addEventListener('change', () => {
+            Store.state.settings.layout.showBorder = $('cfgShowBorder').checked;
             applyLayoutChanges();
         });
 
@@ -388,6 +396,40 @@ const App = (() => {
         $('voucherProcess').addEventListener('click', processVoucher);
     }
 
+    // ---------- Exportar / importar partidas ----------
+
+    function bindTransfer() {
+        const fileInput = $('importFileInput');
+
+        for (const id of ['btnExportMaterial', 'btnExportAx']) {
+            $(id).addEventListener('click', () => {
+                if (Store.state.materials.length === 0 && Store.state.axItems.length === 0) {
+                    toast('No hay partidas para exportar', 'warning');
+                    return;
+                }
+                Transfer.exportData();
+                toast('Lista exportada como archivo .json', 'success');
+            });
+        }
+
+        for (const id of ['btnImportMaterial', 'btnImportAx']) {
+            $(id).addEventListener('click', () => fileInput.click());
+        }
+
+        fileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                const added = await Transfer.importFile(file);
+                refreshTables();
+                toast(`Importado: ${added.materials} material(es) y ${added.axItems} código(s) AX`, 'success');
+            } catch (error) {
+                toast(error.message || 'No se pudo importar el archivo', 'error');
+            }
+            event.target.value = '';
+        });
+    }
+
     // ---------- Helpers ----------
 
     function enableBackdropClose(dialog) {
@@ -434,6 +476,7 @@ const App = (() => {
         bindLayoutModal();
         bindConfigModal();
         bindVoucher();
+        bindTransfer();
     }
 
     document.addEventListener('DOMContentLoaded', init);

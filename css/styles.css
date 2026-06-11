@@ -284,6 +284,19 @@ select.input:focus {
     width: 100%;
 }
 
+/* ============ Exportar / importar ============ */
+.transfer-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: -8px 0 24px;
+}
+
+.transfer-row .hint {
+    margin: 0;
+}
+
 /* ============ Tablas de revisión ============ */
 .section-head {
     display: flex;

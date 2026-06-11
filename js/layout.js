@@ -13,12 +13,14 @@ const Layout = (() => {
     /** Calcula cuántas etiquetas caben físicamente en una hoja. */
     function computeGrid(layout) {
         const page = Store.PAGE_SIZES[layout.pageSize] || Store.PAGE_SIZES.letter;
-        const usableW = page.widthMm - 2 * layout.marginMm;
-        const usableH = page.heightMm - 2 * layout.marginMm;
+        const usableW = page.widthMm - 2 * layout.marginLeftMm;
+        const usableH = page.heightMm - 2 * layout.marginTopMm;
 
         // n etiquetas + (n-1) separaciones <= área útil
-        const cols = Math.max(0, Math.floor((usableW + layout.gapMm) / (layout.labelWidthMm + layout.gapMm)));
-        const rows = Math.max(0, Math.floor((usableH + layout.gapMm) / (layout.labelHeightMm + layout.gapMm)));
+        // (+0.05mm de tolerancia para no perder una columna/fila por redondeo)
+        const EPSILON = 0.05;
+        const cols = Math.max(0, Math.floor((usableW + layout.gapXMm + EPSILON) / (layout.labelWidthMm + layout.gapXMm)));
+        const rows = Math.max(0, Math.floor((usableH + layout.gapYMm + EPSILON) / (layout.labelHeightMm + layout.gapYMm)));
 
         const warnings = [];
         if (cols === 0) warnings.push('El ancho de la etiqueta no cabe en la hoja con el margen actual.');
@@ -41,11 +43,14 @@ const Layout = (() => {
         const root = document.documentElement.style;
         root.setProperty('--page-w', `${grid.page.widthMm}mm`);
         root.setProperty('--page-h', `${grid.page.heightMm}mm`);
-        root.setProperty('--page-margin', `${layout.marginMm}mm`);
+        root.setProperty('--page-margin-top', `${layout.marginTopMm}mm`);
+        root.setProperty('--page-margin-left', `${layout.marginLeftMm}mm`);
         root.setProperty('--label-w', `${layout.labelWidthMm}mm`);
         root.setProperty('--label-h', `${layout.labelHeightMm}mm`);
-        root.setProperty('--label-gap', `${layout.gapMm}mm`);
+        root.setProperty('--label-gap-x', `${layout.gapXMm}mm`);
+        root.setProperty('--label-gap-y', `${layout.gapYMm}mm`);
         root.setProperty('--label-font', `${layout.fontSizePx}px`);
+        root.setProperty('--label-border-w', layout.showBorder === false ? '0mm' : '0.5mm');
         root.setProperty('--grid-cols', String(grid.cols || 1));
 
         if (!pageStyleEl) {

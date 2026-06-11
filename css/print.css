@@ -3,12 +3,13 @@
  * escalada) y en papel. Las dimensiones físicas vienen de variables CSS
  * que JS calcula a partir de la configuración (Layout.applyToDocument):
  *
- *   --page-w / --page-h      tamaño físico de la hoja (mm)
- *   --page-margin            margen de la hoja (mm) — es el padding de .sheet
- *   --label-w / --label-h    tamaño de cada etiqueta (mm)
- *   --label-gap              separación entre etiquetas (mm)
- *   --label-font             tamaño base de la tipografía de la etiqueta
- *   --grid-cols              columnas calculadas que caben en la hoja
+ *   --page-w / --page-h               tamaño físico de la hoja (mm)
+ *   --page-margin-top / -left         márgenes de la hoja (padding de .sheet)
+ *   --label-w / --label-h             tamaño de cada etiqueta (mm)
+ *   --label-gap-x / --label-gap-y     separación entre etiquetas (mm)
+ *   --label-font                      tamaño base de la tipografía
+ *   --label-border-w                  grosor del borde (0 en hojas precortadas)
+ *   --grid-cols                       columnas calculadas que caben en la hoja
  *
  * La regla @page se genera desde JS con margin: 0, así la hoja .sheet es
  * exactamente el papel y no hay dobles márgenes ni saltos inesperados.
@@ -32,7 +33,7 @@
 .sheet {
     width: var(--page-w);
     height: var(--page-h);
-    padding: var(--page-margin);
+    padding: var(--page-margin-top) var(--page-margin-left);
     background: #fff;
     overflow: hidden;
     transform: scale(var(--scale, 1));
@@ -44,14 +45,14 @@
     display: grid;
     grid-template-columns: repeat(var(--grid-cols, 1), var(--label-w));
     grid-auto-rows: var(--label-h);
-    gap: var(--label-gap);
+    gap: var(--label-gap-y) var(--label-gap-x);
 }
 
 /* ============ Etiqueta (común) ============ */
 .label {
     width: var(--label-w);
     height: var(--label-h);
-    border: 0.5mm solid #000;
+    border: var(--label-border-w, 0.5mm) solid #000;
     background: #fff;
     color: #000;
     padding: 1.5mm;

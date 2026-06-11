@@ -13,8 +13,9 @@ Aplicación web (100 % cliente, sin backend) para generar e imprimir etiquetas d
 - Tabla de revisión editable con duplicar/eliminar. La lista **se conserva al recargar** la página.
 - Autocompletado de nombres a partir de un **CSV** con columnas «Codigo AX» y «Nombre».
 - Logos izquierdo/derecho (archivo o URL) y texto de almacén personalizable.
-- **Diseño de plantilla configurable**: tamaño de hoja (Carta/A4), margen, dimensiones de etiqueta, separación y tamaño de fuente. Acepta valores en mm, cm o pulgadas, y trae plantillas predefinidas.
+- **Diseño de plantilla configurable**: tamaño de hoja (Carta/A4), márgenes superior/lateral, dimensiones de etiqueta, separación horizontal/vertical, fuente y borde opcional. Acepta valores en mm, cm o pulgadas, y trae plantillas predefinidas, incluida la de **hojas precortadas 2 × 5 (J-5163 / Avery 5163)** con la geometría exacta del precorte.
 - **Vista previa fiel a la impresión**: las filas y columnas se calculan automáticamente según lo que cabe físicamente en la hoja, por lo que no hay saltos de página inesperados ni hay que ajustar márgenes en el diálogo de impresión.
+- **Exportar / importar la lista** como archivo `.json`: captura las partidas en el teléfono, exporta el archivo (WhatsApp, correo, AirDrop…) e impórtalo en la computadora para imprimir desde ahí.
 
 ## Cómo funciona la impresión
 
@@ -33,6 +34,7 @@ js/labels.js      Construcción del DOM de cada etiqueta (sin innerHTML con dato
 js/csv.js         Parser de CSV con soporte de comillas
 js/gemini.js      Cliente de la API de Gemini para leer vales
 js/tables.js      Tablas de revisión editables
+js/transfer.js    Exportación/importación de partidas (.json)
 js/preview.js     Vista previa escalada e impresión (beforeprint/afterprint)
 js/app.js         Orquestación: formularios, modales y eventos
 ```

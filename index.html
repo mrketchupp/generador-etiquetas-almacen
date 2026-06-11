@@ -89,6 +89,13 @@
                     </form>
                 </div>
 
+                <div class="transfer-row">
+                    <button type="button" id="btnExportMaterial" class="btn">📤 Exportar lista</button>
+                    <button type="button" id="btnImportMaterial" class="btn">📥 Importar lista</button>
+                    <span class="hint">Captura en el teléfono, exporta el archivo e impórtalo en la computadora para
+                        imprimir.</span>
+                </div>
+
                 <section id="materialsSection" hidden>
                     <div class="section-head">
                         <h2 class="section-title">Revisa y edita las partidas</h2>
@@ -143,6 +150,13 @@
                         </div>
                         <button type="submit" class="btn btn--primary btn--block">Añadir a la lista</button>
                     </form>
+                </div>
+
+                <div class="transfer-row">
+                    <button type="button" id="btnExportAx" class="btn">📤 Exportar lista</button>
+                    <button type="button" id="btnImportAx" class="btn">📥 Importar lista</button>
+                    <span class="hint">Captura en el teléfono, exporta el archivo e impórtalo en la computadora para
+                        imprimir.</span>
                 </div>
 
                 <section id="axSection" hidden>
@@ -206,8 +220,12 @@
                     <select id="cfgPageSize" class="input"></select>
                 </label>
                 <label class="field">
-                    <span class="field__label">Margen de hoja (mm)</span>
-                    <input type="text" id="cfgMargin" class="input" placeholder="12.7 o 0.5in">
+                    <span class="field__label">Margen superior e inferior (mm)</span>
+                    <input type="text" id="cfgMarginTop" class="input" placeholder="12.7 o 0.5in">
+                </label>
+                <label class="field">
+                    <span class="field__label">Margen izquierdo y derecho (mm)</span>
+                    <input type="text" id="cfgMarginLeft" class="input" placeholder="3.97 o 0.156in">
                 </label>
             </div>
         </div>
@@ -217,22 +235,31 @@
             <div class="form-grid">
                 <label class="field">
                     <span class="field__label">Ancho (mm)</span>
-                    <input type="text" id="cfgLabelWidth" class="input" placeholder="95.25 o 3.75in">
+                    <input type="text" id="cfgLabelWidth" class="input" placeholder="101.6 o 4in">
                 </label>
                 <label class="field">
                     <span class="field__label">Alto (mm)</span>
-                    <input type="text" id="cfgLabelHeight" class="input" placeholder="42.4 o 1.67in">
+                    <input type="text" id="cfgLabelHeight" class="input" placeholder="50.8 o 2in">
                 </label>
                 <label class="field">
-                    <span class="field__label">Separación entre etiquetas (mm)</span>
-                    <input type="text" id="cfgGap" class="input" placeholder="2.5 o 0.1in">
+                    <span class="field__label">Separación horizontal (mm)</span>
+                    <input type="text" id="cfgGapX" class="input" placeholder="4.76 o 0.187in">
+                </label>
+                <label class="field">
+                    <span class="field__label">Separación vertical (mm)</span>
+                    <input type="text" id="cfgGapY" class="input" placeholder="0">
                 </label>
                 <label class="field">
                     <span class="field__label">Tamaño de fuente base (px)</span>
                     <input type="number" id="cfgFontSize" class="input" min="5" step="0.5" placeholder="10">
                 </label>
+                <label class="field" style="flex-direction: row; align-items: center; gap: 8px; align-self: end;">
+                    <input type="checkbox" id="cfgShowBorder">
+                    <span class="field__label" style="margin: 0;">Imprimir borde de etiqueta</span>
+                </label>
             </div>
-            <p class="hint">Acepta valores en mm, cm o pulgadas (ej. «3.75in»). Sin unidad se interpreta como mm.</p>
+            <p class="hint">Acepta valores en mm, cm o pulgadas (ej. «4in»). Sin unidad se interpreta como mm. En
+                hojas precortadas conviene desactivar el borde.</p>
         </div>
 
         <div class="modal__section">
@@ -310,6 +337,8 @@
         </div>
     </dialog>
 
+    <input type="file" id="importFileInput" accept=".json,application/json" hidden>
+
     <script src="js/utils.js"></script>
     <script src="js/store.js"></script>
     <script src="js/layout.js"></script>
@@ -317,6 +346,7 @@
     <script src="js/csv.js"></script>
     <script src="js/gemini.js"></script>
     <script src="js/tables.js"></script>
+    <script src="js/transfer.js"></script>
     <script src="js/preview.js"></script>
     <script src="js/app.js"></script>
 </body>
