@@ -351,10 +351,12 @@ const App = (() => {
                     id: Utils.uid(),
                     cantidad: clampInt(item.cantidad, 1, 1),
                     codigoAx: String(item.codigo || '').trim(),
+                    // DESCRIPCION DEL MATERIAL del vale → Nombre de la etiqueta;
+                    // O.C. del vale → Descripción de la etiqueta.
                     nombre: String(item.descripcion || '').trim(),
                     dimension: String(item.claveAlmacen || '').trim(),
                     noParte: '',
-                    descripcion: String(item.descripcion || '').trim(),
+                    descripcion: String(item.oc || '').trim(),
                     condicion: 'NUEVO',
                     categoria: 'INVENTARIABLE',
                 });
@@ -396,6 +398,26 @@ const App = (() => {
 
         $('voucherClear').addEventListener('click', clearVoucher);
         $('voucherProcess').addEventListener('click', processVoucher);
+    }
+
+    // ---------- Vaciar listas ----------
+
+    function bindClearButtons() {
+        $('btnClearMaterials').addEventListener('click', () => {
+            const count = Store.state.materials.length;
+            if (!confirm(`¿Vaciar toda la lista de materiales (${count} partida(s))? Esta acción no se puede deshacer.`)) return;
+            Store.state.materials.length = 0;
+            refreshTables();
+            toast('Lista de materiales vaciada', 'info');
+        });
+
+        $('btnClearAx').addEventListener('click', () => {
+            const count = Store.state.axItems.length;
+            if (!confirm(`¿Vaciar toda la lista de códigos AX (${count} partida(s))? Esta acción no se puede deshacer.`)) return;
+            Store.state.axItems.length = 0;
+            refreshTables();
+            toast('Lista de códigos AX vaciada', 'info');
+        });
     }
 
     // ---------- Exportar / importar partidas ----------
@@ -479,6 +501,7 @@ const App = (() => {
         bindConfigModal();
         bindVoucher();
         bindTransfer();
+        bindClearButtons();
     }
 
     document.addEventListener('DOMContentLoaded', init);
