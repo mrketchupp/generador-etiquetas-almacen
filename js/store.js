@@ -51,7 +51,11 @@ const Store = (() => {
         settings: {
             headerText: 'BRONCO RIG-91',
             logoLeft: '',
-            logoRight: '',
+            // Biblioteca de logos derechos con nombre (ej. GSM, DLTA).
+            // El primero es el predeterminado; cada partida puede elegir
+            // otro por nombre (item.logoName) si perItemLogo está activo.
+            rightLogos: [],
+            perItemLogo: false,
             geminiApiKey: '',
             geminiModel: '',
             layout: { ...DEFAULT_LAYOUT },
@@ -90,7 +94,7 @@ const Store = (() => {
             if (!raw) return migrateFromV1();
             const parsed = JSON.parse(raw);
             const base = freshState();
-            return {
+            const merged = {
                 ...base,
                 ...parsed,
                 settings: {
@@ -99,6 +103,14 @@ const Store = (() => {
                     layout: normalizeLayout((parsed.settings || {}).layout),
                 },
             };
+            // Migración: el logo derecho único anterior pasa a ser el primer
+            // logo (predeterminado) de la biblioteca.
+            if (!Array.isArray(merged.settings.rightLogos)) merged.settings.rightLogos = [];
+            if (merged.settings.logoRight && merged.settings.rightLogos.length === 0) {
+                merged.settings.rightLogos.push({ id: Utils.uid(), name: 'Principal', src: merged.settings.logoRight });
+            }
+            delete merged.settings.logoRight;
+            return merged;
         } catch (error) {
             console.error('No se pudo cargar el estado guardado:', error);
             return freshState();
@@ -111,7 +123,9 @@ const Store = (() => {
         const old = (key) => localStorage.getItem(key);
 
         if (old('logoLeft')) state.settings.logoLeft = old('logoLeft');
-        if (old('logoRight')) state.settings.logoRight = old('logoRight');
+        if (old('logoRight')) {
+            state.settings.rightLogos.push({ id: Utils.uid(), name: 'Principal', src: old('logoRight') });
+        }
         if (old('headerText')) state.settings.headerText = old('headerText');
         if (old('geminiApiKey')) state.settings.geminiApiKey = old('geminiApiKey');
 

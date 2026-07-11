@@ -42,6 +42,7 @@ const App = (() => {
                 descripcion: $('fDescripcion').value.trim(),
                 condicion: 'NUEVO',
                 categoria: 'INVENTARIABLE',
+                logoName: '',
             });
             event.target.reset();
             $('fCantidad').value = '1';
@@ -227,6 +228,89 @@ const App = (() => {
         });
     }
 
+    // ---------- Biblioteca de logos derechos ----------
+
+    function renderRightLogos() {
+        const list = $('rightLogosList');
+        const logos = Store.state.settings.rightLogos;
+        list.replaceChildren();
+        if (!logos.length) {
+            list.append(el('p', { class: 'hint', text: 'Sin logos registrados: el lado derecho de la etiqueta quedará vacío.' }));
+        }
+        logos.forEach((logo, index) => {
+            list.append(el('div', { class: 'logo-row' }, [
+                el('img', { class: 'logo-row__img', src: logo.src, alt: logo.name }),
+                el('span', { class: 'logo-row__name', text: index === 0 ? `${logo.name} · predeterminado` : logo.name }),
+                index > 0 ? el('button', {
+                    class: 'btn btn--small', type: 'button', text: '★ Predeterminado',
+                    onclick: () => {
+                        logos.splice(index, 1);
+                        logos.unshift(logo);
+                        Store.save();
+                        renderRightLogos();
+                        refreshTables();
+                    },
+                }) : null,
+                el('button', {
+                    class: 'btn btn--small btn--danger', type: 'button', text: 'Eliminar',
+                    onclick: () => {
+                        if (!confirm(`¿Eliminar el logo "${logo.name}"?`)) return;
+                        logos.splice(index, 1);
+                        Store.save();
+                        renderRightLogos();
+                        refreshTables();
+                    },
+                }),
+            ]));
+        });
+    }
+
+    async function addRightLogo() {
+        const name = $('newLogoName').value.trim();
+        const file = $('newLogoFile').files[0];
+        const url = $('newLogoUrl').value.trim();
+
+        if (!name) {
+            toast('Ponle un nombre al logo (ej. GSM o DLTA)', 'error');
+            return;
+        }
+        if (Store.state.settings.rightLogos.some((logo) => logo.name.toLowerCase() === name.toLowerCase())) {
+            toast('Ya existe un logo con ese nombre', 'error');
+            return;
+        }
+        let src = url;
+        if (file) {
+            try {
+                src = await readFileAsDataURL(file);
+            } catch {
+                toast('No se pudo leer la imagen del logo', 'error');
+                return;
+            }
+        }
+        if (!src) {
+            toast('Elige un archivo o pega una URL', 'error');
+            return;
+        }
+
+        Store.state.settings.rightLogos.push({ id: Utils.uid(), name, src });
+        Store.save();
+        $('newLogoName').value = '';
+        $('newLogoFile').value = '';
+        $('newLogoUrl').value = '';
+        renderRightLogos();
+        refreshTables();
+        toast(`Logo "${name}" añadido`, 'success');
+    }
+
+    function bindRightLogos() {
+        $('newLogoAdd').addEventListener('click', addRightLogo);
+        $('cfgPerItemLogo').addEventListener('change', () => {
+            Store.state.settings.perItemLogo = $('cfgPerItemLogo').checked;
+            Store.save();
+            refreshTables(); // muestra/oculta el chip y el selector de logo
+        });
+    }
+
     function updateCsvStatus() {
         const count = Object.keys(Store.state.codigosAX).length;
         $('csvStatus').textContent = count > 0
@@ -300,7 +384,7 @@ const App = (() => {
         enableBackdropClose(modal);
 
         bindLogoControls('logoLeft');
-        bindLogoControls('logoRight');
+        bindRightLogos();
         bindCsvControls();
         bindGeneralConfig();
     }
@@ -361,6 +445,7 @@ const App = (() => {
                     descripcion: oc ? `OC: ${oc}` : '',
                     condicion: 'NUEVO',
                     categoria: 'INVENTARIABLE',
+                    logoName: '',
                 });
             }
             refreshTables();
@@ -485,11 +570,11 @@ const App = (() => {
         // Valores iniciales del modal de configuración
         $('cfgHeaderText').value = Store.state.settings.headerText;
         $('geminiKeyInput').value = Store.state.settings.geminiApiKey;
-        for (const key of ['logoLeft', 'logoRight']) {
-            const src = Store.state.settings[key];
-            $(`${key}Url`).value = src && !src.startsWith('data:') ? src : '';
-            updateLogoPreview(key);
-        }
+        const leftSrc = Store.state.settings.logoLeft;
+        $('logoLeftUrl').value = leftSrc && !leftSrc.startsWith('data:') ? leftSrc : '';
+        updateLogoPreview('logoLeft');
+        renderRightLogos();
+        $('cfgPerItemLogo').checked = Boolean(Store.state.settings.perItemLogo);
         updateCsvStatus();
         updateGeminiUi();
 
@@ -504,6 +589,7 @@ const App = (() => {
         bindVoucher();
         bindTransfer();
         bindClearButtons();
+        Inventory.init({ onAdd: refreshTables });
     }
 
     document.addEventListener('DOMContentLoaded', init);
