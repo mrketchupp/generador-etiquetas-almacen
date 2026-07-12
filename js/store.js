@@ -163,10 +163,33 @@ const Store = (() => {
         }
     }
 
-    /** Busca el nombre asociado a un código AX en la tabla cargada por CSV. */
+    /**
+     * Los archivos de códigos suelen traerlos con ceros a la izquierda
+     * («000000007»), pero el usuario escribe «7». Se comparan ambos sin
+     * los ceros iniciales.
+     */
+    function normalizeCodigo(code) {
+        return code.replace(/^0+(?=.)/, '');
+    }
+
+    // Índice normalizado, reconstruido solo cuando cambia la tabla.
+    let codigosIndex = { source: null, map: {} };
+
+    /** Busca el nombre asociado a un código AX en la lista cargada. */
     function lookupNombre(codigo) {
         const key = String(codigo || '').trim().toUpperCase();
-        return state.codigosAX[key] || null;
+        if (!key) return null;
+        const table = state.codigosAX;
+        if (table[key]) return table[key];
+
+        if (codigosIndex.source !== table) {
+            const map = {};
+            for (const [code, nombre] of Object.entries(table)) {
+                map[normalizeCodigo(code)] = nombre;
+            }
+            codigosIndex = { source: table, map };
+        }
+        return codigosIndex.map[normalizeCodigo(key)] || null;
     }
 
     return { state, save, lookupNombre, PAGE_SIZES, DEFAULT_LAYOUT, LAYOUT_PRESETS };
