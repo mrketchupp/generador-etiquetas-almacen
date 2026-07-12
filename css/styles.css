@@ -848,13 +848,14 @@ body.preview-open #previewSection {
 .toast-host {
     position: fixed;
     bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 12px;
+    right: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
     z-index: 2000;
+    pointer-events: none;
 }
 
 .toast {
@@ -868,7 +869,11 @@ body.preview-open #previewSection {
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 0.25s, transform 0.25s;
-    max-width: 90vw;
+    max-width: min(520px, 100%);
+    box-sizing: border-box;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    pointer-events: auto;
 }
 
 .toast--visible {
@@ -884,9 +889,12 @@ body.preview-open #previewSection {
     display: flex;
     align-items: center;
     gap: 12px;
-    max-width: min(520px, 90vw);
-    white-space: normal;
     text-align: left;
+}
+
+.toast--action > span {
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .toast__btn {

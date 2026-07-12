@@ -4,19 +4,20 @@
  * Cliente mínimo de la API de Gemini para extraer las partidas de la
  * foto de un vale de material.
  *
- * Google renombra y retira modelos con frecuencia (el error
- * "model is not found for API version v1beta" viene de ahí). Para no
- * depender de un nombre fijo, el modelo se resuelve consultando
- * ListModels con la API Key del usuario: se elige el mejor modelo
- * "flash" disponible que soporte generateContent, se guarda en la
- * configuración y, si algún día deja de existir, se vuelve a resolver
- * automáticamente.
+ * Diseñado para redes lentas o inestables:
+ * - Toda petición tiene tiempo límite (AbortController); nada se queda
+ *   colgado esperando un ERR_CONNECTION_TIMED_OUT del navegador.
+ * - ListModels es solo una mejora opcional con timeout corto: si no
+ *   responde, se prueban directamente los modelos preferidos.
+ * - Si un modelo devuelve 404 (Google lo renombró/retiró) se prueba el
+ *   siguiente candidato; el que funcione queda guardado para la próxima.
+ * - Los errores de red se traducen a mensajes claros en español.
  */
 const Gemini = (() => {
     const API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 
-    // Orden de preferencia si están disponibles (los "lite" son más
-    // baratos y suficientes para leer una tabla).
+    // Orden de preferencia (los "lite" son más baratos y suficientes
+    // para leer una tabla). Se prueban en orden si no hay lista.
     const PREFERRED_MODELS = [
         'gemini-3.1-flash-lite',
         'gemini-3.1-flash',
@@ -45,14 +46,40 @@ const Gemini = (() => {
         },
     };
 
+    /** Traduce fallos de red a un mensaje accionable. */
+    function networkError() {
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            return new Error('Sin conexión a internet. Extraer datos del vale necesita conexión; el resto de la app funciona sin ella.');
+        }
+        return new Error('No se pudo conectar con la API de Gemini (tiempo de espera agotado). ' +
+            'Revisa tu conexión, o si tu red/VPN/firewall bloquea generativelanguage.googleapis.com.');
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            return await fetch(url, { ...options, signal: controller.signal });
+        } catch (error) {
+            // AbortError (nuestro timeout) o TypeError: Failed to fetch
+            throw networkError();
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
     async function apiError(response) {
         const body = await response.json().catch(() => null);
         return new Error(body?.error?.message || `Error HTTP ${response.status}`);
     }
 
     /** Modelos disponibles para esta API Key que soportan generateContent. */
-    async function listAvailableModels(apiKey) {
-        const response = await fetch(`${API_BASE}/models?pageSize=200&key=${encodeURIComponent(apiKey)}`);
+    async function listAvailableModels(apiKey, timeoutMs) {
+        const response = await fetchWithTimeout(
+            `${API_BASE}/models?pageSize=200&key=${encodeURIComponent(apiKey)}`,
+            {},
+            timeoutMs,
+        );
         if (!response.ok) throw await apiError(response);
         const data = await response.json();
         return (data.models || [])
@@ -77,32 +104,47 @@ const Gemini = (() => {
         return [...available].sort((a, b) => score(b) - score(a))[0] || null;
     }
 
-    async function resolveModel(apiKey) {
-        const cached = Store.state.settings.geminiModel;
-        if (cached) return cached;
-        const available = await listAvailableModels(apiKey);
-        const model = pickModel(available);
-        if (!model) {
-            throw new Error('Tu API Key no tiene ningún modelo de Gemini compatible disponible');
+    /**
+     * Candidatos a probar, en orden: el modelo que ya funcionó antes,
+     * el mejor según ListModels (si responde rápido) y los preferidos.
+     * ListModels es best-effort: si falla o tarda, no bloquea nada.
+     */
+    async function candidateModels(apiKey) {
+        const candidates = [];
+        const push = (model) => {
+            if (model && !candidates.includes(model)) candidates.push(model);
+        };
+
+        push(Store.state.settings.geminiModel);
+
+        if (!Store.state.settings.geminiModel) {
+            try {
+                push(pickModel(await listAvailableModels(apiKey, 8000)));
+            } catch (error) {
+                console.warn('ListModels no respondió; se probarán los modelos preferidos:', error.message);
+            }
         }
-        Store.state.settings.geminiModel = model;
-        Store.save();
-        console.log('Modelo de Gemini seleccionado:', model);
-        return model;
+
+        for (const model of PREFERRED_MODELS) push(model);
+        return candidates;
     }
 
     function callModel(model, payload, apiKey) {
-        return fetch(`${API_BASE}/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-        });
+        return fetchWithTimeout(
+            `${API_BASE}/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            },
+            60000, // analizar una imagen puede tardar
+        );
     }
 
     /**
      * @param {string} dataUrl Imagen como data URL (image/png o image/jpeg)
      * @param {string} apiKey  API Key de Gemini del usuario
-     * @returns {Promise<Array<{cantidad:number,codigo:string,descripcion:string,claveAlmacen:string}>>}
+     * @returns {Promise<Array<{oc:string,cantidad:number,codigo:string,descripcion:string,claveAlmacen:string}>>}
      */
     async function extractMaterials(dataUrl, apiKey) {
         const match = String(dataUrl).match(/^data:([^;]+);base64,(.+)$/);
@@ -122,33 +164,46 @@ const Gemini = (() => {
             },
         };
 
-        let model = await resolveModel(apiKey);
-        let response = await callModel(model, payload, apiKey);
+        let lastError = null;
+        for (const model of await candidateModels(apiKey)) {
+            // Los errores de red se propagan de inmediato: si no hay red,
+            // no tiene sentido seguir probando modelos.
+            const response = await callModel(model, payload, apiKey);
 
-        // Si el modelo guardado fue retirado por Google, se vuelve a
-        // resolver contra ListModels y se reintenta una vez.
-        if (response.status === 404) {
-            console.warn(`El modelo "${model}" ya no existe; buscando uno disponible…`);
-            Store.state.settings.geminiModel = '';
-            Store.save();
-            model = await resolveModel(apiKey);
-            response = await callModel(model, payload, apiKey);
+            if (response.status === 404) {
+                // Modelo renombrado/retirado por Google: probar el siguiente.
+                console.warn(`El modelo "${model}" no existe; probando el siguiente…`);
+                if (Store.state.settings.geminiModel === model) {
+                    Store.state.settings.geminiModel = '';
+                    Store.save();
+                }
+                lastError = await apiError(response);
+                continue;
+            }
+            if (!response.ok) throw await apiError(response);
+
+            // Este modelo funciona: recordarlo para las próximas veces.
+            if (Store.state.settings.geminiModel !== model) {
+                Store.state.settings.geminiModel = model;
+                Store.save();
+                console.log('Modelo de Gemini seleccionado:', model);
+            }
+
+            const data = await response.json();
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            let items = null;
+            try {
+                items = text ? JSON.parse(text) : null;
+            } catch {
+                throw new Error('La respuesta del modelo no es un JSON válido');
+            }
+            if (!Array.isArray(items) || items.length === 0) {
+                throw new Error('No se pudieron extraer materiales de la imagen');
+            }
+            return items;
         }
 
-        if (!response.ok) throw await apiError(response);
-
-        const data = await response.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        let items = null;
-        try {
-            items = text ? JSON.parse(text) : null;
-        } catch {
-            throw new Error('La respuesta del modelo no es un JSON válido');
-        }
-        if (!Array.isArray(items) || items.length === 0) {
-            throw new Error('No se pudieron extraer materiales de la imagen');
-        }
-        return items;
+        throw lastError || new Error('Ningún modelo de Gemini está disponible con tu API Key');
     }
 
     return { extractMaterials };
