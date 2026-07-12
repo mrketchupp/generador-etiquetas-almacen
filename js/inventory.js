@@ -90,7 +90,9 @@ const Inventory = (() => {
             sheets = [];
             $('invUi').hidden = true;
             status.className = 'status status--error';
-            status.textContent = `❌ ${error.message}`;
+            status.textContent = `❌ ${error.message}. Compara tu archivo con el ejemplo de la guía de abajo.`;
+            const help = $('invHelp');
+            if (help) help.open = true;
         }
     }
 
@@ -167,7 +169,7 @@ const Inventory = (() => {
                 descripcion: '',
                 condicion: 'NUEVO',
                 categoria,
-                logoName: '',
+                logoIndex: 0,
             });
             added++;
         }

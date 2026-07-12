@@ -15,18 +15,14 @@ const Labels = (() => {
     }
 
     /**
-     * Logo derecho de una partida: el que indique item.logoName (por
-     * nombre, así sobrevive a exportar/importar entre equipos) o el
-     * primero de la biblioteca como predeterminado. El izquierdo nunca
-     * cambia.
+     * Logo derecho de una partida: el de la posición item.logoIndex de la
+     * biblioteca (0 = predeterminado). El izquierdo nunca cambia.
      */
     function rightLogoSrc(settings, item) {
         const logos = settings.rightLogos || [];
-        if (item && item.logoName) {
-            const match = logos.find((logo) => logo.name === item.logoName);
-            if (match) return match.src;
-        }
-        return logos.length ? logos[0].src : '';
+        if (!logos.length) return '';
+        const idx = item && Number.isInteger(item.logoIndex) ? item.logoIndex : 0;
+        return (logos[idx] || logos[0]).src;
     }
 
     function header(settings, item) {

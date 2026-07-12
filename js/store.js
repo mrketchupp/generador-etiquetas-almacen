@@ -51,11 +51,10 @@ const Store = (() => {
         settings: {
             headerText: 'BRONCO RIG-91',
             logoLeft: '',
-            // Biblioteca de logos derechos con nombre (ej. GSM, DLTA).
-            // El primero es el predeterminado; cada partida puede elegir
-            // otro por nombre (item.logoName) si perItemLogo está activo.
+            // Biblioteca de logos derechos: [{id, src}]. El primero es el
+            // predeterminado; cada partida guarda item.logoIndex (0 =
+            // predeterminado), lo que también sirve al exportar/importar.
             rightLogos: [],
-            perItemLogo: false,
             geminiApiKey: '',
             geminiModel: '',
             layout: { ...DEFAULT_LAYOUT },
@@ -107,9 +106,21 @@ const Store = (() => {
             // logo (predeterminado) de la biblioteca.
             if (!Array.isArray(merged.settings.rightLogos)) merged.settings.rightLogos = [];
             if (merged.settings.logoRight && merged.settings.rightLogos.length === 0) {
-                merged.settings.rightLogos.push({ id: Utils.uid(), name: 'Principal', src: merged.settings.logoRight });
+                merged.settings.rightLogos.push({ id: Utils.uid(), src: merged.settings.logoRight });
             }
             delete merged.settings.logoRight;
+            delete merged.settings.perItemLogo;
+            // Migración: la referencia por nombre (versión anterior) pasa a
+            // ser por posición (0 = predeterminado).
+            for (const item of merged.materials || []) {
+                if (!Number.isInteger(item.logoIndex)) {
+                    const idx = item.logoName
+                        ? merged.settings.rightLogos.findIndex((logo) => logo.name === item.logoName)
+                        : -1;
+                    item.logoIndex = idx > 0 ? idx : 0;
+                }
+                delete item.logoName;
+            }
             return merged;
         } catch (error) {
             console.error('No se pudo cargar el estado guardado:', error);
@@ -124,7 +135,7 @@ const Store = (() => {
 
         if (old('logoLeft')) state.settings.logoLeft = old('logoLeft');
         if (old('logoRight')) {
-            state.settings.rightLogos.push({ id: Utils.uid(), name: 'Principal', src: old('logoRight') });
+            state.settings.rightLogos.push({ id: Utils.uid(), src: old('logoRight') });
         }
         if (old('headerText')) state.settings.headerText = old('headerText');
         if (old('geminiApiKey')) state.settings.geminiApiKey = old('geminiApiKey');

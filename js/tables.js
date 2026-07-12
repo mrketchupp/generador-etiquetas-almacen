@@ -38,11 +38,12 @@ const Tables = (() => {
         onListChanged();
     }
 
-    /** Nombre del logo derecho que usará esta partida. */
-    function itemLogoName(item) {
+    /** Logo derecho efectivo de la partida (posición en la biblioteca). */
+    function itemLogo(item) {
         const logos = Store.state.settings.rightLogos;
-        if (item.logoName && logos.some((logo) => logo.name === item.logoName)) return item.logoName;
-        return logos.length ? `${logos[0].name} (pred.)` : '—';
+        if (!logos.length) return null;
+        const idx = Number.isInteger(item.logoIndex) && logos[item.logoIndex] ? item.logoIndex : 0;
+        return { ...logos[idx], isDefault: idx === 0 };
     }
 
     function materialCard(item, onListChanged) {
@@ -50,16 +51,25 @@ const Tables = (() => {
         const addChip = (text, title) => {
             if (text) chips.append(el('span', { class: 'chip', text, title }));
         };
-        addChip(`× ${item.cantidad}`, 'Cantidad');
         addChip(item.codigoAx ? `AX ${item.codigoAx}` : '', 'Código AX');
-        addChip(item.dimension, 'Dimensión / Clave almacén');
         addChip(item.noParte ? `NP ${item.noParte}` : '', 'No. Parte');
         addChip(item.descripcion, 'Descripción');
         addChip(item.condicion, 'Condición');
         addChip(item.categoria, 'Categoría');
-        if (Store.state.settings.perItemLogo) {
-            addChip(`Logo: ${itemLogoName(item)}`, 'Logo derecho');
+        const logo = itemLogo(item);
+        if (logo) {
+            chips.append(el('span', {
+                class: 'chip chip--logo',
+                title: logo.isDefault ? 'Logo derecho (predeterminado)' : 'Logo derecho',
+            }, el('img', { src: logo.src, alt: 'Logo derecho' })));
         }
+
+        // Nombre + dimensión siempre juntos: con varias partidas del mismo
+        // material (BANDA, BANDA…) la dimensión es lo que las distingue.
+        const title = el('div', { class: 'item-card__title' }, [
+            el('span', { text: item.nombre || '(sin nombre)' }),
+            item.dimension ? el('span', { class: 'dim-badge', text: item.dimension, title: 'Dimensión / Clave almacén' }) : null,
+        ]);
 
         const materials = Store.state.materials;
         const actions = el('div', { class: 'item-actions' }, [
@@ -69,10 +79,8 @@ const Tables = (() => {
         ]);
 
         return el('div', { class: 'item-card' }, [
-            el('div', { class: 'item-card__body' }, [
-                el('div', { class: 'item-card__title', text: item.nombre || '(sin nombre)' }),
-                chips,
-            ]),
+            el('div', { class: 'qty-badge', title: 'Cantidad de etiquetas', text: `×${item.cantidad}` }),
+            el('div', { class: 'item-card__body' }, [title, chips]),
             actions,
         ]);
     }
@@ -112,26 +120,35 @@ const Tables = (() => {
             selectField('Categoría', 'categoria', CATEGORIAS),
         ]);
 
-        // Autocompletar nombre al cambiar el código AX (si hay CSV cargado)
+        // Autocompletar nombre al cambiar el código AX (si hay lista cargada)
         fields.codigoAx.addEventListener('change', () => {
             const nombre = Store.lookupNombre(fields.codigoAx.value);
             if (nombre) fields.nombre.value = nombre;
+            else if (typeof App !== 'undefined') App.suggestCodigosFile();
         });
 
-        // Selector de logo derecho por partida (si la opción está activa)
-        if (Store.state.settings.perItemLogo) {
-            const logos = Store.state.settings.rightLogos;
-            const select = el('select', { class: 'input' });
-            select.append(el('option', {
-                value: '',
-                text: logos.length ? `Predeterminado (${logos[0].name})` : 'Predeterminado (sin logos)',
-            }));
-            for (const logo of logos) select.append(el('option', { value: logo.name, text: logo.name }));
-            select.value = logos.some((logo) => logo.name === item.logoName) ? item.logoName : '';
-            fields.logoName = select;
-            grid.append(el('label', { class: 'field' }, [
+        // Selector visual de logo derecho (miniaturas, sin nombres)
+        const logos = Store.state.settings.rightLogos;
+        let chosenLogo = Number.isInteger(item.logoIndex) && logos[item.logoIndex] ? item.logoIndex : 0;
+        if (logos.length > 0) {
+            const picker = el('div', { class: 'logo-picker' });
+            logos.forEach((logo, idx) => {
+                const option = el('button', {
+                    type: 'button',
+                    class: `logo-option${idx === chosenLogo ? ' logo-option--selected' : ''}`,
+                    title: idx === 0 ? 'Logo predeterminado' : 'Logo alternativo',
+                }, el('img', { src: logo.src, alt: idx === 0 ? 'Logo predeterminado' : 'Logo alternativo' }));
+                option.addEventListener('click', () => {
+                    chosenLogo = idx;
+                    picker.querySelectorAll('.logo-option').forEach((btn, i) => {
+                        btn.classList.toggle('logo-option--selected', i === idx);
+                    });
+                });
+                picker.append(option);
+            });
+            grid.append(el('div', { class: 'field field--full' }, [
                 el('span', { class: 'field__label', text: 'Logo derecho' }),
-                select,
+                picker,
             ]));
         }
 
@@ -144,7 +161,7 @@ const Tables = (() => {
             item.descripcion = fields.descripcion.value.trim();
             item.condicion = fields.condicion.value;
             item.categoria = fields.categoria.value;
-            if (fields.logoName) item.logoName = fields.logoName.value;
+            item.logoIndex = chosenLogo;
             editingId = null;
             onListChanged();
         };

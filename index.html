@@ -67,6 +67,44 @@
                         <p class="hint">El inventario no se guarda al recargar la página, pero las partidas que añadas
                             a la lista de revisión sí se conservan. La categoría (inventariable/consumible) se toma del
                             nombre de cada hoja.</p>
+                        <details id="invHelp" class="format-help">
+                            <summary>📋 ¿Cómo debe ser el archivo?</summary>
+                            <p class="hint">Cada hoja del Excel debe tener una fila de encabezados con al menos estas
+                                columnas (no importan mayúsculas/minúsculas ni el orden; DIMENSION y NP son
+                                opcionales):</p>
+                            <div class="table-wrap">
+                                <table class="format-example">
+                                    <thead>
+                                        <tr>
+                                            <th>CODIGO AX</th>
+                                            <th>DESCRIPCION</th>
+                                            <th>DIMENSION</th>
+                                            <th>NP</th>
+                                            <th>CANTIDAD</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1739</td>
+                                            <td>BANDA</td>
+                                            <td>3VX900</td>
+                                            <td></td>
+                                            <td>1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1063</td>
+                                            <td>EMPAQUE</td>
+                                            <td>FLEXITALIC 8"</td>
+                                            <td></td>
+                                            <td>17</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="hint">Si el nombre de la hoja contiene la palabra <strong>CONSUMIBLE</strong>
+                                (ej. «CONTENEDOR #1 CONSUMIBLE»), sus partidas se marcan como CONSUMIBLES; si no, como
+                                INVENTARIABLE.</p>
+                        </details>
                         <div id="invStatus" class="status" hidden></div>
                         <div id="invUi" hidden>
                             <div class="inv-toolbar">
@@ -313,28 +351,20 @@
 
         <div class="modal__section">
             <h3>Logos derechos</h3>
-            <p class="hint">Registra uno por inventario (ej. GSM y DLTA). El primero es el predeterminado y cada
-                partida puede usar otro.</p>
+            <p class="hint">Registra uno por inventario. El primero es el predeterminado; al editar una partida puedes
+                elegir cuál usar.</p>
             <div id="rightLogosList" class="logo-list"></div>
             <div class="form-grid" style="margin-top: 12px;">
-                <label class="field">
-                    <span class="field__label">Nombre del logo</span>
-                    <input type="text" id="newLogoName" class="input" placeholder="Ej: GSM">
-                </label>
                 <label class="field">
                     <span class="field__label">Archivo</span>
                     <input type="file" id="newLogoFile" class="input" accept="image/*">
                 </label>
-                <label class="field field--full">
+                <label class="field">
                     <span class="field__label">O URL de imagen</span>
                     <input type="text" id="newLogoUrl" class="input" placeholder="https://ejemplo.com/logo.png">
                 </label>
             </div>
             <button type="button" id="newLogoAdd" class="btn">➕ Añadir logo</button>
-            <label style="display: flex; align-items: center; gap: 8px; margin-top: 14px;">
-                <input type="checkbox" id="cfgPerItemLogo">
-                <span>Seleccionar logo derecho por partida (aparece al editar cada partida)</span>
-            </label>
         </div>
 
         <div class="modal__section">
@@ -343,14 +373,46 @@
             <input type="text" id="cfgHeaderText" class="input" style="width: 100%;" placeholder="BRONCO RIG-91">
         </div>
 
-        <div class="modal__section">
-            <h3>Tabla de códigos AX</h3>
-            <p class="hint">CSV con columnas «Codigo AX» y «Nombre» para autocompletar nombres.</p>
+        <div class="modal__section" id="csvSection">
+            <h3>Lista de códigos AX</h3>
+            <p class="hint">Archivo CSV o Excel con los códigos y sus nombres, para autocompletar el Nombre al
+                escribir un código.</p>
             <div class="inline-controls">
-                <input type="file" id="csvFile" class="input" accept=".csv" style="flex: 1;">
+                <input type="file" id="csvFile" class="input"
+                    accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    style="flex: 1;">
                 <button type="button" id="csvClear" class="btn">Limpiar</button>
             </div>
             <p id="csvStatus" class="hint"></p>
+            <details id="csvHelp" class="format-help">
+                <summary>📋 ¿Cómo debe ser el archivo?</summary>
+                <p class="hint">La primera fila debe tener los encabezados <strong>Codigo AX</strong> y
+                    <strong>Nombre</strong> (no importan mayúsculas/minúsculas). Sirve un .csv o un Excel .xlsx:</p>
+                <div class="table-wrap">
+                    <table class="format-example">
+                        <thead>
+                            <tr>
+                                <th>Codigo AX</th>
+                                <th>Nombre</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1739</td>
+                                <td>BANDA</td>
+                            </tr>
+                            <tr>
+                                <td>1720</td>
+                                <td>ANILLOS</td>
+                            </tr>
+                            <tr>
+                                <td>1763</td>
+                                <td>BOMBA HID DE TRANSFERENCIA</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
         </div>
 
         <div class="modal__section">

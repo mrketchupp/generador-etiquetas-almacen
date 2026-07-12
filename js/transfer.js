@@ -57,9 +57,9 @@ const Transfer = (() => {
             descripcion: text(item.descripcion),
             condicion: Tables.CONDICIONES.includes(item.condicion) ? item.condicion : 'NUEVO',
             categoria: Tables.CATEGORIAS.includes(item.categoria) ? item.categoria : 'INVENTARIABLE',
-            // Se referencia por nombre para que sobreviva entre equipos si
-            // los logos se llaman igual; si no existe, cae al predeterminado.
-            logoName: text(item.logoName),
+            // Posición del logo derecho en la biblioteca (0 = predeterminado);
+            // al importar en otro equipo se usa la misma posición de su lista.
+            logoIndex: Utils.clampInt(item.logoIndex, 0, 0),
         };
     }
 

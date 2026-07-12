@@ -42,7 +42,7 @@ const App = (() => {
                 descripcion: $('fDescripcion').value.trim(),
                 condicion: 'NUEVO',
                 categoria: 'INVENTARIABLE',
-                logoName: '',
+                logoIndex: 0,
             });
             event.target.reset();
             $('fCantidad').value = '1';
@@ -54,6 +54,7 @@ const App = (() => {
         $('fCodigoAx').addEventListener('change', () => {
             const nombre = Store.lookupNombre($('fCodigoAx').value);
             if (nombre) $('fNombre').value = nombre;
+            else suggestCodigosFile();
         });
     }
 
@@ -76,7 +77,33 @@ const App = (() => {
         $('fAxCodigo').addEventListener('change', () => {
             const nombre = Store.lookupNombre($('fAxCodigo').value);
             if (nombre) $('fAxNombre').value = nombre;
+            else suggestCodigosFile();
         });
+    }
+
+    // ---------- Sugerencia: lista de códigos AX ----------
+
+    let codigosSuggested = false;
+
+    /**
+     * Si el usuario escribe códigos a mano y no hay lista de códigos
+     * cargada, se le sugiere (una vez por sesión) cargarla para
+     * autocompletar los nombres, con acceso directo a la configuración.
+     */
+    function suggestCodigosFile() {
+        if (codigosSuggested) return;
+        if (Object.keys(Store.state.codigosAX).length > 0) return;
+        codigosSuggested = true;
+        Utils.toastAction(
+            '💡 El Nombre puede autocompletarse solo: carga una vez tu lista de códigos AX.',
+            'Cargar lista',
+            () => {
+                $('configModal').showModal();
+                const help = $('csvHelp');
+                if (help) help.open = true;
+                $('csvSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            },
+        );
     }
 
     // ---------- Vista previa / impresión ----------
@@ -239,10 +266,10 @@ const App = (() => {
         }
         logos.forEach((logo, index) => {
             list.append(el('div', { class: 'logo-row' }, [
-                el('img', { class: 'logo-row__img', src: logo.src, alt: logo.name }),
-                el('span', { class: 'logo-row__name', text: index === 0 ? `${logo.name} · predeterminado` : logo.name }),
+                el('img', { class: 'logo-row__img', src: logo.src, alt: 'Logo derecho' }),
+                el('span', { class: 'logo-row__name', text: index === 0 ? 'Predeterminado' : `Alternativo ${index}` }),
                 index > 0 ? el('button', {
-                    class: 'btn btn--small', type: 'button', text: '★ Predeterminado',
+                    class: 'btn btn--small', type: 'button', text: '★ Hacer predeterminado',
                     onclick: () => {
                         logos.splice(index, 1);
                         logos.unshift(logo);
@@ -254,7 +281,7 @@ const App = (() => {
                 el('button', {
                     class: 'btn btn--small btn--danger', type: 'button', text: 'Eliminar',
                     onclick: () => {
-                        if (!confirm(`¿Eliminar el logo "${logo.name}"?`)) return;
+                        if (!confirm('¿Eliminar este logo?')) return;
                         logos.splice(index, 1);
                         Store.save();
                         renderRightLogos();
@@ -266,18 +293,9 @@ const App = (() => {
     }
 
     async function addRightLogo() {
-        const name = $('newLogoName').value.trim();
         const file = $('newLogoFile').files[0];
         const url = $('newLogoUrl').value.trim();
 
-        if (!name) {
-            toast('Ponle un nombre al logo (ej. GSM o DLTA)', 'error');
-            return;
-        }
-        if (Store.state.settings.rightLogos.some((logo) => logo.name.toLowerCase() === name.toLowerCase())) {
-            toast('Ya existe un logo con ese nombre', 'error');
-            return;
-        }
         let src = url;
         if (file) {
             try {
@@ -292,30 +310,62 @@ const App = (() => {
             return;
         }
 
-        Store.state.settings.rightLogos.push({ id: Utils.uid(), name, src });
+        Store.state.settings.rightLogos.push({ id: Utils.uid(), src });
         Store.save();
-        $('newLogoName').value = '';
         $('newLogoFile').value = '';
         $('newLogoUrl').value = '';
         renderRightLogos();
         refreshTables();
-        toast(`Logo "${name}" añadido`, 'success');
+        toast('Logo añadido', 'success');
     }
 
     function bindRightLogos() {
         $('newLogoAdd').addEventListener('click', addRightLogo);
-        $('cfgPerItemLogo').addEventListener('change', () => {
-            Store.state.settings.perItemLogo = $('cfgPerItemLogo').checked;
-            Store.save();
-            refreshTables(); // muestra/oculta el chip y el selector de logo
-        });
     }
 
     function updateCsvStatus() {
         const count = Object.keys(Store.state.codigosAX).length;
-        $('csvStatus').textContent = count > 0
-            ? `${count} códigos AX cargados`
+        const status = $('csvStatus');
+        status.className = 'hint';
+        status.textContent = count > 0
+            ? `✅ ${count} códigos AX cargados`
             : 'Sin códigos cargados';
+    }
+
+    /** Lee la lista de códigos desde CSV o Excel (.xlsx). */
+    async function parseCodigosFile(file) {
+        const isExcel = /\.xlsx$/i.test(file.name) || (file.type || '').includes('spreadsheetml');
+        if (!isExcel) {
+            return CSV.parseCodigosMap(await readFileAsText(file));
+        }
+        const sheets = await Xlsx.read(file);
+        const map = {};
+        for (const sheet of sheets) {
+            // localizar la fila de encabezados en las primeras filas
+            for (let i = 0; i < Math.min(sheet.rows.length, 10); i++) {
+                const cells = sheet.rows[i].map((c) => String(c ?? '').trim().toLowerCase());
+                const codeIdx = cells.findIndex((c) => c.includes('codigo') || c.includes('código'));
+                const nameIdx = cells.findIndex((c) => c.includes('nombre'));
+                if (codeIdx === -1 || nameIdx === -1) continue;
+                for (const row of sheet.rows.slice(i + 1)) {
+                    const code = String(row[codeIdx] ?? '').trim().toUpperCase();
+                    const name = String(row[nameIdx] ?? '').trim();
+                    if (code && name) map[code] = name;
+                }
+                break;
+            }
+        }
+        return map;
+    }
+
+    /** Muestra la ayuda de formato (para corregir el archivo sin ser técnico). */
+    function showCodigosFormatError(message) {
+        const status = $('csvStatus');
+        status.className = 'status status--error';
+        status.textContent = `❌ ${message}`;
+        const help = $('csvHelp');
+        if (help) help.open = true;
+        toast('Revisa el formato del archivo: abrí la guía con un ejemplo', 'error');
     }
 
     function bindCsvControls() {
@@ -323,18 +373,19 @@ const App = (() => {
             const file = event.target.files[0];
             if (!file) return;
             try {
-                const map = CSV.parseCodigosMap(await readFileAsText(file));
+                const map = await parseCodigosFile(file);
                 const count = Object.keys(map).length;
                 if (count === 0) {
-                    toast('El CSV debe tener columnas "Codigo AX" y "Nombre"', 'error');
+                    showCodigosFormatError('No encontré las columnas «Codigo AX» y «Nombre». Compara tu archivo con el ejemplo de abajo.');
                     return;
                 }
                 Store.state.codigosAX = map;
                 Store.save();
                 updateCsvStatus();
                 toast(`${count} códigos AX cargados`, 'success');
-            } catch {
-                toast('No se pudo leer el archivo CSV', 'error');
+            } catch (error) {
+                console.error('Error al leer la lista de códigos:', error);
+                showCodigosFormatError('No se pudo leer el archivo. Debe ser .csv o .xlsx como el ejemplo de abajo.');
             }
         });
 
@@ -445,7 +496,7 @@ const App = (() => {
                     descripcion: oc ? `OC: ${oc}` : '',
                     condicion: 'NUEVO',
                     categoria: 'INVENTARIABLE',
-                    logoName: '',
+                    logoIndex: 0,
                 });
             }
             refreshTables();
@@ -574,7 +625,6 @@ const App = (() => {
         $('logoLeftUrl').value = leftSrc && !leftSrc.startsWith('data:') ? leftSrc : '';
         updateLogoPreview('logoLeft');
         renderRightLogos();
-        $('cfgPerItemLogo').checked = Boolean(Store.state.settings.perItemLogo);
         updateCsvStatus();
         updateGeminiUi();
 
@@ -594,5 +644,5 @@ const App = (() => {
 
     document.addEventListener('DOMContentLoaded', init);
 
-    return { setMode, refreshTables };
+    return { setMode, refreshTables, suggestCodigosFile };
 })();

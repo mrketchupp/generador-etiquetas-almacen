@@ -61,19 +61,40 @@ const Utils = (() => {
 
     let toastHost = null;
 
-    /** Notificación no bloqueante (reemplaza a alert()). */
-    function toast(message, type = 'info') {
+    function ensureToastHost() {
         if (!toastHost) {
             toastHost = el('div', { class: 'toast-host' });
             document.body.append(toastHost);
         }
-        const item = el('div', { class: `toast toast--${type}`, text: message });
-        toastHost.append(item);
+        return toastHost;
+    }
+
+    function showToast(item, duration) {
+        ensureToastHost().append(item);
         requestAnimationFrame(() => item.classList.add('toast--visible'));
         setTimeout(() => {
             item.classList.remove('toast--visible');
             setTimeout(() => item.remove(), 300);
-        }, 3500);
+        }, duration);
+    }
+
+    /** Notificación no bloqueante (reemplaza a alert()). */
+    function toast(message, type = 'info') {
+        showToast(el('div', { class: `toast toast--${type}`, text: message }), 3500);
+    }
+
+    /** Notificación con botón de acción (llamada a la acción). */
+    function toastAction(message, actionText, onAction, duration = 10000) {
+        const button = el('button', { class: 'toast__btn', type: 'button', text: actionText });
+        const item = el('div', { class: 'toast toast--action' }, [
+            el('span', { text: message }),
+            button,
+        ]);
+        button.addEventListener('click', () => {
+            item.remove();
+            onAction();
+        });
+        showToast(item, duration);
     }
 
     function readFileAsDataURL(file) {
@@ -94,5 +115,5 @@ const Utils = (() => {
         });
     }
 
-    return { parseLength, formatMm, mmToPx, clampInt, uid, el, toast, readFileAsDataURL, readFileAsText };
+    return { parseLength, formatMm, mmToPx, clampInt, uid, el, toast, toastAction, readFileAsDataURL, readFileAsText };
 })();
