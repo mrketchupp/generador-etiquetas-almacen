@@ -42,17 +42,20 @@ const App = (() => {
                 descripcion: $('fDescripcion').value.trim(),
                 condicion: 'NUEVO',
                 categoria: 'INVENTARIABLE',
+                logoIndex: 0,
             });
             event.target.reset();
             $('fCantidad').value = '1';
             refreshTables();
             $('fCodigoAx').focus();
             toast('Partida añadida a la lista', 'success');
+            suggestLogos();
         });
 
         $('fCodigoAx').addEventListener('change', () => {
             const nombre = Store.lookupNombre($('fCodigoAx').value);
             if (nombre) $('fNombre').value = nombre;
+            else suggestCodigosFile();
         });
     }
 
@@ -70,12 +73,41 @@ const App = (() => {
             refreshTables();
             $('fAxCodigo').focus();
             toast('Código añadido a la lista', 'success');
+            suggestLogos();
         });
 
         $('fAxCodigo').addEventListener('change', () => {
             const nombre = Store.lookupNombre($('fAxCodigo').value);
             if (nombre) $('fAxNombre').value = nombre;
+            else suggestCodigosFile();
         });
+    }
+
+    // ---------- Sugerencia: lista de códigos AX ----------
+
+    let codigosSuggested = false;
+
+    /**
+     * Si el usuario escribe códigos a mano y no hay lista de códigos
+     * cargada, se le sugiere (una vez por sesión) cargarla para
+     * autocompletar los nombres, con acceso directo a la configuración.
+     */
+    function suggestCodigosFile() {
+        if (codigosSuggested) return;
+        if (Object.keys(Store.state.codigosAX).length > 0) return;
+        // una sola sugerencia a la vez; la otra saldrá en la próxima acción
+        if (document.querySelector('.toast--action')) return;
+        codigosSuggested = true;
+        Utils.toastAction(
+            '💡 El Nombre puede autocompletarse solo: carga una vez tu lista de códigos AX.',
+            'Cargar lista',
+            () => {
+                $('configModal').showModal();
+                const help = $('csvHelp');
+                if (help) help.open = true;
+                $('csvSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            },
+        );
     }
 
     // ---------- Vista previa / impresión ----------
@@ -207,6 +239,7 @@ const App = (() => {
                 $(`${key}Url`).value = '';
                 Store.save();
                 updateLogoPreview(key);
+                toast('✅ Logo izquierdo cargado', 'success');
             } catch {
                 toast('No se pudo leer la imagen del logo', 'error');
             }
@@ -216,6 +249,7 @@ const App = (() => {
             Store.state.settings[key] = $(`${key}Url`).value.trim();
             Store.save();
             updateLogoPreview(key);
+            if (Store.state.settings[key]) toast('✅ Logo izquierdo actualizado', 'success');
         });
 
         $(`${key}Clear`).addEventListener('click', () => {
@@ -224,14 +258,171 @@ const App = (() => {
             $(`${key}File`).value = '';
             Store.save();
             updateLogoPreview(key);
+            toast('Logo izquierdo eliminado', 'info');
         });
+    }
+
+    // ---------- Biblioteca de logos derechos ----------
+
+    function renderRightLogos() {
+        const list = $('rightLogosList');
+        const logos = Store.state.settings.rightLogos;
+        list.replaceChildren();
+        if (!logos.length) {
+            list.append(el('p', { class: 'hint', text: 'Sin logos registrados: el lado derecho de la etiqueta quedará vacío.' }));
+        }
+        logos.forEach((logo, index) => {
+            list.append(el('div', { class: 'logo-row' }, [
+                el('img', { class: 'logo-row__img', src: logo.src, alt: 'Logo derecho' }),
+                el('span', { class: 'logo-row__name', text: index === 0 ? 'Predeterminado' : `Alternativo ${index}` }),
+                index > 0 ? el('button', {
+                    class: 'btn btn--small', type: 'button', text: '★ Hacer predeterminado',
+                    onclick: () => {
+                        logos.splice(index, 1);
+                        logos.unshift(logo);
+                        Store.save();
+                        renderRightLogos();
+                        refreshTables();
+                    },
+                }) : null,
+                el('button', {
+                    class: 'btn btn--small btn--danger', type: 'button', text: 'Eliminar',
+                    onclick: () => {
+                        if (!confirm('¿Eliminar este logo?')) return;
+                        logos.splice(index, 1);
+                        Store.save();
+                        renderRightLogos();
+                        refreshTables();
+                    },
+                }),
+            ]));
+        });
+    }
+
+    // La imagen elegida se muestra al instante en una vista previa; el
+    // nombre del archivo solo no basta para saber si cargó bien.
+    let pendingLogoSrc = '';
+
+    function updateNewLogoPreview() {
+        const preview = $('newLogoPreview');
+        preview.replaceChildren();
+        if (pendingLogoSrc) {
+            preview.append(el('img', { src: pendingLogoSrc, alt: 'Vista previa del logo' }));
+            preview.classList.remove('logo-preview--empty');
+        } else {
+            preview.textContent = 'Aún sin imagen: elige un archivo o pega una URL';
+            preview.classList.add('logo-preview--empty');
+        }
+        $('newLogoAdd').disabled = !pendingLogoSrc;
+    }
+
+    function addRightLogo() {
+        if (!pendingLogoSrc) {
+            toast('Elige un archivo o pega una URL primero', 'error');
+            return;
+        }
+        Store.state.settings.rightLogos.push({ id: Utils.uid(), src: pendingLogoSrc });
+        Store.save();
+        pendingLogoSrc = '';
+        $('newLogoFile').value = '';
+        $('newLogoUrl').value = '';
+        updateNewLogoPreview();
+        renderRightLogos();
+        refreshTables();
+        toast('✅ Logo derecho añadido', 'success');
+    }
+
+    function bindRightLogos() {
+        $('newLogoFile').addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                pendingLogoSrc = await readFileAsDataURL(file);
+                $('newLogoUrl').value = '';
+                updateNewLogoPreview();
+                toast('Imagen cargada: revisa la vista previa y pulsa «Añadir logo»', 'info');
+            } catch {
+                pendingLogoSrc = '';
+                updateNewLogoPreview();
+                toast('No se pudo leer la imagen del logo', 'error');
+            }
+        });
+
+        $('newLogoUrl').addEventListener('change', () => {
+            pendingLogoSrc = $('newLogoUrl').value.trim();
+            if (pendingLogoSrc) $('newLogoFile').value = '';
+            updateNewLogoPreview();
+        });
+
+        $('newLogoAdd').addEventListener('click', addRightLogo);
+    }
+
+    // ---------- Sugerencia: cargar logos ----------
+
+    let logosSuggested = false;
+
+    /** Si se empieza a trabajar sin ningún logo, se sugiere cargarlos. */
+    function suggestLogos() {
+        if (logosSuggested) return;
+        const settings = Store.state.settings;
+        if (settings.logoLeft || settings.rightLogos.length > 0) return;
+        // una sola sugerencia a la vez; la otra saldrá en la próxima acción
+        if (document.querySelector('.toast--action')) return;
+        logosSuggested = true;
+        Utils.toastAction(
+            '💡 Tus etiquetas se imprimirán sin logos. Cárgalos una vez y quedan guardados.',
+            'Cargar logos',
+            () => {
+                const modal = $('configModal');
+                modal.showModal();
+                modal.scrollTop = 0;
+            },
+        );
     }
 
     function updateCsvStatus() {
         const count = Object.keys(Store.state.codigosAX).length;
-        $('csvStatus').textContent = count > 0
-            ? `${count} códigos AX cargados`
+        const status = $('csvStatus');
+        status.className = 'hint';
+        status.textContent = count > 0
+            ? `✅ ${count} códigos AX cargados`
             : 'Sin códigos cargados';
+    }
+
+    /** Lee la lista de códigos desde CSV o Excel (.xlsx). */
+    async function parseCodigosFile(file) {
+        const isExcel = /\.xlsx$/i.test(file.name) || (file.type || '').includes('spreadsheetml');
+        if (!isExcel) {
+            return CSV.parseCodigosMap(await readFileAsText(file));
+        }
+        const sheets = await Xlsx.read(file);
+        const map = {};
+        for (const sheet of sheets) {
+            // localizar la fila de encabezados en las primeras filas
+            for (let i = 0; i < Math.min(sheet.rows.length, 10); i++) {
+                const cells = sheet.rows[i].map((c) => String(c ?? '').trim().toLowerCase());
+                const codeIdx = cells.findIndex((c) => c.includes('codigo') || c.includes('código'));
+                const nameIdx = cells.findIndex((c) => c.includes('nombre'));
+                if (codeIdx === -1 || nameIdx === -1) continue;
+                for (const row of sheet.rows.slice(i + 1)) {
+                    const code = String(row[codeIdx] ?? '').trim().toUpperCase();
+                    const name = String(row[nameIdx] ?? '').trim();
+                    if (code && name) map[code] = name;
+                }
+                break;
+            }
+        }
+        return map;
+    }
+
+    /** Muestra la ayuda de formato (para corregir el archivo sin ser técnico). */
+    function showCodigosFormatError(message) {
+        const status = $('csvStatus');
+        status.className = 'status status--error';
+        status.textContent = `❌ ${message}`;
+        const help = $('csvHelp');
+        if (help) help.open = true;
+        toast('Revisa el formato del archivo: abrí la guía con un ejemplo', 'error');
     }
 
     function bindCsvControls() {
@@ -239,18 +430,19 @@ const App = (() => {
             const file = event.target.files[0];
             if (!file) return;
             try {
-                const map = CSV.parseCodigosMap(await readFileAsText(file));
+                const map = await parseCodigosFile(file);
                 const count = Object.keys(map).length;
                 if (count === 0) {
-                    toast('El CSV debe tener columnas "Codigo AX" y "Nombre"', 'error');
+                    showCodigosFormatError('No encontré las columnas «Codigo AX» y «Nombre». Compara tu archivo con el ejemplo de abajo.');
                     return;
                 }
                 Store.state.codigosAX = map;
                 Store.save();
                 updateCsvStatus();
                 toast(`${count} códigos AX cargados`, 'success');
-            } catch {
-                toast('No se pudo leer el archivo CSV', 'error');
+            } catch (error) {
+                console.error('Error al leer la lista de códigos:', error);
+                showCodigosFormatError('No se pudo leer el archivo. Debe ser .csv o .xlsx como el ejemplo de abajo.');
             }
         });
 
@@ -268,6 +460,7 @@ const App = (() => {
             Store.state.settings.headerText = $('cfgHeaderText').value.trim() || 'BRONCO RIG-91';
             $('cfgHeaderText').value = Store.state.settings.headerText;
             Store.save();
+            toast('✅ Texto de almacén guardado', 'success');
         });
 
         $('geminiKeySave').addEventListener('click', () => {
@@ -300,7 +493,7 @@ const App = (() => {
         enableBackdropClose(modal);
 
         bindLogoControls('logoLeft');
-        bindLogoControls('logoRight');
+        bindRightLogos();
         bindCsvControls();
         bindGeneralConfig();
     }
@@ -361,10 +554,13 @@ const App = (() => {
                     descripcion: oc ? `OC: ${oc}` : '',
                     condicion: 'NUEVO',
                     categoria: 'INVENTARIABLE',
+                    logoIndex: 0,
                 });
             }
             refreshTables();
             setVoucherStatus(`✅ Se extrajeron ${items.length} materiales. Revísalos en la tabla de abajo.`, 'success');
+            toast(`✅ ${items.length} materiales extraídos del vale`, 'success');
+            suggestLogos();
         } catch (error) {
             console.error('Error al procesar el vale:', error);
             setVoucherStatus(`❌ ${error.message}`, 'error');
@@ -392,6 +588,7 @@ const App = (() => {
                 $('voucherPreview').src = voucherDataUrl;
                 $('voucherPreviewBox').hidden = false;
                 setVoucherStatus('', '');
+                toast('✅ Imagen del vale cargada', 'success');
             } catch {
                 toast('No se pudo cargar la imagen', 'error');
             }
@@ -485,11 +682,11 @@ const App = (() => {
         // Valores iniciales del modal de configuración
         $('cfgHeaderText').value = Store.state.settings.headerText;
         $('geminiKeyInput').value = Store.state.settings.geminiApiKey;
-        for (const key of ['logoLeft', 'logoRight']) {
-            const src = Store.state.settings[key];
-            $(`${key}Url`).value = src && !src.startsWith('data:') ? src : '';
-            updateLogoPreview(key);
-        }
+        const leftSrc = Store.state.settings.logoLeft;
+        $('logoLeftUrl').value = leftSrc && !leftSrc.startsWith('data:') ? leftSrc : '';
+        updateLogoPreview('logoLeft');
+        renderRightLogos();
+        updateNewLogoPreview();
         updateCsvStatus();
         updateGeminiUi();
 
@@ -504,9 +701,18 @@ const App = (() => {
         bindVoucher();
         bindTransfer();
         bindClearButtons();
+        Inventory.init({ onAdd: () => { refreshTables(); suggestLogos(); } });
+
+        // Service worker: permite usar la app sin conexión una vez cargada
+        // (no aplica al abrir el archivo directamente con file://).
+        if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+            navigator.serviceWorker.register('sw.js').catch((error) => {
+                console.warn('No se pudo registrar el service worker:', error);
+            });
+        }
     }
 
     document.addEventListener('DOMContentLoaded', init);
 
-    return { setMode, refreshTables };
+    return { setMode, refreshTables, suggestCodigosFile };
 })();

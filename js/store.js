@@ -51,7 +51,10 @@ const Store = (() => {
         settings: {
             headerText: 'BRONCO RIG-91',
             logoLeft: '',
-            logoRight: '',
+            // Biblioteca de logos derechos: [{id, src}]. El primero es el
+            // predeterminado; cada partida guarda item.logoIndex (0 =
+            // predeterminado), lo que también sirve al exportar/importar.
+            rightLogos: [],
             geminiApiKey: '',
             geminiModel: '',
             layout: { ...DEFAULT_LAYOUT },
@@ -90,7 +93,7 @@ const Store = (() => {
             if (!raw) return migrateFromV1();
             const parsed = JSON.parse(raw);
             const base = freshState();
-            return {
+            const merged = {
                 ...base,
                 ...parsed,
                 settings: {
@@ -99,6 +102,26 @@ const Store = (() => {
                     layout: normalizeLayout((parsed.settings || {}).layout),
                 },
             };
+            // Migración: el logo derecho único anterior pasa a ser el primer
+            // logo (predeterminado) de la biblioteca.
+            if (!Array.isArray(merged.settings.rightLogos)) merged.settings.rightLogos = [];
+            if (merged.settings.logoRight && merged.settings.rightLogos.length === 0) {
+                merged.settings.rightLogos.push({ id: Utils.uid(), src: merged.settings.logoRight });
+            }
+            delete merged.settings.logoRight;
+            delete merged.settings.perItemLogo;
+            // Migración: la referencia por nombre (versión anterior) pasa a
+            // ser por posición (0 = predeterminado).
+            for (const item of merged.materials || []) {
+                if (!Number.isInteger(item.logoIndex)) {
+                    const idx = item.logoName
+                        ? merged.settings.rightLogos.findIndex((logo) => logo.name === item.logoName)
+                        : -1;
+                    item.logoIndex = idx > 0 ? idx : 0;
+                }
+                delete item.logoName;
+            }
+            return merged;
         } catch (error) {
             console.error('No se pudo cargar el estado guardado:', error);
             return freshState();
@@ -111,7 +134,9 @@ const Store = (() => {
         const old = (key) => localStorage.getItem(key);
 
         if (old('logoLeft')) state.settings.logoLeft = old('logoLeft');
-        if (old('logoRight')) state.settings.logoRight = old('logoRight');
+        if (old('logoRight')) {
+            state.settings.rightLogos.push({ id: Utils.uid(), src: old('logoRight') });
+        }
         if (old('headerText')) state.settings.headerText = old('headerText');
         if (old('geminiApiKey')) state.settings.geminiApiKey = old('geminiApiKey');
 

@@ -360,6 +360,319 @@ select.input:focus {
     color: var(--color-text);
 }
 
+/* ============ Lista de partidas (estilo Notion) ============ */
+.items-list {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.item-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color 0.1s;
+}
+
+.item-card:last-child,
+.item-editor:last-child {
+    border-bottom: none;
+}
+
+.item-card:hover {
+    background-color: var(--color-secondary);
+}
+
+.item-card__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-card__title {
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.item-card__title > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+/* La dimensión distingue partidas con el mismo nombre (BANDA, BANDA…) */
+.dim-badge {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 5px;
+    background-color: rgba(59, 130, 246, 0.14);
+    color: var(--color-blue);
+    white-space: nowrap;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (prefers-color-scheme: dark) {
+    .dim-badge {
+        background-color: rgba(96, 165, 250, 0.18);
+        color: #93c5fd;
+    }
+}
+
+/* Cantidad prominente al inicio de la tarjeta */
+.qty-badge {
+    flex-shrink: 0;
+    min-width: 46px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 8px 6px;
+    border-radius: 8px;
+    background-color: rgba(124, 58, 237, 0.12);
+    color: var(--color-accent);
+}
+
+@media (prefers-color-scheme: dark) {
+    .qty-badge {
+        background-color: rgba(167, 139, 250, 0.18);
+        color: #c4b5fd;
+    }
+}
+
+.item-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 5px;
+}
+
+.chip {
+    font-size: 11px;
+    line-height: 1.4;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    white-space: nowrap;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-actions {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.icon-action {
+    background: none;
+    border: none;
+    font-size: 15px;
+    line-height: 1;
+    padding: 7px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.icon-action:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+.item-editor {
+    padding: 14px;
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-secondary);
+}
+
+.item-editor .form-grid {
+    margin: 0 0 14px;
+}
+
+/* Chip con la miniatura del logo */
+.chip--logo {
+    padding: 2px 6px;
+    background-color: #fff;
+    border: 1px solid var(--color-border);
+    display: inline-flex;
+    align-items: center;
+}
+
+.chip--logo img {
+    height: 16px;
+    max-width: 64px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Selector visual de logo en el editor */
+.logo-picker {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.logo-option {
+    border: 2px solid var(--color-border);
+    background-color: #fff;
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.logo-option img {
+    width: 64px;
+    height: 30px;
+    object-fit: contain;
+    display: block;
+}
+
+.logo-option--selected {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
+}
+
+/* Guías de formato de archivo (para usuarios no técnicos) */
+.format-help {
+    margin: 10px 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 13px;
+}
+
+.format-help > summary {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.format-example {
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 4px 0;
+}
+
+.format-example th,
+.format-example td {
+    border: 1px solid var(--color-border);
+    padding: 6px 12px;
+    text-align: left;
+}
+
+.format-example th {
+    background-color: var(--color-secondary);
+    font-weight: 600;
+}
+
+/* ============ Inventario Excel ============ */
+.inv-toolbar {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) minmax(200px, 2fr);
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.inv-selectall {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.inv-list {
+    max-height: 340px;
+    overflow: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.inv-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.inv-row:last-child {
+    border-bottom: none;
+}
+
+.inv-row:hover {
+    background-color: var(--color-secondary);
+}
+
+.inv-row__code {
+    font-weight: 600;
+    min-width: 52px;
+    flex-shrink: 0;
+}
+
+.inv-row__desc {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.inv-row__dim {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 40%;
+}
+
+/* ============ Biblioteca de logos ============ */
+.logo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    flex-wrap: wrap;
+}
+
+.logo-row__img {
+    width: 64px;
+    height: 32px;
+    object-fit: contain;
+    background-color: #fff;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.logo-row__name {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 500;
+}
+
 /* ============ Estado / mensajes ============ */
 .status {
     margin-top: 12px;
@@ -567,6 +880,32 @@ body.preview-open #previewSection {
 .toast--error { background-color: #b91c1c; color: #fff; }
 .toast--warning { background-color: #b45309; color: #fff; }
 
+.toast--action {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: min(520px, 90vw);
+    white-space: normal;
+    text-align: left;
+}
+
+.toast__btn {
+    flex-shrink: 0;
+    background-color: var(--color-accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.toast__btn:hover {
+    background-color: var(--color-accent-hover);
+}
+
 /* ============ Responsive ============ */
 @media (max-width: 768px) {
     .form-grid {
@@ -575,5 +914,22 @@ body.preview-open #previewSection {
 
     .main {
         padding: 20px 14px 48px;
+    }
+
+    .inv-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    /* La dimensión distingue las partidas: visible también en móvil,
+       en su propia línea bajo la descripción. */
+    .inv-row {
+        flex-wrap: wrap;
+    }
+
+    .inv-row__dim {
+        flex-basis: 100%;
+        order: 4;
+        max-width: 100%;
+        padding-left: 26px;
     }
 }

@@ -14,14 +14,25 @@ const Labels = (() => {
         return box;
     }
 
-    function header(settings) {
+    /**
+     * Logo derecho de una partida: el de la posición item.logoIndex de la
+     * biblioteca (0 = predeterminado). El izquierdo nunca cambia.
+     */
+    function rightLogoSrc(settings, item) {
+        const logos = settings.rightLogos || [];
+        if (!logos.length) return '';
+        const idx = item && Number.isInteger(item.logoIndex) ? item.logoIndex : 0;
+        return (logos[idx] || logos[0]).src;
+    }
+
+    function header(settings, item) {
         return el('div', { class: 'label__header' }, [
             logoBox(settings.logoLeft, 'Logo izquierdo'),
             el('div', { class: 'label__title' }, [
                 el('h4', { text: 'ETIQUETADO ALMACEN' }),
                 el('p', { text: settings.headerText }),
             ]),
-            logoBox(settings.logoRight, 'Logo derecho'),
+            logoBox(rightLogoSrc(settings, item), 'Logo derecho'),
         ]);
     }
 
@@ -35,7 +46,7 @@ const Labels = (() => {
     /** Etiqueta completa de material. */
     function material(item, settings) {
         return el('div', { class: 'label label--material' }, [
-            header(settings),
+            header(settings, item),
             el('div', { class: 'label__body' }, [
                 el('div', { class: 'label__row-2' }, [
                     field('CODIGO AX:', item.codigoAx),
@@ -53,7 +64,7 @@ const Labels = (() => {
     /** Etiqueta de código AX en grande. */
     function codigoAx(item, settings) {
         return el('div', { class: 'label label--ax' }, [
-            header(settings),
+            header(settings, item),
             el('div', { class: 'label__ax-code', text: item.codigoAx }),
             el('div', { class: 'label__ax-name', text: item.nombre }),
         ]);
