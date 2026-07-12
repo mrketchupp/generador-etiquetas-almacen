@@ -39,6 +39,14 @@ js/preview.js     Vista previa escalada e impresión (beforeprint/afterprint)
 js/app.js         Orquestación: formularios, modales y eventos
 ```
 
-## Uso
+## Instalación como app y uso sin conexión
 
-No requiere instalación ni compilación: funciona abriendo `index.html` directamente en el navegador, con cualquier servidor estático o en GitHub Pages.
+La app es una PWA: servida por HTTPS (por ejemplo GitHub Pages), el navegador ofrece **instalarla** (menú → «Instalar aplicación» en Chrome/Edge, o «Añadir a pantalla de inicio» en iPhone/iPad). Tras la primera carga, un service worker guarda todos los archivos y la app **abre y funciona sin conexión a internet**: formularios, inventario Excel, lista de códigos, exportar/importar e imprimir.
+
+Solo requieren internet dos cosas: extraer datos de un vale con Gemini y los logos configurados por URL externa (si los cargas como archivo quedan guardados dentro de la app y funcionan offline).
+
+Las actualizaciones se descargan solas en segundo plano y se aplican en la siguiente visita. Al añadir archivos nuevos al proyecto hay que listarlos en `sw.js` (ASSETS).
+
+## Uso sin servidor
+
+También funciona abriendo `index.html` directamente en el navegador (sin instalación ni compilación); en ese caso no aplica el modo offline instalable.

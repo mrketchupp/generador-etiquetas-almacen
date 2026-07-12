@@ -1,0 +1,17 @@
+{
+    "name": "Generador de Etiquetas de Almacén",
+    "short_name": "Etiquetas",
+    "description": "Genera e imprime etiquetas de almacén: materiales, códigos AX, inventario desde Excel y lectura de vales con IA.",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "any",
+    "background_color": "#faf9f7",
+    "theme_color": "#7c3aed",
+    "lang": "es",
+    "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+        { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ]
+}

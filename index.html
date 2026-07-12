@@ -7,6 +7,9 @@
     <title>Generador de Etiquetas de Almacén</title>
     <link rel="icon" type="image/svg+xml"
         href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%237c3aed" d="M32.5 96l0 149.5c0 17 6.7 33.3 18.7 45.3l192 192c25 25 65.5 25 90.5 0L483.2 333.3c25-25 25-65.5 0-90.5l-192-192C279.2 38.7 263 32 246 32L96.5 32c-35.3 0-64 28.7-64 64zm112 16a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>'>
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/print.css">
 </head>
@@ -364,7 +367,10 @@
                     <input type="text" id="newLogoUrl" class="input" placeholder="https://ejemplo.com/logo.png">
                 </label>
             </div>
-            <button type="button" id="newLogoAdd" class="btn">➕ Añadir logo</button>
+            <div id="newLogoPreview" class="logo-preview logo-preview--empty">Aún sin imagen: elige un archivo o pega
+                una URL</div>
+            <button type="button" id="newLogoAdd" class="btn" style="margin-top: 10px;" disabled>➕ Añadir
+                logo</button>
         </div>
 
         <div class="modal__section">

@@ -85,6 +85,7 @@ const Inventory = (() => {
             const total = sheets.reduce((sum, s) => sum + s.items.length, 0);
             status.className = 'status status--success';
             status.textContent = `✅ ${total} artículos en ${sheets.length} hoja(s). Marca los que necesites y añádelos a la lista.`;
+            toast(`✅ Inventario cargado: ${total} artículos en ${sheets.length} hoja(s)`, 'success');
         } catch (error) {
             console.error('Error al leer el inventario:', error);
             sheets = [];

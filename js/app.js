@@ -49,6 +49,7 @@ const App = (() => {
             refreshTables();
             $('fCodigoAx').focus();
             toast('Partida añadida a la lista', 'success');
+            suggestLogos();
         });
 
         $('fCodigoAx').addEventListener('change', () => {
@@ -72,6 +73,7 @@ const App = (() => {
             refreshTables();
             $('fAxCodigo').focus();
             toast('Código añadido a la lista', 'success');
+            suggestLogos();
         });
 
         $('fAxCodigo').addEventListener('change', () => {
@@ -93,6 +95,8 @@ const App = (() => {
     function suggestCodigosFile() {
         if (codigosSuggested) return;
         if (Object.keys(Store.state.codigosAX).length > 0) return;
+        // una sola sugerencia a la vez; la otra saldrá en la próxima acción
+        if (document.querySelector('.toast--action')) return;
         codigosSuggested = true;
         Utils.toastAction(
             '💡 El Nombre puede autocompletarse solo: carga una vez tu lista de códigos AX.',
@@ -235,6 +239,7 @@ const App = (() => {
                 $(`${key}Url`).value = '';
                 Store.save();
                 updateLogoPreview(key);
+                toast('✅ Logo izquierdo cargado', 'success');
             } catch {
                 toast('No se pudo leer la imagen del logo', 'error');
             }
@@ -244,6 +249,7 @@ const App = (() => {
             Store.state.settings[key] = $(`${key}Url`).value.trim();
             Store.save();
             updateLogoPreview(key);
+            if (Store.state.settings[key]) toast('✅ Logo izquierdo actualizado', 'success');
         });
 
         $(`${key}Clear`).addEventListener('click', () => {
@@ -252,6 +258,7 @@ const App = (() => {
             $(`${key}File`).value = '';
             Store.save();
             updateLogoPreview(key);
+            toast('Logo izquierdo eliminado', 'info');
         });
     }
 
@@ -292,35 +299,85 @@ const App = (() => {
         });
     }
 
-    async function addRightLogo() {
-        const file = $('newLogoFile').files[0];
-        const url = $('newLogoUrl').value.trim();
+    // La imagen elegida se muestra al instante en una vista previa; el
+    // nombre del archivo solo no basta para saber si cargó bien.
+    let pendingLogoSrc = '';
 
-        let src = url;
-        if (file) {
-            try {
-                src = await readFileAsDataURL(file);
-            } catch {
-                toast('No se pudo leer la imagen del logo', 'error');
-                return;
-            }
+    function updateNewLogoPreview() {
+        const preview = $('newLogoPreview');
+        preview.replaceChildren();
+        if (pendingLogoSrc) {
+            preview.append(el('img', { src: pendingLogoSrc, alt: 'Vista previa del logo' }));
+            preview.classList.remove('logo-preview--empty');
+        } else {
+            preview.textContent = 'Aún sin imagen: elige un archivo o pega una URL';
+            preview.classList.add('logo-preview--empty');
         }
-        if (!src) {
-            toast('Elige un archivo o pega una URL', 'error');
+        $('newLogoAdd').disabled = !pendingLogoSrc;
+    }
+
+    function addRightLogo() {
+        if (!pendingLogoSrc) {
+            toast('Elige un archivo o pega una URL primero', 'error');
             return;
         }
-
-        Store.state.settings.rightLogos.push({ id: Utils.uid(), src });
+        Store.state.settings.rightLogos.push({ id: Utils.uid(), src: pendingLogoSrc });
         Store.save();
+        pendingLogoSrc = '';
         $('newLogoFile').value = '';
         $('newLogoUrl').value = '';
+        updateNewLogoPreview();
         renderRightLogos();
         refreshTables();
-        toast('Logo añadido', 'success');
+        toast('✅ Logo derecho añadido', 'success');
     }
 
     function bindRightLogos() {
+        $('newLogoFile').addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                pendingLogoSrc = await readFileAsDataURL(file);
+                $('newLogoUrl').value = '';
+                updateNewLogoPreview();
+                toast('Imagen cargada: revisa la vista previa y pulsa «Añadir logo»', 'info');
+            } catch {
+                pendingLogoSrc = '';
+                updateNewLogoPreview();
+                toast('No se pudo leer la imagen del logo', 'error');
+            }
+        });
+
+        $('newLogoUrl').addEventListener('change', () => {
+            pendingLogoSrc = $('newLogoUrl').value.trim();
+            if (pendingLogoSrc) $('newLogoFile').value = '';
+            updateNewLogoPreview();
+        });
+
         $('newLogoAdd').addEventListener('click', addRightLogo);
+    }
+
+    // ---------- Sugerencia: cargar logos ----------
+
+    let logosSuggested = false;
+
+    /** Si se empieza a trabajar sin ningún logo, se sugiere cargarlos. */
+    function suggestLogos() {
+        if (logosSuggested) return;
+        const settings = Store.state.settings;
+        if (settings.logoLeft || settings.rightLogos.length > 0) return;
+        // una sola sugerencia a la vez; la otra saldrá en la próxima acción
+        if (document.querySelector('.toast--action')) return;
+        logosSuggested = true;
+        Utils.toastAction(
+            '💡 Tus etiquetas se imprimirán sin logos. Cárgalos una vez y quedan guardados.',
+            'Cargar logos',
+            () => {
+                const modal = $('configModal');
+                modal.showModal();
+                modal.scrollTop = 0;
+            },
+        );
     }
 
     function updateCsvStatus() {
@@ -403,6 +460,7 @@ const App = (() => {
             Store.state.settings.headerText = $('cfgHeaderText').value.trim() || 'BRONCO RIG-91';
             $('cfgHeaderText').value = Store.state.settings.headerText;
             Store.save();
+            toast('✅ Texto de almacén guardado', 'success');
         });
 
         $('geminiKeySave').addEventListener('click', () => {
@@ -501,6 +559,8 @@ const App = (() => {
             }
             refreshTables();
             setVoucherStatus(`✅ Se extrajeron ${items.length} materiales. Revísalos en la tabla de abajo.`, 'success');
+            toast(`✅ ${items.length} materiales extraídos del vale`, 'success');
+            suggestLogos();
         } catch (error) {
             console.error('Error al procesar el vale:', error);
             setVoucherStatus(`❌ ${error.message}`, 'error');
@@ -528,6 +588,7 @@ const App = (() => {
                 $('voucherPreview').src = voucherDataUrl;
                 $('voucherPreviewBox').hidden = false;
                 setVoucherStatus('', '');
+                toast('✅ Imagen del vale cargada', 'success');
             } catch {
                 toast('No se pudo cargar la imagen', 'error');
             }
@@ -625,6 +686,7 @@ const App = (() => {
         $('logoLeftUrl').value = leftSrc && !leftSrc.startsWith('data:') ? leftSrc : '';
         updateLogoPreview('logoLeft');
         renderRightLogos();
+        updateNewLogoPreview();
         updateCsvStatus();
         updateGeminiUi();
 
@@ -639,7 +701,15 @@ const App = (() => {
         bindVoucher();
         bindTransfer();
         bindClearButtons();
-        Inventory.init({ onAdd: refreshTables });
+        Inventory.init({ onAdd: () => { refreshTables(); suggestLogos(); } });
+
+        // Service worker: permite usar la app sin conexión una vez cargada
+        // (no aplica al abrir el archivo directamente con file://).
+        if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+            navigator.serviceWorker.register('sw.js').catch((error) => {
+                console.warn('No se pudo registrar el service worker:', error);
+            });
+        }
     }
 
     document.addEventListener('DOMContentLoaded', init);
