@@ -17,7 +17,14 @@ const Tables = (() => {
     const CONDICIONES = ['NUEVO', 'USADO NUEVO', 'RESGUARDO'];
     const CATEGORIAS = ['INVENTARIABLE', 'CONSUMIBLES'];
 
+    // Duración del cierre del editor; debe coincidir con la animación CSS.
+    const EDITOR_CLOSE_MS = 150;
+
     let editingId = null;
+    // Solo se anima al abrir de verdad, no en cada redibujado de la lista.
+    let editorJustOpened = false;
+
+    const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // ---------- Tarjetas de materiales ----------
 
@@ -73,7 +80,11 @@ const Tables = (() => {
 
         const materials = Store.state.materials;
         const actions = el('div', { class: 'item-actions' }, [
-            actionBtn('✏️', 'Editar', () => { editingId = item.id; onListChanged(); }),
+            actionBtn('✏️', 'Editar', () => {
+                editingId = item.id;
+                editorJustOpened = true;
+                onListChanged();
+            }),
             actionBtn('📋', 'Duplicar', () => duplicateItem(materials, item, onListChanged)),
             actionBtn('🗑️', 'Eliminar', () => deleteItem(materials, item, '¿Eliminar esta partida?', onListChanged)),
         ]);
@@ -83,6 +94,49 @@ const Tables = (() => {
             el('div', { class: 'item-card__body' }, [title, chips]),
             actions,
         ]);
+    }
+
+    /**
+     * Cierra el editor plegándolo antes de volver a dibujar la lista, en
+     * vez de sustituirlo de golpe por la tarjeta.
+     */
+    function collapseEditor(editor, onListChanged) {
+        editingId = null;
+        if (reduceMotion() || !editor.isConnected) {
+            onListChanged();
+            return;
+        }
+        editor.classList.remove('item-editor--opening');
+        editor.classList.add('item-editor--closing');
+        setTimeout(onListChanged, EDITOR_CLOSE_MS);
+    }
+
+    /**
+     * Tras abrirse, acerca el editor si quedó fuera de la vista. Cuando no
+     * cabe entero (móvil), se alinea su cabecera justo bajo la barra
+     * superior: así se ve siempre qué partida se está editando.
+     */
+    function revealEditor(editor) {
+        // El foco entra en el editor en cuanto aparece (sin abrir el teclado
+        // del móvil). Se hace ya, no al terminar la animación, para no
+        // quitárselo a quien empiece a escribir de inmediato.
+        const active = document.activeElement;
+        if (!active || active === document.body) editor.focus({ preventScroll: true });
+
+        const settle = () => {
+            const header = document.querySelector('.app-header');
+            const margin = 12;
+            const top = (header ? header.getBoundingClientRect().height : 0) + margin;
+            const bottom = window.innerHeight - margin;
+            const rect = editor.getBoundingClientRect();
+
+            let delta = 0;
+            if (rect.top < top || rect.height > bottom - top) delta = rect.top - top;
+            else if (rect.bottom > bottom) delta = rect.bottom - bottom;
+            if (delta !== 0) window.scrollBy({ top: delta, behavior: reduceMotion() ? 'auto' : 'smooth' });
+        };
+        if (reduceMotion()) settle();
+        else editor.addEventListener('animationend', settle, { once: true });
     }
 
     function materialEditor(item, onListChanged) {
@@ -120,9 +174,33 @@ const Tables = (() => {
             selectField('Categoría', 'categoria', CATEGORIAS),
         ]);
 
+        // Cabecera: la partida no «desaparece» al editarla. Sigue a la
+        // vista quién es (cantidad, nombre y dimensión) y se actualiza
+        // mientras se escribe, así el editor se siente parte de la ficha.
+        const qtyBadge = el('div', { class: 'qty-badge', title: 'Cantidad de etiquetas', text: `×${item.cantidad}` });
+        const titleText = el('span', { text: item.nombre || '(sin nombre)' });
+        const dimBadge = el('span', { class: 'dim-badge', title: 'Dimensión / Clave almacén', text: item.dimension || '' });
+        dimBadge.hidden = !item.dimension;
+
+        const head = el('div', { class: 'item-editor__head' }, [
+            qtyBadge,
+            el('div', { class: 'item-card__title' }, [titleText, dimBadge]),
+            el('span', { class: 'item-editor__tag', text: '✏️ Editando' }),
+        ]);
+
+        const syncHead = () => {
+            titleText.textContent = fields.nombre.value.trim() || '(sin nombre)';
+            dimBadge.textContent = fields.dimension.value.trim();
+            dimBadge.hidden = !dimBadge.textContent;
+            qtyBadge.textContent = `×${clampInt(fields.cantidad.value, 1, 1)}`;
+        };
+        for (const key of ['nombre', 'dimension', 'cantidad']) {
+            fields[key].addEventListener('input', syncHead);
+        }
+
         // Autocompletar el nombre al escribir el código AX. Al editar una
         // partida el nombre guardado sí se actualiza si cambia el código.
-        Autocomplete.attach(fields.codigoAx, fields.nombre, { replaceExisting: true });
+        Autocomplete.attach(fields.codigoAx, fields.nombre, { replaceExisting: true, onFill: syncHead });
 
         // Selector visual de logo derecho (miniaturas, sin nombres)
         const logos = Store.state.settings.rightLogos;
@@ -149,6 +227,10 @@ const Tables = (() => {
             ]));
         }
 
+        // `editor` se usa dentro de los manejadores; se declara antes de
+        // crearlo para que lo vean al ejecutarse.
+        let editor;
+
         const save = () => {
             item.cantidad = clampInt(fields.cantidad.value, 1, 1);
             item.codigoAx = fields.codigoAx.value.trim();
@@ -159,22 +241,25 @@ const Tables = (() => {
             item.condicion = fields.condicion.value;
             item.categoria = fields.categoria.value;
             item.logoIndex = chosenLogo;
-            editingId = null;
-            onListChanged();
+            // Se guarda ya: el plegado es solo visual y no debe retrasar
+            // la persistencia de lo editado.
+            Store.save();
+            collapseEditor(editor, onListChanged);
         };
 
-        const cancel = () => {
-            editingId = null;
-            onListChanged();
-        };
+        const cancel = () => collapseEditor(editor, onListChanged);
 
-        const editor = el('div', { class: 'item-editor' }, [
-            grid,
-            el('div', { class: 'inline-controls' }, [
-                el('button', { class: 'btn btn--primary', type: 'button', text: '💾 Guardar', onclick: save }),
-                el('button', { class: 'btn', type: 'button', text: 'Cancelar', onclick: cancel }),
-            ]),
-        ]);
+        editor = el('div', { class: 'item-editor', tabindex: '-1' },
+            el('div', { class: 'item-editor__clip' }, [
+                el('div', { class: 'item-editor__inner' }, [
+                    head,
+                    grid,
+                    el('div', { class: 'inline-controls' }, [
+                        el('button', { class: 'btn btn--primary', type: 'button', text: '💾 Guardar', onclick: save }),
+                        el('button', { class: 'btn', type: 'button', text: 'Cancelar', onclick: cancel }),
+                    ]),
+                ]),
+            ]));
 
         editor.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && event.target.tagName === 'INPUT') {
@@ -189,11 +274,29 @@ const Tables = (() => {
     function renderMaterials(onListChanged) {
         const list = $('materialsList');
         list.replaceChildren();
+        let opened = null;
         for (const item of Store.state.materials) {
-            list.append(editingId === item.id ? materialEditor(item, onListChanged) : materialCard(item, onListChanged));
+            if (editingId !== item.id) {
+                list.append(materialCard(item, onListChanged));
+                continue;
+            }
+            const editor = materialEditor(item, onListChanged);
+            if (editorJustOpened) {
+                editor.classList.add('item-editor--opening');
+                opened = editor;
+            }
+            list.append(editor);
         }
+        editorJustOpened = false;
+        if (opened) revealEditor(opened);
         $('materialsSection').hidden = Store.state.materials.length === 0;
         updateCounters();
+    }
+
+    /** Cierra el editor abierto sin animación (al deshacer/rehacer). */
+    function closeEditor() {
+        editingId = null;
+        editorJustOpened = false;
     }
 
     // ---------- Tabla de códigos AX ----------
@@ -264,5 +367,5 @@ const Tables = (() => {
         $('axCount').textContent = counterText(Store.state.axItems);
     }
 
-    return { renderMaterials, renderAx, CONDICIONES, CATEGORIAS };
+    return { renderMaterials, renderAx, closeEditor, CONDICIONES, CATEGORIAS };
 })();

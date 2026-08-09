@@ -107,6 +107,64 @@ const App = (() => {
         );
     }
 
+    // ---------- Deshacer / rehacer ----------
+
+    const IS_MAC = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent || '');
+
+    function updateHistoryButtons() {
+        $('btnUndo').disabled = !History.canUndo();
+        $('btnRedo').disabled = !History.canRedo();
+    }
+
+    /**
+     * Mientras se escribe en un campo con texto manda el deshacer del
+     * navegador (revierte lo tecleado); con el campo vacío no hay nada que
+     * deshacer ahí, así que el atajo lo toma el historial de la app.
+     */
+    function isTypingContext(target) {
+        if (!target) return false;
+        if (target.isContentEditable) return true;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') return false;
+        return String(target.value || '') !== '';
+    }
+
+    function runHistory(isUndo) {
+        if (isUndo ? !History.canUndo() : !History.canRedo()) {
+            toast(isUndo ? 'No hay nada que deshacer' : 'No hay nada que rehacer', 'info', 'history');
+            return;
+        }
+        // El editor abierto apunta a la partida anterior: se cierra antes
+        // de sustituir las listas.
+        Tables.closeEditor();
+        const description = isUndo ? History.undo() : History.redo();
+        refreshTables();
+        if (Preview.isOpen) Preview.render();
+        // Misma clave: al deshacer varias veces seguidas no se apilan avisos.
+        toast(`${isUndo ? '↩️ Deshecho' : '↪️ Rehecho'}: ${description}`, 'success', 'history');
+    }
+
+    function bindHistory() {
+        $('btnUndo').title = `Deshacer (${IS_MAC ? '⌘Z' : 'Ctrl+Z'})`;
+        $('btnRedo').title = `Rehacer (${IS_MAC ? '⇧⌘Z' : 'Ctrl+Shift+Z'})`;
+        $('btnUndo').addEventListener('click', () => runHistory(true));
+        $('btnRedo').addEventListener('click', () => runHistory(false));
+
+        document.addEventListener('keydown', (event) => {
+            if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+            const key = event.key.toLowerCase();
+            const isUndo = key === 'z' && !event.shiftKey;
+            const isRedo = (key === 'z' && event.shiftKey) || key === 'y';
+            if (!isUndo && !isRedo) return;
+            if (isTypingContext(event.target)) return;
+            // Con un modal abierto la atención está en la configuración.
+            if (document.querySelector('dialog[open]')) return;
+            event.preventDefault();
+            runHistory(isUndo);
+        });
+
+        History.init(updateHistoryButtons);
+    }
+
     // ---------- Vista previa / impresión ----------
 
     function bindPreview() {
@@ -798,6 +856,7 @@ const App = (() => {
         bindMaterialForm();
         bindAxForm();
         bindCodeListSelects();
+        bindHistory();
         bindPreview();
         bindLayoutModal();
         bindConfigModal();

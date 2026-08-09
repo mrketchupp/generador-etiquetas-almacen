@@ -122,8 +122,13 @@ body {
     line-height: 1;
 }
 
-.icon-btn:hover {
+.icon-btn:hover:not(:disabled) {
     background-color: var(--color-secondary);
+}
+
+.icon-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
 }
 
 /* ============ Contenido ============ */
@@ -490,10 +495,93 @@ select.input:focus {
     background-color: var(--color-secondary-hover);
 }
 
+/* El editor se despliega en el sitio de la tarjeta (0fr → 1fr) para que
+   el contenido de abajo no dé un salto al abrirlo o cerrarlo. */
 .item-editor {
-    padding: 14px;
+    display: grid;
+    grid-template-rows: 1fr;
     border-bottom: 1px solid var(--color-border);
     background-color: var(--color-secondary);
+}
+
+.item-editor:focus {
+    outline: none;
+}
+
+.item-editor__clip {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.item-editor__inner {
+    padding: 14px;
+}
+
+.item-editor--opening {
+    animation: item-editor-open 0.24s ease-out;
+}
+
+.item-editor--closing {
+    animation: item-editor-close 0.15s ease-in forwards;
+}
+
+@keyframes item-editor-open {
+    from {
+        grid-template-rows: 0fr;
+        opacity: 0;
+    }
+
+    to {
+        grid-template-rows: 1fr;
+        opacity: 1;
+    }
+}
+
+@keyframes item-editor-close {
+    from {
+        grid-template-rows: 1fr;
+        opacity: 1;
+    }
+
+    to {
+        grid-template-rows: 0fr;
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .item-editor--opening,
+    .item-editor--closing {
+        animation: none;
+    }
+}
+
+/* Cabecera del editor: la partida sigue identificándose mientras se edita */
+.item-editor__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.item-editor__head .item-card__title {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-editor__tag {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    white-space: nowrap;
 }
 
 .item-editor .form-grid {

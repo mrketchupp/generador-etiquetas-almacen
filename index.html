@@ -22,6 +22,10 @@
             <button id="tabCodigoAx" class="tab" type="button">Código AX</button>
         </nav>
         <div class="app-header__actions">
+            <button id="btnUndo" class="icon-btn" type="button" title="Deshacer" aria-label="Deshacer"
+                disabled>↩️</button>
+            <button id="btnRedo" class="icon-btn" type="button" title="Rehacer" aria-label="Rehacer"
+                disabled>↪️</button>
             <button id="btnLayout" class="icon-btn" type="button" title="Diseño de plantilla"
                 aria-label="Diseño de plantilla">📏</button>
             <button id="btnConfig" class="icon-btn" type="button" title="Configuración"
@@ -462,6 +466,7 @@
 
     <script src="js/utils.js"></script>
     <script src="js/store.js"></script>
+    <script src="js/history.js"></script>
     <script src="js/layout.js"></script>
     <script src="js/labels.js"></script>
     <script src="js/csv.js"></script>

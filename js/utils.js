@@ -78,9 +78,19 @@ const Utils = (() => {
         }, duration);
     }
 
-    /** Notificación no bloqueante (reemplaza a alert()). */
-    function toast(message, type = 'info') {
-        showToast(el('div', { class: `toast toast--${type}`, text: message }), 3500);
+    /**
+     * Notificación no bloqueante (reemplaza a alert()).
+     * Con `key`, la notificación sustituye a la anterior de la misma clave
+     * en vez de apilarse (útil al repetir una acción, como deshacer).
+     */
+    function toast(message, type = 'info', key = '') {
+        const item = el('div', { class: `toast toast--${type}`, text: message });
+        if (key) {
+            const previous = ensureToastHost().querySelector(`[data-toast-key="${key}"]`);
+            if (previous) previous.remove();
+            item.dataset.toastKey = key;
+        }
+        showToast(item, 3500);
     }
 
     /** Notificación con botón de acción (llamada a la acción). */
