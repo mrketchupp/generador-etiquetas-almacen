@@ -206,6 +206,14 @@ const Store = (() => {
 
     const state = load();
 
+    // Avisos de guardado: los usa el historial para detectar los cambios
+    // sin tener que instrumentar cada sitio que muta el estado.
+    const saveListeners = [];
+
+    function onSaved(listener) {
+        saveListeners.push(listener);
+    }
+
     function save() {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -213,6 +221,8 @@ const Store = (() => {
             console.error('No se pudo guardar el estado:', error);
             Utils.toast('No se pudo guardar la configuración (¿almacenamiento lleno?)', 'error');
         }
+        // Se avisa aunque falle el guardado: el estado en memoria ya cambió.
+        for (const listener of saveListeners) listener();
     }
 
     // ---------- Listas de códigos AX ----------
@@ -352,6 +362,7 @@ const Store = (() => {
     return {
         state,
         save,
+        onSaved,
         lookupNombre,
         searchCodigos,
         addCodeList,

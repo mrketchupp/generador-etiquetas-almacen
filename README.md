@@ -10,7 +10,8 @@ Aplicación web (100 % cliente, sin backend) para generar e imprimir etiquetas d
 ## Funciones
 
 - Alta manual de partidas y extracción automática desde la **foto de un vale de material** usando la API de Gemini (requiere API Key propia). El modelo se detecta automáticamente consultando `ListModels`, así la app sigue funcionando cuando Google renombra o retira modelos.
-- Tabla de revisión editable con duplicar/eliminar. La lista **se conserva al recargar** la página.
+- Tabla de revisión editable con duplicar/eliminar. La lista **se conserva al recargar** la página. Al editar una partida, el editor se despliega en su sitio manteniendo a la vista de qué partida se trata (cantidad, nombre y dimensión, que se actualizan mientras escribes).
+- **Deshacer y rehacer** los cambios de las listas con `Ctrl+Z` / `Ctrl+Shift+Z` (`⌘Z` / `⇧⌘Z` en Mac; también vale `Ctrl+Y`) o con los botones ↩️ ↪️ de la barra superior. Cubre altas manuales, inventario, vales, ediciones, duplicados, borrados, importaciones y el vaciado de listas; un alta en lote se deshace de una sola vez. Mientras escribes en un campo con texto manda el deshacer del navegador, para no perder lo tecleado.
 - **Autocompletado del Nombre al escribir el código AX**, a partir de una o varias listas de códigos:
   - Se cargan **varios archivos a la vez** (CSV o Excel con columnas «Codigo AX» y «Nombre»). Cada archivo se guarda como una lista independiente que **toma el nombre del archivo** (p. ej. `CODIGOS AX CONSUMIBLES.xlsx` → «CODIGOS AX CONSUMIBLES»); volver a cargar un archivo con el mismo nombre actualiza esa lista.
   - Un **selector en el formulario de alta** elige desde qué lista se autocompleta («Todas las listas» o una en concreto). Es el mismo para los dos modos y se recuerda al recargar.
@@ -34,6 +35,7 @@ css/styles.css     Estilos de la interfaz
 css/print.css      Hojas, etiquetas y reglas de impresión
 js/utils.js        Unidades físicas (mm/in/cm), DOM helpers, toasts
 js/store.js        Estado central + persistencia (con migración desde versiones anteriores)
+js/history.js      Historial de las partidas para deshacer/rehacer
 js/layout.js       Cálculo de la cuadrícula que cabe en la hoja y regla @page
 js/labels.js       Construcción del DOM de cada etiqueta (sin innerHTML con datos del usuario)
 js/csv.js          Parser de CSV con soporte de comillas

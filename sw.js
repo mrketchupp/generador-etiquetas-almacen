@@ -9,7 +9,7 @@
  *
  * Al añadir un archivo nuevo a la app, inclúyelo en ASSETS.
  */
-const CACHE_NAME = 'etiquetas-almacen-v2';
+const CACHE_NAME = 'etiquetas-almacen-v3';
 
 const ASSETS = [
     './',
@@ -19,6 +19,7 @@ const ASSETS = [
     'css/print.css',
     'js/utils.js',
     'js/store.js',
+    'js/history.js',
     'js/layout.js',
     'js/labels.js',
     'js/csv.js',
