@@ -120,12 +120,9 @@ const Tables = (() => {
             selectField('Categoría', 'categoria', CATEGORIAS),
         ]);
 
-        // Autocompletar nombre al cambiar el código AX (si hay lista cargada)
-        fields.codigoAx.addEventListener('change', () => {
-            const nombre = Store.lookupNombre(fields.codigoAx.value);
-            if (nombre) fields.nombre.value = nombre;
-            else if (typeof App !== 'undefined') App.suggestCodigosFile();
-        });
+        // Autocompletar el nombre al escribir el código AX. Al editar una
+        // partida el nombre guardado sí se actualiza si cambia el código.
+        Autocomplete.attach(fields.codigoAx, fields.nombre, { replaceExisting: true });
 
         // Selector visual de logo derecho (miniaturas, sin nombres)
         const logos = Store.state.settings.rightLogos;
@@ -210,10 +207,18 @@ const Tables = (() => {
 
     function axRow(item, onListChanged) {
         const nombreInput = el('input', { type: 'text', value: item.nombre });
-        nombreInput.addEventListener('change', () => {
-            item.nombre = nombreInput.value;
+        const codigoInput = el('input', { type: 'text', value: item.codigoAx });
+
+        // El autocompletado puede escribir en ambos campos a la vez, así que
+        // los dos se vuelcan juntos a la partida.
+        const sync = () => {
+            item.codigoAx = codigoInput.value.trim();
+            item.nombre = nombreInput.value.trim();
             Store.save();
-        });
+        };
+        nombreInput.addEventListener('change', sync);
+        codigoInput.addEventListener('change', sync);
+        Autocomplete.attach(codigoInput, nombreInput, { onFill: sync, replaceExisting: true });
 
         const row = el('tr', {});
         row.append(
@@ -223,15 +228,7 @@ const Tables = (() => {
                 Store.save();
                 updateCounters();
             }),
-            inputCell(item.codigoAx, 'text', (input) => {
-                item.codigoAx = input.value.trim();
-                const nombre = Store.lookupNombre(item.codigoAx);
-                if (nombre) {
-                    item.nombre = nombre;
-                    nombreInput.value = nombre;
-                }
-                Store.save();
-            }),
+            el('td', {}, codigoInput),
             el('td', {}, nombreInput),
             el('td', {}, el('button', {
                 class: 'btn btn--small btn--blue', type: 'button', text: 'Duplicar',

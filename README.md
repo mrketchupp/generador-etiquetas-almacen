@@ -11,7 +11,12 @@ Aplicación web (100 % cliente, sin backend) para generar e imprimir etiquetas d
 
 - Alta manual de partidas y extracción automática desde la **foto de un vale de material** usando la API de Gemini (requiere API Key propia). El modelo se detecta automáticamente consultando `ListModels`, así la app sigue funcionando cuando Google renombra o retira modelos.
 - Tabla de revisión editable con duplicar/eliminar. La lista **se conserva al recargar** la página.
-- Autocompletado de nombres a partir de un **CSV** con columnas «Codigo AX» y «Nombre».
+- **Autocompletado del Nombre al escribir el código AX**, a partir de una o varias listas de códigos:
+  - Se cargan **varios archivos a la vez** (CSV o Excel con columnas «Codigo AX» y «Nombre»). Cada archivo se guarda como una lista independiente que **toma el nombre del archivo** (p. ej. `CODIGOS AX CONSUMIBLES.xlsx` → «CODIGOS AX CONSUMIBLES»); volver a cargar un archivo con el mismo nombre actualiza esa lista.
+  - Un **selector en el formulario de alta** elige desde qué lista se autocompleta («Todas las listas» o una en concreto). Es el mismo para los dos modos y se recuerda al recargar.
+  - Al teclear aparecen las **sugerencias** (código, nombre y lista de origen) y el Nombre se rellena solo en cuanto el código coincide. También se puede buscar por nombre («BANDA») para quedarse con su código. Se navega con ↑ ↓ y se elige con Enter.
+  - Nunca se pisa un Nombre escrito a mano; si el código deja de coincidir, el nombre autocompletado se limpia.
+  - Las mismas reglas aplican en el editor de partidas, en la tabla de códigos AX, al añadir desde el inventario Excel y al extraer un vale con Gemini.
 - Logos izquierdo/derecho (archivo o URL) y texto de almacén personalizable.
 - **Diseño de plantilla configurable**: tamaño de hoja (Carta/A4), márgenes superior/lateral, dimensiones de etiqueta, separación horizontal/vertical, fuente y borde opcional. Acepta valores en mm, cm o pulgadas, y trae plantillas predefinidas, incluida la de **hojas precortadas 2 × 5 (J-5163 / Avery 5163)** con la geometría exacta del precorte.
 - **Vista previa fiel a la impresión**: las filas y columnas se calculan automáticamente según lo que cabe físicamente en la hoja, por lo que no hay saltos de página inesperados ni hay que ajustar márgenes en el diálogo de impresión.
@@ -24,24 +29,27 @@ Cada hoja (`.sheet`) se genera con el tamaño físico exacto del papel y los má
 ## Estructura del código
 
 ```
-index.html        Marcado de la aplicación (sin lógica inline)
-css/styles.css    Estilos de la interfaz
-css/print.css     Hojas, etiquetas y reglas de impresión
-js/utils.js       Unidades físicas (mm/in/cm), DOM helpers, toasts
-js/store.js       Estado central + persistencia (con migración desde la versión anterior)
-js/layout.js      Cálculo de la cuadrícula que cabe en la hoja y regla @page
-js/labels.js      Construcción del DOM de cada etiqueta (sin innerHTML con datos del usuario)
-js/csv.js         Parser de CSV con soporte de comillas
-js/gemini.js      Cliente de la API de Gemini para leer vales
-js/tables.js      Tablas de revisión editables
-js/transfer.js    Exportación/importación de partidas (.json)
-js/preview.js     Vista previa escalada e impresión (beforeprint/afterprint)
-js/app.js         Orquestación: formularios, modales y eventos
+index.html         Marcado de la aplicación (sin lógica inline)
+css/styles.css     Estilos de la interfaz
+css/print.css      Hojas, etiquetas y reglas de impresión
+js/utils.js        Unidades físicas (mm/in/cm), DOM helpers, toasts
+js/store.js        Estado central + persistencia (con migración desde versiones anteriores)
+js/layout.js       Cálculo de la cuadrícula que cabe en la hoja y regla @page
+js/labels.js       Construcción del DOM de cada etiqueta (sin innerHTML con datos del usuario)
+js/csv.js          Parser de CSV con soporte de comillas
+js/xlsx.js         Lector de archivos .xlsx sin dependencias externas
+js/autocomplete.js Sugerencias de código AX y relleno automático del Nombre
+js/gemini.js       Cliente de la API de Gemini para leer vales
+js/tables.js       Tablas de revisión editables
+js/inventory.js    Inventario Excel: selección múltiple y alta en lote
+js/transfer.js     Exportación/importación de partidas (.json)
+js/preview.js      Vista previa escalada e impresión (beforeprint/afterprint)
+js/app.js          Orquestación: formularios, modales y eventos
 ```
 
 ## Instalación como app y uso sin conexión
 
-La app es una PWA: servida por HTTPS (por ejemplo GitHub Pages), el navegador ofrece **instalarla** (menú → «Instalar aplicación» en Chrome/Edge, o «Añadir a pantalla de inicio» en iPhone/iPad). Tras la primera carga, un service worker guarda todos los archivos y la app **abre y funciona sin conexión a internet**: formularios, inventario Excel, lista de códigos, exportar/importar e imprimir.
+La app es una PWA: servida por HTTPS (por ejemplo GitHub Pages), el navegador ofrece **instalarla** (menú → «Instalar aplicación» en Chrome/Edge, o «Añadir a pantalla de inicio» en iPhone/iPad). Tras la primera carga, un service worker guarda todos los archivos y la app **abre y funciona sin conexión a internet**: formularios, inventario Excel, listas de códigos, exportar/importar e imprimir.
 
 Solo requieren internet dos cosas: extraer datos de un vale con Gemini y los logos configurados por URL externa (si los cargas como archivo quedan guardados dentro de la app y funcionan offline).
 

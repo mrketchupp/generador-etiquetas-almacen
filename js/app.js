@@ -30,6 +30,8 @@ const App = (() => {
     // ---------- Formularios de alta ----------
 
     function bindMaterialForm() {
+        const autocomplete = Autocomplete.attach($('fCodigoAx'), $('fNombre'));
+
         $('materialForm').addEventListener('submit', (event) => {
             event.preventDefault();
             Store.state.materials.push({
@@ -46,20 +48,17 @@ const App = (() => {
             });
             event.target.reset();
             $('fCantidad').value = '1';
+            Autocomplete.reset(autocomplete);
             refreshTables();
             $('fCodigoAx').focus();
             toast('Partida añadida a la lista', 'success');
             suggestLogos();
         });
-
-        $('fCodigoAx').addEventListener('change', () => {
-            const nombre = Store.lookupNombre($('fCodigoAx').value);
-            if (nombre) $('fNombre').value = nombre;
-            else suggestCodigosFile();
-        });
     }
 
     function bindAxForm() {
+        const autocomplete = Autocomplete.attach($('fAxCodigo'), $('fAxNombre'));
+
         $('axForm').addEventListener('submit', (event) => {
             event.preventDefault();
             Store.state.axItems.push({
@@ -70,16 +69,11 @@ const App = (() => {
             });
             event.target.reset();
             $('fAxCantidad').value = '1';
+            Autocomplete.reset(autocomplete);
             refreshTables();
             $('fAxCodigo').focus();
             toast('Código añadido a la lista', 'success');
             suggestLogos();
-        });
-
-        $('fAxCodigo').addEventListener('change', () => {
-            const nombre = Store.lookupNombre($('fAxCodigo').value);
-            if (nombre) $('fAxNombre').value = nombre;
-            else suggestCodigosFile();
         });
     }
 
@@ -87,26 +81,29 @@ const App = (() => {
 
     let codigosSuggested = false;
 
+    /** Abre la configuración directamente en la sección de listas de códigos. */
+    function openCodeListsConfig(openHelp = false) {
+        $('configModal').showModal();
+        const help = $('csvHelp');
+        if (help && openHelp) help.open = true;
+        $('csvSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     /**
-     * Si el usuario escribe códigos a mano y no hay lista de códigos
+     * Si el usuario escribe códigos a mano y no hay ninguna lista
      * cargada, se le sugiere (una vez por sesión) cargarla para
      * autocompletar los nombres, con acceso directo a la configuración.
      */
     function suggestCodigosFile() {
         if (codigosSuggested) return;
-        if (Object.keys(Store.state.codigosAX).length > 0) return;
+        if (Store.state.codeLists.length > 0) return;
         // una sola sugerencia a la vez; la otra saldrá en la próxima acción
         if (document.querySelector('.toast--action')) return;
         codigosSuggested = true;
         Utils.toastAction(
             '💡 El Nombre puede autocompletarse solo: carga una vez tu lista de códigos AX.',
             'Cargar lista',
-            () => {
-                $('configModal').showModal();
-                const help = $('csvHelp');
-                if (help) help.open = true;
-                $('csvSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            },
+            () => openCodeListsConfig(true),
         );
     }
 
@@ -380,13 +377,81 @@ const App = (() => {
         );
     }
 
+    // ---------- Listas de códigos AX ----------
+
+    // Ambos paneles comparten la misma lista activa: los dos selectores se
+    // dibujan juntos para que no se desincronicen.
+    const CODE_LIST_UI = [
+        { select: 'codeListMaterial', empty: 'codeListEmptyMaterial' },
+        { select: 'codeListAx', empty: 'codeListEmptyAx' },
+    ];
+
     function updateCsvStatus() {
-        const count = Object.keys(Store.state.codigosAX).length;
+        const lists = Store.state.codeLists;
         const status = $('csvStatus');
         status.className = 'hint';
-        status.textContent = count > 0
-            ? `✅ ${count} códigos AX cargados`
-            : 'Sin códigos cargados';
+        status.textContent = lists.length > 0
+            ? `✅ ${lists.length} lista(s) · ${Store.totalCodeCount()} códigos AX en total`
+            : 'Sin listas cargadas';
+    }
+
+    /** Selector de la lista usada al autocompletar, en ambos formularios. */
+    function renderCodeListSelects() {
+        const lists = Store.state.codeLists;
+        for (const ids of CODE_LIST_UI) {
+            const select = $(ids.select);
+            select.replaceChildren();
+            select.append(el('option', { value: '', text: `Todas las listas (${Store.totalCodeCount()})` }));
+            for (const list of lists) {
+                select.append(el('option', {
+                    value: list.id,
+                    text: `${list.name} (${Store.codeCount(list)})`,
+                }));
+            }
+            select.value = Store.state.activeCodeListId;
+            select.hidden = lists.length === 0;
+            $(ids.empty).hidden = lists.length > 0;
+        }
+    }
+
+    /** Listas cargadas dentro de ⚙️ Configuración: renombrar y eliminar. */
+    function renderCodeLists() {
+        const host = $('codeListsList');
+        host.replaceChildren();
+        const lists = Store.state.codeLists;
+        if (lists.length === 0) {
+            host.append(el('p', { class: 'hint', text: 'Aún no hay listas. Elige uno o varios archivos abajo.' }));
+            return;
+        }
+        for (const list of lists) {
+            const nameInput = el('input', { class: 'input code-list__name', type: 'text', value: list.name });
+            nameInput.addEventListener('change', () => {
+                const updated = Store.renameCodeList(list.id, nameInput.value);
+                nameInput.value = updated ? updated.name : list.name;
+                renderCodeListSelects();
+                toast('Nombre de la lista actualizado', 'success');
+            });
+            host.append(el('div', { class: 'code-list-row' }, [
+                el('span', { class: 'code-list__icon', text: '📄' }),
+                nameInput,
+                el('span', { class: 'chip', text: `${Store.codeCount(list)} códigos` }),
+                el('button', {
+                    class: 'btn btn--small btn--danger', type: 'button', text: 'Eliminar',
+                    onclick: () => {
+                        if (!confirm(`¿Eliminar la lista «${list.name}»?`)) return;
+                        Store.removeCodeList(list.id);
+                        refreshCodeListUi();
+                        toast('Lista eliminada', 'info');
+                    },
+                }),
+            ]));
+        }
+    }
+
+    function refreshCodeListUi() {
+        renderCodeLists();
+        renderCodeListSelects();
+        updateCsvStatus();
     }
 
     /** Lee la lista de códigos desde CSV o Excel (.xlsx). */
@@ -425,34 +490,68 @@ const App = (() => {
         toast('Revisa el formato del archivo: abrí la guía con un ejemplo', 'error');
     }
 
+    /** «CODIGOS AX CONSUMIBLES.xlsx» → «CODIGOS AX CONSUMIBLES». */
+    function listNameFromFile(file) {
+        return file.name.replace(/\.[^.]+$/, '').trim() || file.name;
+    }
+
     function bindCsvControls() {
         $('csvFile').addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            try {
-                const map = await parseCodigosFile(file);
-                const count = Object.keys(map).length;
-                if (count === 0) {
-                    showCodigosFormatError('No encontré las columnas «Codigo AX» y «Nombre». Compara tu archivo con el ejemplo de abajo.');
-                    return;
+            const files = Array.from(event.target.files || []);
+            if (files.length === 0) return;
+
+            const loaded = [];
+            const failed = [];
+            for (const file of files) {
+                try {
+                    const map = await parseCodigosFile(file);
+                    if (Object.keys(map).length === 0) {
+                        failed.push(file.name);
+                        continue;
+                    }
+                    loaded.push(Store.addCodeList(listNameFromFile(file), map));
+                } catch (error) {
+                    console.error(`Error al leer la lista de códigos «${file.name}»:`, error);
+                    failed.push(file.name);
                 }
-                Store.state.codigosAX = map;
-                Store.save();
-                updateCsvStatus();
-                toast(`${count} códigos AX cargados`, 'success');
-            } catch (error) {
-                console.error('Error al leer la lista de códigos:', error);
-                showCodigosFormatError('No se pudo leer el archivo. Debe ser .csv o .xlsx como el ejemplo de abajo.');
+            }
+
+            refreshCodeListUi();
+            event.target.value = '';
+
+            if (loaded.length > 0) {
+                const total = loaded.reduce((sum, item) => sum + item.count, 0);
+                toast(`✅ ${loaded.length} lista(s) cargada(s) · ${total} códigos AX`, 'success');
+            }
+            if (failed.length > 0) {
+                showCodigosFormatError(
+                    `No pude leer ${failed.join(', ')}. Debe ser .csv o .xlsx con las columnas «Codigo AX» y «Nombre», como el ejemplo de abajo.`,
+                );
             }
         });
 
         $('csvClear').addEventListener('click', () => {
-            Store.state.codigosAX = {};
+            if (Store.state.codeLists.length === 0) return;
+            if (!confirm('¿Quitar todas las listas de códigos AX?')) return;
+            Store.clearCodeLists();
             $('csvFile').value = '';
-            Store.save();
-            updateCsvStatus();
-            toast('Tabla de códigos eliminada', 'info');
+            refreshCodeListUi();
+            toast('Listas de códigos eliminadas', 'info');
         });
+    }
+
+    function bindCodeListSelects() {
+        for (const ids of CODE_LIST_UI) {
+            $(ids.select).addEventListener('change', (event) => {
+                Store.setActiveCodeList(event.target.value);
+                renderCodeListSelects();
+                const active = Store.state.codeLists.find((list) => list.id === Store.state.activeCodeListId);
+                toast(active ? `Autocompletando desde «${active.name}»` : 'Autocompletando desde todas las listas', 'info');
+            });
+        }
+        for (const id of ['codeListOpenMaterial', 'codeListOpenAx']) {
+            $(id).addEventListener('click', () => openCodeListsConfig());
+        }
     }
 
     function bindGeneralConfig() {
@@ -541,14 +640,17 @@ const App = (() => {
             const items = await Gemini.extractMaterials(voucherDataUrl, apiKey);
             for (const item of items) {
                 const oc = String(item.oc || '').trim();
+                const codigoAx = String(item.codigo || '').trim();
                 Store.state.materials.push({
                     id: Utils.uid(),
                     cantidad: clampInt(item.cantidad, 1, 1),
-                    codigoAx: String(item.codigo || '').trim(),
+                    codigoAx,
                     // DESCRIPCION DEL MATERIAL del vale → Nombre de la etiqueta;
                     // O.C. del vale → Descripción de la etiqueta, con prefijo
                     // "OC:" para que se entienda a qué se refiere el valor.
-                    nombre: String(item.descripcion || '').trim(),
+                    // Si el código está en la lista cargada, gana ese nombre:
+                    // es más fiable que lo que se alcance a leer en la foto.
+                    nombre: Store.lookupNombre(codigoAx) || String(item.descripcion || '').trim(),
                     dimension: String(item.claveAlmacen || '').trim(),
                     noParte: '',
                     descripcion: oc ? `OC: ${oc}` : '',
@@ -687,7 +789,7 @@ const App = (() => {
         updateLogoPreview('logoLeft');
         renderRightLogos();
         updateNewLogoPreview();
-        updateCsvStatus();
+        refreshCodeListUi();
         updateGeminiUi();
 
         // Eventos
@@ -695,6 +797,7 @@ const App = (() => {
         $('tabCodigoAx').addEventListener('click', () => setMode('codigoax'));
         bindMaterialForm();
         bindAxForm();
+        bindCodeListSelects();
         bindPreview();
         bindLayoutModal();
         bindConfigModal();
@@ -714,5 +817,5 @@ const App = (() => {
 
     document.addEventListener('DOMContentLoaded', init);
 
-    return { setMode, refreshTables, suggestCodigosFile };
+    return { setMode, refreshTables, suggestCodigosFile, refreshCodeListUi };
 })();
