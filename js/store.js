@@ -8,6 +8,9 @@
 const Store = (() => {
     const STORAGE_KEY = 'etiquetas-almacen.v2';
 
+    /** Clave normalizada de un código AX (sin espacios, en mayúsculas). */
+    const normCode = (value) => String(value ?? '').trim().toUpperCase();
+
     const PAGE_SIZES = {
         letter: { label: 'Carta (215.9 × 279.4 mm)', widthMm: 215.9, heightMm: 279.4 },
         a4: { label: 'A4 (210 × 297 mm)', widthMm: 210, heightMm: 297 },
@@ -47,7 +50,12 @@ const Store = (() => {
         mode: 'material',
         materials: [],
         axItems: [],
-        codigosAX: {},
+        // Listas de códigos AX para autocompletar el Nombre. Cada archivo
+        // cargado (CSV/Excel) se guarda como una lista independiente que
+        // toma el nombre del archivo: [{id, name, codes: {CODIGO: NOMBRE}}].
+        codeLists: [],
+        // Lista usada al autocompletar. '' = buscar en todas.
+        activeCodeListId: '',
         settings: {
             headerText: 'BRONCO RIG-91',
             logoLeft: '',
@@ -87,6 +95,43 @@ const Store = (() => {
         return layout;
     }
 
+    /** Normaliza un mapa CODIGO → NOMBRE descartando entradas vacías. */
+    function normalizeCodes(raw) {
+        const codes = {};
+        if (!raw || typeof raw !== 'object') return codes;
+        for (const [key, value] of Object.entries(raw)) {
+            const code = normCode(key);
+            const nombre = String(value ?? '').trim();
+            if (code && nombre) codes[code] = nombre;
+        }
+        return codes;
+    }
+
+    /**
+     * Normaliza las listas guardadas. `legacyMap` es el mapa único de la
+     * versión anterior (state.codigosAX), que pasa a ser la primera lista.
+     */
+    function normalizeCodeLists(rawLists, legacyMap) {
+        const lists = [];
+        for (const raw of Array.isArray(rawLists) ? rawLists : []) {
+            if (!raw || typeof raw !== 'object') continue;
+            const codes = normalizeCodes(raw.codes);
+            if (Object.keys(codes).length === 0) continue;
+            lists.push({
+                id: String(raw.id || Utils.uid()),
+                name: String(raw.name || '').trim() || 'Lista de códigos',
+                codes,
+            });
+        }
+        if (lists.length === 0) {
+            const legacy = normalizeCodes(legacyMap);
+            if (Object.keys(legacy).length > 0) {
+                lists.push({ id: Utils.uid(), name: 'Lista de códigos', codes: legacy });
+            }
+        }
+        return lists;
+    }
+
     function load() {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -102,6 +147,13 @@ const Store = (() => {
                     layout: normalizeLayout((parsed.settings || {}).layout),
                 },
             };
+            // Migración: el mapa único de códigos pasa a ser la primera lista.
+            merged.codeLists = normalizeCodeLists(parsed.codeLists, parsed.codigosAX);
+            delete merged.codigosAX;
+            merged.activeCodeListId = typeof parsed.activeCodeListId === 'string' ? parsed.activeCodeListId : '';
+            if (!merged.codeLists.some((list) => list.id === merged.activeCodeListId)) {
+                merged.activeCodeListId = '';
+            }
             // Migración: el logo derecho único anterior pasa a ser el primer
             // logo (predeterminado) de la biblioteca.
             if (!Array.isArray(merged.settings.rightLogos)) merged.settings.rightLogos = [];
@@ -142,7 +194,7 @@ const Store = (() => {
 
         try {
             const csv = old('codigosAX');
-            if (csv) state.codigosAX = JSON.parse(csv) || {};
+            if (csv) state.codeLists = normalizeCodeLists(null, JSON.parse(csv));
         } catch { /* CSV corrupto: se ignora */ }
 
         // El layout de la versión anterior NO se migra a propósito: sus
@@ -163,11 +215,154 @@ const Store = (() => {
         }
     }
 
-    /** Busca el nombre asociado a un código AX en la tabla cargada por CSV. */
-    function lookupNombre(codigo) {
-        const key = String(codigo || '').trim().toUpperCase();
-        return state.codigosAX[key] || null;
+    // ---------- Listas de códigos AX ----------
+
+    // Índice plano de todas las listas para las búsquedas del autocompletado.
+    // Se reconstruye solo cuando cambian las listas.
+    let entriesCache = null;
+
+    function invalidateCodes() {
+        entriesCache = null;
     }
 
-    return { state, save, lookupNombre, PAGE_SIZES, DEFAULT_LAYOUT, LAYOUT_PRESETS };
+    function allEntries() {
+        if (!entriesCache) {
+            entriesCache = [];
+            for (const list of state.codeLists) {
+                for (const [codigo, nombre] of Object.entries(list.codes)) {
+                    entriesCache.push({ codigo, nombre, listId: list.id, listName: list.name });
+                }
+            }
+        }
+        return entriesCache;
+    }
+
+    /**
+     * Listas en las que se busca. Con `listId` vacío (o apuntando a una
+     * lista borrada) se buscan todas.
+     */
+    function scopedLists(listId) {
+        const id = listId === undefined ? state.activeCodeListId : listId;
+        const found = id ? state.codeLists.find((list) => list.id === id) : null;
+        return found ? [found] : state.codeLists;
+    }
+
+    function codeCount(list) {
+        return Object.keys(list.codes).length;
+    }
+
+    function totalCodeCount() {
+        return state.codeLists.reduce((sum, list) => sum + codeCount(list), 0);
+    }
+
+    /**
+     * Nombre asociado a un código AX. Busca en la lista activa (o en la
+     * indicada por `listId`); sin lista seleccionada busca en todas.
+     */
+    function lookupNombre(codigo, listId) {
+        const key = normCode(codigo);
+        if (!key) return null;
+        for (const list of scopedLists(listId)) {
+            // hasOwnProperty: evita devolver propiedades heredadas de Object.
+            if (Object.prototype.hasOwnProperty.call(list.codes, key)) {
+                const nombre = list.codes[key];
+                if (typeof nombre === 'string' && nombre) return nombre;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sugerencias para el autocompletado. Coincide por código (prioridad a
+     * los que empiezan igual) y también por nombre, para poder buscar
+     * «BANDA» y quedarse con su código.
+     * @returns {Array<{codigo, nombre, listId, listName}>}
+     */
+    function searchCodigos(query, options = {}) {
+        const q = normCode(query);
+        if (!q) return [];
+        const limit = options.limit || 8;
+        const listId = options.listId === undefined ? state.activeCodeListId : options.listId;
+        const scope = new Set(scopedLists(listId).map((list) => list.id));
+
+        const matches = [];
+        for (const entry of allEntries()) {
+            if (!scope.has(entry.listId)) continue;
+            let score;
+            if (entry.codigo === q) score = 0;
+            else if (entry.codigo.startsWith(q)) score = 1;
+            else if (entry.codigo.includes(q)) score = 2;
+            else if (entry.nombre.toUpperCase().includes(q)) score = 3;
+            else continue;
+            matches.push({ score, entry });
+        }
+        matches.sort((a, b) => a.score - b.score || a.entry.codigo.localeCompare(b.entry.codigo));
+        return matches.slice(0, limit).map((match) => match.entry);
+    }
+
+    /**
+     * Añade (o reemplaza, si ya existe una con el mismo nombre) una lista.
+     * Volver a cargar el mismo archivo actualiza su contenido.
+     */
+    function addCodeList(name, codes) {
+        const clean = normalizeCodes(codes);
+        const listName = String(name || '').trim() || 'Lista de códigos';
+        const existing = state.codeLists.find((list) => list.name.toLowerCase() === listName.toLowerCase());
+        const list = existing || { id: Utils.uid(), name: listName, codes: {} };
+        list.codes = clean;
+        if (!existing) state.codeLists.push(list);
+        invalidateCodes();
+        save();
+        return { list, replaced: Boolean(existing), count: codeCount(list) };
+    }
+
+    function renameCodeList(id, name) {
+        const list = state.codeLists.find((item) => item.id === id);
+        if (!list) return null;
+        list.name = String(name || '').trim() || list.name;
+        invalidateCodes();
+        save();
+        return list;
+    }
+
+    function removeCodeList(id) {
+        const index = state.codeLists.findIndex((list) => list.id === id);
+        if (index === -1) return false;
+        state.codeLists.splice(index, 1);
+        if (state.activeCodeListId === id) state.activeCodeListId = '';
+        invalidateCodes();
+        save();
+        return true;
+    }
+
+    function clearCodeLists() {
+        state.codeLists.length = 0;
+        state.activeCodeListId = '';
+        invalidateCodes();
+        save();
+    }
+
+    /** Selecciona la lista usada al autocompletar ('' = todas). */
+    function setActiveCodeList(id) {
+        state.activeCodeListId = state.codeLists.some((list) => list.id === id) ? id : '';
+        save();
+        return state.activeCodeListId;
+    }
+
+    return {
+        state,
+        save,
+        lookupNombre,
+        searchCodigos,
+        addCodeList,
+        renameCodeList,
+        removeCodeList,
+        clearCodeLists,
+        setActiveCodeList,
+        codeCount,
+        totalCodeCount,
+        PAGE_SIZES,
+        DEFAULT_LAYOUT,
+        LAYOUT_PRESETS,
+    };
 })();

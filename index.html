@@ -131,6 +131,15 @@
 
                 <div class="card">
                     <h2 class="section-title">Añadir partida manualmente</h2>
+                    <div class="ac-bar">
+                        <span class="ac-bar__title">🔎 Autocompletar «Nombre» desde:</span>
+                        <select id="codeListMaterial" class="input ac-bar__select"
+                            aria-label="Lista de códigos AX para autocompletar"></select>
+                        <span id="codeListEmptyMaterial" class="ac-bar__empty" hidden>Sin listas cargadas: el Nombre
+                            se escribe a mano.</span>
+                        <button type="button" id="codeListOpenMaterial" class="btn btn--small">📄 Listas de
+                            códigos</button>
+                    </div>
                     <form id="materialForm">
                         <div class="form-grid">
                             <label class="field">
@@ -190,6 +199,14 @@
 
                 <div class="card">
                     <h2 class="section-title">Añadir código manualmente</h2>
+                    <div class="ac-bar">
+                        <span class="ac-bar__title">🔎 Autocompletar «Nombre» desde:</span>
+                        <select id="codeListAx" class="input ac-bar__select"
+                            aria-label="Lista de códigos AX para autocompletar"></select>
+                        <span id="codeListEmptyAx" class="ac-bar__empty" hidden>Sin listas cargadas: el Nombre se
+                            escribe a mano.</span>
+                        <button type="button" id="codeListOpenAx" class="btn btn--small">📄 Listas de códigos</button>
+                    </div>
                     <form id="axForm">
                         <div class="form-grid">
                             <label class="field">
@@ -380,14 +397,17 @@
         </div>
 
         <div class="modal__section" id="csvSection">
-            <h3>Lista de códigos AX</h3>
-            <p class="hint">Archivo CSV o Excel con los códigos y sus nombres, para autocompletar el Nombre al
-                escribir un código.</p>
-            <div class="inline-controls">
-                <input type="file" id="csvFile" class="input"
+            <h3>Listas de códigos AX</h3>
+            <p class="hint">Archivos CSV o Excel con los códigos y sus nombres, para autocompletar el Nombre al
+                escribir un código. Puedes cargar varias listas a la vez (por ejemplo inventariables y consumibles):
+                cada una toma el nombre de su archivo y luego eliges cuál usar desde el formulario de alta. Volver a
+                cargar un archivo con el mismo nombre actualiza esa lista.</p>
+            <div id="codeListsList" class="code-lists"></div>
+            <div class="inline-controls" style="margin-top: 12px;">
+                <input type="file" id="csvFile" class="input" multiple
                     accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     style="flex: 1;">
-                <button type="button" id="csvClear" class="btn">Limpiar</button>
+                <button type="button" id="csvClear" class="btn">Quitar todas</button>
             </div>
             <p id="csvStatus" class="hint"></p>
             <details id="csvHelp" class="format-help">
@@ -446,6 +466,7 @@
     <script src="js/labels.js"></script>
     <script src="js/csv.js"></script>
     <script src="js/xlsx.js"></script>
+    <script src="js/autocomplete.js"></script>
     <script src="js/gemini.js"></script>
     <script src="js/tables.js"></script>
     <script src="js/inventory.js"></script>

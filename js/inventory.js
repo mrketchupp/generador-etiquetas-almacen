@@ -7,7 +7,7 @@
  *
  * Mapeo Excel → etiqueta:
  *   CANTIDAD → Cantidad · CODIGO AX → Código AX ·
- *   DESCRIPCION → Nombre (con prioridad al autocompletado del CSV de códigos) ·
+ *   DESCRIPCION → Nombre (con prioridad al nombre de la lista de códigos AX) ·
  *   DIMENSION → Dimensión/Clave almacén · NP → No. Parte · Descripción → vacío.
  * La categoría (INVENTARIABLE/CONSUMIBLES) se deduce del nombre de la hoja.
  */
@@ -163,7 +163,7 @@ const Inventory = (() => {
                 id: Utils.uid(),
                 cantidad: item.cantidad,
                 codigoAx: item.codigoAx,
-                // Prioridad al nombre del CSV de códigos; si no hay, la DESCRIPCION del Excel.
+                // Prioridad al nombre de la lista de códigos activa; si no, la DESCRIPCION del Excel.
                 nombre: Store.lookupNombre(item.codigoAx) || item.descripcion,
                 dimension: item.dimension,
                 noParte: item.np,
