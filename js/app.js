@@ -43,7 +43,7 @@ const App = (() => {
                 noParte: $('fNoParte').value.trim(),
                 descripcion: $('fDescripcion').value.trim(),
                 condicion: 'NUEVO',
-                categoria: 'INVENTARIABLE',
+                area: $('fArea').value.trim(),
                 logoIndex: 0,
             });
             event.target.reset();
@@ -713,7 +713,8 @@ const App = (() => {
                     noParte: '',
                     descripcion: oc ? `OC: ${oc}` : '',
                     condicion: 'NUEVO',
-                    categoria: 'INVENTARIABLE',
+                    // El vale no trae el área: se escribe al revisar la partida.
+                    area: '',
                     logoIndex: 0,
                 });
             }

@@ -172,6 +172,10 @@ const Store = (() => {
                     item.logoIndex = idx > 0 ? idx : 0;
                 }
                 delete item.logoName;
+                // Migración: la categoría (lista fija) pasa a ser el área
+                // (texto libre); se conserva lo que ya tuviera la partida.
+                if (item.area === undefined) item.area = String(item.categoria ?? '').trim();
+                delete item.categoria;
             }
             return merged;
         } catch (error) {

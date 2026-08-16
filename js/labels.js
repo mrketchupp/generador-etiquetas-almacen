@@ -56,7 +56,7 @@ const Labels = (() => {
                 field('DIMENSIÓN:', item.dimension),
                 field('DESCRIPCION:', item.descripcion),
                 field('NO. PARTE:', item.noParte),
-                field('CATEGORIA:', item.categoria),
+                field('ÁREA:', item.area),
             ]),
         ]);
     }

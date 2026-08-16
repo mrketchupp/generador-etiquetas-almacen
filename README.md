@@ -2,7 +2,7 @@
 
 Aplicación web (100 % cliente, sin backend) para generar e imprimir etiquetas de almacén en dos formatos:
 
-- **Material**: etiqueta completa con código AX, nombre, dimensión/clave de almacén, no. de parte, descripción, condición y categoría.
+- **Material**: etiqueta completa con código AX, nombre, dimensión/clave de almacén, no. de parte, descripción, condición y área.
 - **Código AX**: etiqueta con el código en grande y el nombre del material.
 
 🔒 Privacidad: todos los datos (partidas, logos, CSV, API Key) viven solo en el navegador del usuario (localStorage).

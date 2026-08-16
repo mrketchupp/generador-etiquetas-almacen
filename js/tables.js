@@ -15,7 +15,6 @@ const Tables = (() => {
     const $ = (id) => document.getElementById(id);
 
     const CONDICIONES = ['NUEVO', 'USADO NUEVO', 'RESGUARDO'];
-    const CATEGORIAS = ['INVENTARIABLE', 'CONSUMIBLES'];
 
     // Duración del cierre del editor; debe coincidir con la animación CSS.
     const EDITOR_CLOSE_MS = 150;
@@ -62,7 +61,7 @@ const Tables = (() => {
         addChip(item.noParte ? `NP ${item.noParte}` : '', 'No. Parte');
         addChip(item.descripcion, 'Descripción');
         addChip(item.condicion, 'Condición');
-        addChip(item.categoria, 'Categoría');
+        addChip(item.area, 'Área');
         const logo = itemLogo(item);
         if (logo) {
             chips.append(el('span', {
@@ -171,7 +170,7 @@ const Tables = (() => {
             inputField('No. Parte', 'noParte'),
             inputField('Descripción', 'descripcion'),
             selectField('Condición', 'condicion', CONDICIONES),
-            selectField('Categoría', 'categoria', CATEGORIAS),
+            inputField('Área', 'area'),
         ]);
 
         // Cabecera: la partida no «desaparece» al editarla. Sigue a la
@@ -239,7 +238,7 @@ const Tables = (() => {
             item.noParte = fields.noParte.value.trim();
             item.descripcion = fields.descripcion.value.trim();
             item.condicion = fields.condicion.value;
-            item.categoria = fields.categoria.value;
+            item.area = fields.area.value.trim();
             item.logoIndex = chosenLogo;
             // Se guarda ya: el plegado es solo visual y no debe retrasar
             // la persistencia de lo editado.
@@ -367,5 +366,5 @@ const Tables = (() => {
         $('axCount').textContent = counterText(Store.state.axItems);
     }
 
-    return { renderMaterials, renderAx, closeEditor, CONDICIONES, CATEGORIAS };
+    return { renderMaterials, renderAx, closeEditor, CONDICIONES };
 })();

@@ -72,8 +72,8 @@
                                 accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
                         </label>
                         <p class="hint">El inventario no se guarda al recargar la página, pero las partidas que añadas
-                            a la lista de revisión sí se conservan. La categoría (inventariable/consumible) se toma del
-                            nombre de cada hoja.</p>
+                            a la lista de revisión sí se conservan. El área se toma del nombre de cada hoja y se puede
+                            corregir al revisar la partida.</p>
                         <details id="invHelp" class="format-help">
                             <summary>📋 ¿Cómo debe ser el archivo?</summary>
                             <p class="hint">Cada hoja del Excel debe tener una fila de encabezados con al menos estas
@@ -108,9 +108,8 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <p class="hint">Si el nombre de la hoja contiene la palabra <strong>CONSUMIBLE</strong>
-                                (ej. «CONTENEDOR #1 CONSUMIBLE»), sus partidas se marcan como CONSUMIBLES; si no, como
-                                INVENTARIABLE.</p>
+                            <p class="hint">El <strong>nombre de la hoja</strong> (ej. «CONTENEDOR #1 CONSUMIBLE») se
+                                usa como área de sus partidas.</p>
                         </details>
                         <div id="invStatus" class="status" hidden></div>
                         <div id="invUi" hidden>
@@ -169,6 +168,10 @@
                             <label class="field">
                                 <span class="field__label">Descripción <span class="optional">(opcional)</span></span>
                                 <input type="text" id="fDescripcion" class="input" placeholder="Detalles adicionales">
+                            </label>
+                            <label class="field">
+                                <span class="field__label">Área <span class="optional">(opcional)</span></span>
+                                <input type="text" id="fArea" class="input" placeholder="Ej: TALLER MECÁNICO">
                             </label>
                         </div>
                         <button type="submit" class="btn btn--primary btn--block">Añadir a la lista</button>

@@ -9,13 +9,14 @@
  *   CANTIDAD → Cantidad · CODIGO AX → Código AX ·
  *   DESCRIPCION → Nombre (con prioridad al nombre de la lista de códigos AX) ·
  *   DIMENSION → Dimensión/Clave almacén · NP → No. Parte · Descripción → vacío.
- * La categoría (INVENTARIABLE/CONSUMIBLES) se deduce del nombre de la hoja.
+ * El área se rellena con el nombre de la hoja de la que sale la partida
+ * (es texto libre: se puede corregir al revisarla).
  */
 const Inventory = (() => {
     const { el, toast, clampInt } = Utils;
     const $ = (id) => document.getElementById(id);
 
-    let sheets = [];       // [{name, categoria, items: [...]}]
+    let sheets = [];       // [{name, items: [...]}]
     let currentSheet = 0;
     let selected = new Set();
     let query = '';
@@ -45,7 +46,6 @@ const Inventory = (() => {
         }
         if (headerIdx === -1) return null;
 
-        const categoria = norm(sheet.name).includes('CONSUMIBLE') ? 'CONSUMIBLES' : 'INVENTARIABLE';
         const items = [];
         for (const row of sheet.rows.slice(headerIdx + 1)) {
             const get = (idx) => (idx === -1 ? '' : String(row[idx] ?? '').trim());
@@ -61,7 +61,7 @@ const Inventory = (() => {
                 cantidad: clampInt(get(cols.cantidad), 1, 1),
             });
         }
-        return { name: sheet.name, categoria, items };
+        return { name: sheet.name, items };
     }
 
     async function handleFile(file) {
@@ -152,13 +152,13 @@ const Inventory = (() => {
     function addSelected() {
         const byId = new Map();
         for (const sheet of sheets) {
-            for (const item of sheet.items) byId.set(item.id, { item, categoria: sheet.categoria });
+            for (const item of sheet.items) byId.set(item.id, { item, area: String(sheet.name || '').trim() });
         }
         let added = 0;
         for (const id of selected) {
             const found = byId.get(id);
             if (!found) continue;
-            const { item, categoria } = found;
+            const { item, area } = found;
             Store.state.materials.push({
                 id: Utils.uid(),
                 cantidad: item.cantidad,
@@ -169,7 +169,7 @@ const Inventory = (() => {
                 noParte: item.np,
                 descripcion: '',
                 condicion: 'NUEVO',
-                categoria,
+                area,
                 logoIndex: 0,
             });
             added++;

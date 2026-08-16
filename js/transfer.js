@@ -56,7 +56,9 @@ const Transfer = (() => {
             noParte: text(item.noParte),
             descripcion: text(item.descripcion),
             condicion: Tables.CONDICIONES.includes(item.condicion) ? item.condicion : 'NUEVO',
-            categoria: Tables.CATEGORIAS.includes(item.categoria) ? item.categoria : 'INVENTARIABLE',
+            // Área: texto libre. En archivos exportados antes del cambio el
+            // valor venía en `categoria` (INVENTARIABLE/CONSUMIBLES).
+            area: text(item.area ?? item.categoria),
             // Posición del logo derecho en la biblioteca (0 = predeterminado);
             // al importar en otro equipo se usa la misma posición de su lista.
             logoIndex: Utils.clampInt(item.logoIndex, 0, 0),
