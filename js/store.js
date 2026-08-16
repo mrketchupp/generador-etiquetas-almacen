@@ -11,6 +11,16 @@ const Store = (() => {
     /** Clave normalizada de un código AX (sin espacios, en mayúsculas). */
     const normCode = (value) => String(value ?? '').trim().toUpperCase();
 
+    // Texto de almacén que traían por defecto las versiones anteriores. Ahora
+    // el campo nace vacío (cada almacén escribe el suyo en ⚙️ Configuración),
+    // así que ese valor heredado se limpia y queda solo como placeholder.
+    const LEGACY_HEADER_TEXT = 'BRONCO RIG-91';
+
+    function normalizeHeaderText(value) {
+        const text = String(value ?? '').trim();
+        return text === LEGACY_HEADER_TEXT ? '' : text;
+    }
+
     const PAGE_SIZES = {
         letter: { label: 'Carta (215.9 × 279.4 mm)', widthMm: 215.9, heightMm: 279.4 },
         a4: { label: 'A4 (210 × 297 mm)', widthMm: 210, heightMm: 297 },
@@ -57,7 +67,8 @@ const Store = (() => {
         // Lista usada al autocompletar. '' = buscar en todas.
         activeCodeListId: '',
         settings: {
-            headerText: 'BRONCO RIG-91',
+            // Vacío a propósito: se personaliza en ⚙️ Configuración.
+            headerText: '',
             logoLeft: '',
             // Biblioteca de logos derechos: [{id, src}]. El primero es el
             // predeterminado; cada partida guarda item.logoIndex (0 =
@@ -145,6 +156,9 @@ const Store = (() => {
                     ...base.settings,
                     ...(parsed.settings || {}),
                     layout: normalizeLayout((parsed.settings || {}).layout),
+                    // Migración: el texto de almacén heredado del valor por
+                    // defecto anterior se vacía; uno escrito a mano se respeta.
+                    headerText: normalizeHeaderText((parsed.settings || {}).headerText),
                 },
             };
             // Migración: el mapa único de códigos pasa a ser la primera lista.
@@ -193,7 +207,7 @@ const Store = (() => {
         if (old('logoRight')) {
             state.settings.rightLogos.push({ id: Utils.uid(), src: old('logoRight') });
         }
-        if (old('headerText')) state.settings.headerText = old('headerText');
+        if (old('headerText')) state.settings.headerText = normalizeHeaderText(old('headerText'));
         if (old('geminiApiKey')) state.settings.geminiApiKey = old('geminiApiKey');
 
         try {

@@ -30,7 +30,9 @@ const Labels = (() => {
             logoBox(settings.logoLeft, 'Logo izquierdo'),
             el('div', { class: 'label__title' }, [
                 el('h4', { text: 'ETIQUETADO ALMACEN' }),
-                el('p', { text: settings.headerText }),
+                // Sin texto de almacén no se dibuja la línea: la etiqueta
+                // queda con el título solo, sin un hueco vacío debajo.
+                settings.headerText ? el('p', { text: settings.headerText }) : null,
             ]),
             logoBox(rightLogoSrc(settings, item), 'Logo derecho'),
         ]);

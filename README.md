@@ -18,7 +18,7 @@ Aplicación web (100 % cliente, sin backend) para generar e imprimir etiquetas d
   - Al teclear aparecen las **sugerencias** (código, nombre y lista de origen) y el Nombre se rellena solo en cuanto el código coincide. También se puede buscar por nombre («BANDA») para quedarse con su código. Se navega con ↑ ↓ y se elige con Enter.
   - Nunca se pisa un Nombre escrito a mano; si el código deja de coincidir, el nombre autocompletado se limpia.
   - Las mismas reglas aplican en el editor de partidas, en la tabla de códigos AX, al añadir desde el inventario Excel y al extraer un vale con Gemini.
-- Logos izquierdo/derecho (archivo o URL) y texto de almacén personalizable.
+- Logos izquierdo/derecho (archivo o URL) y **texto de almacén** personalizable desde ⚙️ Configuración. El texto empieza vacío (el campo muestra `BRONCO RIG-91` solo como ejemplo) y, mientras no se escriba, las etiquetas se imprimen sin esa línea.
 - **Diseño de plantilla configurable**: tamaño de hoja (Carta/A4), márgenes superior/lateral, dimensiones de etiqueta, separación horizontal/vertical, fuente y borde opcional. Acepta valores en mm, cm o pulgadas, y trae plantillas predefinidas, incluida la de **hojas precortadas 2 × 5 (J-5163 / Avery 5163)** con la geometría exacta del precorte.
 - **Vista previa fiel a la impresión**: las filas y columnas se calculan automáticamente según lo que cabe físicamente en la hoja, por lo que no hay saltos de página inesperados ni hay que ajustar márgenes en el diálogo de impresión.
 - **Exportar / importar la lista** como archivo `.json`: captura las partidas en el teléfono, exporta el archivo (WhatsApp, correo, AirDrop…) e impórtalo en la computadora para imprimir desde ahí.

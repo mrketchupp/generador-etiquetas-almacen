@@ -52,7 +52,7 @@ const App = (() => {
             refreshTables();
             $('fCodigoAx').focus();
             toast('Partida añadida a la lista', 'success');
-            suggestLogos();
+            suggestSetup();
         });
     }
 
@@ -73,7 +73,7 @@ const App = (() => {
             refreshTables();
             $('fAxCodigo').focus();
             toast('Código añadido a la lista', 'success');
-            suggestLogos();
+            suggestSetup();
         });
     }
 
@@ -435,6 +435,40 @@ const App = (() => {
         );
     }
 
+    // ---------- Sugerencia: texto de almacén ----------
+
+    let headerSuggested = false;
+
+    /** Abre la configuración directamente en el texto de almacén. */
+    function openHeaderTextConfig() {
+        $('configModal').showModal();
+        $('headerTextSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('cfgHeaderText').focus({ preventScroll: true });
+    }
+
+    /**
+     * El texto de almacén nace vacío: se recuerda una vez dónde se escribe
+     * (y dónde se cambia después), porque solo se ve al imprimir.
+     */
+    function suggestHeaderText() {
+        if (headerSuggested) return;
+        if (Store.state.settings.headerText) return;
+        // una sola sugerencia a la vez; la otra saldrá en la próxima acción
+        if (document.querySelector('.toast--action')) return;
+        headerSuggested = true;
+        Utils.toastAction(
+            '💡 Tus etiquetas saldrán sin texto de almacén. Escribe el tuyo en ⚙️ Configuración y queda guardado.',
+            'Escribir texto',
+            openHeaderTextConfig,
+        );
+    }
+
+    /** Recordatorios (una vez cada uno) de lo que queda por configurar. */
+    function suggestSetup() {
+        suggestLogos();
+        suggestHeaderText();
+    }
+
     // ---------- Listas de códigos AX ----------
 
     // Ambos paneles comparten la misma lista activa: los dos selectores se
@@ -613,11 +647,17 @@ const App = (() => {
     }
 
     function bindGeneralConfig() {
+        // Se puede dejar vacío: entonces la etiqueta sale sin esa línea.
         $('cfgHeaderText').addEventListener('change', () => {
-            Store.state.settings.headerText = $('cfgHeaderText').value.trim() || 'BRONCO RIG-91';
-            $('cfgHeaderText').value = Store.state.settings.headerText;
+            const text = $('cfgHeaderText').value.trim();
+            Store.state.settings.headerText = text;
+            $('cfgHeaderText').value = text;
             Store.save();
-            toast('✅ Texto de almacén guardado', 'success');
+            if (Preview.isOpen) Preview.render();
+            toast(
+                text ? '✅ Texto de almacén guardado' : 'Texto de almacén vacío: las etiquetas saldrán sin esa línea',
+                text ? 'success' : 'info',
+            );
         });
 
         $('geminiKeySave').addEventListener('click', () => {
@@ -721,7 +761,7 @@ const App = (() => {
             refreshTables();
             setVoucherStatus(`✅ Se extrajeron ${items.length} materiales. Revísalos en la tabla de abajo.`, 'success');
             toast(`✅ ${items.length} materiales extraídos del vale`, 'success');
-            suggestLogos();
+            suggestSetup();
         } catch (error) {
             console.error('Error al procesar el vale:', error);
             setVoucherStatus(`❌ ${error.message}`, 'error');
@@ -864,7 +904,7 @@ const App = (() => {
         bindVoucher();
         bindTransfer();
         bindClearButtons();
-        Inventory.init({ onAdd: () => { refreshTables(); suggestLogos(); } });
+        Inventory.init({ onAdd: () => { refreshTables(); suggestSetup(); } });
 
         // Service worker: permite usar la app sin conexión una vez cargada
         // (no aplica al abrir el archivo directamente con file://).
